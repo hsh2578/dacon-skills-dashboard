@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>종목 PER · PBR</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<link rel="stylesheet" href="style.css?v=20">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body>
+<header>
+  <div>
+    <h1 id="stock-title">종목 PER · PBR</h1>
+    <p class="updated">최근 갱신 <span id="updated">-</span> · <a href="index.html" style="color:#2563eb;text-decoration:none">← 지수 대시보드</a></p>
+  </div>
+</header>
+
+<section class="signal-section" id="signal-section" style="display:none">
+  <div class="signal-card">
+    <div class="signal-header">
+      <div>
+        <h2>PER · PBR + Forward 시그널 분석</h2>
+        <p class="signal-rank-line" id="signal-rank-line">universe 분석 중...</p>
+      </div>
+      <div class="signal-tier-badge" id="signal-tier"></div>
+    </div>
+    <div class="signal-body">
+      <div class="signal-factors">
+        <h3>4팩터 정규화 점수</h3>
+        <div class="factor-list" id="signal-factors"></div>
+      </div>
+      <div class="signal-groups">
+        <h3>그룹 점수 (Z-Score)</h3>
+        <div class="group-list" id="signal-groups"></div>
+      </div>
+      <div class="signal-total">
+        <div class="total-lbl">종합 점수 (Value 60% + Growth 40%)</div>
+        <div class="total-val" id="signal-total">—</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ai-section-detail" id="ai-section-detail" style="display:none">
+  <div class="ai-detail-card">
+    <div class="ai-detail-header">
+      <div>
+        <h2>AI 서브에이전트 분석</h2>
+        <p class="ai-detail-sub">
+          .claude/agents/ 3종 (fundamental-analyst · risk-analyst · synthesizer) 룰 기반 정성 분석 ·
+          정량 점수에는 영향 없음 · 정성 항목은 모두 출처 태그 필수
+        </p>
+      </div>
+      <div class="ai-detail-badges" id="ai-detail-badges"></div>
+    </div>
+    <div class="ai-detail-oneliner" id="ai-detail-oneliner"></div>
+    <div class="ai-detail-body">
+      <div class="ai-detail-block">
+        <h3>투자 포인트</h3>
+        <ul class="ai-points" id="ai-detail-points"></ul>
+      </div>
+      <div class="ai-detail-block">
+        <h3>리스크</h3>
+        <ul class="ai-risks" id="ai-detail-risks"></ul>
+      </div>
+    </div>
+    <div class="ai-detail-verdict" id="ai-detail-verdict"></div>
+    <div class="ai-detail-meta" id="ai-detail-meta"></div>
+  </div>
+</section>
+
+<main>
+  <aside class="sidebar">
+    <h2>표시</h2>
+    <label><input type="checkbox" id="opt-band" checked> 평균 ±1σ 밴드</label>
+    <label><input type="checkbox" id="opt-mean" checked> 평균선</label>
+
+    <h2>기간</h2>
+    <select id="opt-period">
+      <option value="10">10년</option>
+      <option value="5" selected>5년</option>
+      <option value="3">3년</option>
+      <option value="1">1년</option>
+    </select>
+
+    <h2 id="summary-title">통계 + 컨센서스</h2>
+    <div id="summary"></div>
+
+    <p class="note" id="note"></p>
+    <div class="legend-note">
+      <span><span class="legend-line legend-mean"></span>평균선</span>
+      <span><span class="legend-band"></span>±1σ 밴드</span>
+      <span><span class="legend-line legend-fwd"></span>Forward (컨센서스)</span>
+    </div>
+  </aside>
+
+  <section class="charts">
+    <div class="chart-card" data-metric="per">
+      <h3>PER (주가수익비율)</h3>
+      <div id="chart-per"></div>
+    </div>
+    <div class="chart-card" data-metric="pbr">
+      <h3>PBR (주가순자산비율)</h3>
+      <div id="chart-pbr"></div>
+    </div>
+    <div class="chart-card" data-metric="market_cap">
+      <h3>시가총액</h3>
+      <div id="chart-cap"></div>
+    </div>
+    <div class="chart-card" data-metric="close">
+      <h3>주가 (종가)</h3>
+      <div id="chart-close"></div>
+    </div>
+  </section>
+</main>
+
+<script src="stock.js?v=8"></script>
+</body>
+</html>

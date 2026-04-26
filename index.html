@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Skills 기반 가치투자 대시보드 · DACON</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css?v=20">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div>
+      <h1>Skills 기반 가치투자 종목 발굴 대시보드</h1>
+      <p class="updated">최근 갱신 <span id="updated">-</span> · DACON 월간 해커톤 · 투자 데이터를 시각화하라 — Skills 기반 대시보드 설계</p>
+    </div>
+    <nav class="header-nav">
+      <a href="#section-index">시장 지수</a>
+      <a href="#section-screen">Top 10</a>
+      <a href="#section-search">종목 검색</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============================================================ -->
+<!-- SECTION 1: 시장 지수 (KOSPI/KOSDAQ)                          -->
+<!-- ============================================================ -->
+<section class="page-section section-index" id="section-index">
+  <div class="section-tag">Section 1</div>
+  <div class="section-divider">
+    <h2>시장 지수 PER · PBR</h2>
+    <p class="section-sub">KOSPI / KOSDAQ 10년 시계열 — 시장 전체의 저평가 / 고평가 맥락 파악</p>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab" data-mode="kospi"><span class="dot" style="background:#2563eb"></span>KOSPI</button>
+    <button class="tab" data-mode="kosdaq"><span class="dot" style="background:#059669"></span>KOSDAQ</button>
+    <button class="tab" data-mode="sp500"><span class="dot" style="background:#dc2626"></span>S&amp;P 500</button>
+    <button class="tab is-active" data-mode="compare">비교</button>
+  </nav>
+
+  <main>
+    <aside class="sidebar">
+      <div id="panel-compare" class="mode-panel">
+        <h2>지수 선택</h2>
+        <label><span class="dot" style="background:#2563eb"></span><input type="checkbox" data-key="kospi" checked> KOSPI</label>
+        <label><span class="dot" style="background:#059669"></span><input type="checkbox" data-key="kosdaq" checked> KOSDAQ</label>
+        <label><span class="dot" style="background:#dc2626"></span><input type="checkbox" data-key="sp500" checked> S&amp;P 500</label>
+      </div>
+
+      <h2>표시</h2>
+      <label><input type="checkbox" id="opt-band" checked> 평균 ±1σ 밴드</label>
+      <label><input type="checkbox" id="opt-mean" checked> 평균선</label>
+      <label><input type="checkbox" id="opt-norm"> 종가 100 정규화</label>
+
+      <h2>기간</h2>
+      <select id="opt-period">
+        <option value="10">10년</option>
+        <option value="5">5년</option>
+        <option value="3">3년</option>
+        <option value="1">1년</option>
+      </select>
+
+      <h2 id="summary-title">현재 PER 요약</h2>
+      <div id="summary"></div>
+
+      <p class="note" id="note"></p>
+    </aside>
+
+    <section class="charts">
+      <div class="chart-card" data-metric="per">
+        <h3>PER (주가수익비율)</h3>
+        <div id="chart-per"></div>
+      </div>
+      <div class="chart-card" data-metric="pbr">
+        <h3>PBR (주가순자산비율)</h3>
+        <div id="chart-pbr"></div>
+      </div>
+      <div class="chart-card" data-metric="div_yield">
+        <h3>배당수익률 (%)</h3>
+        <div id="chart-div"></div>
+      </div>
+      <div class="chart-card" data-metric="close">
+        <h3>지수 종가</h3>
+        <div id="chart-close"></div>
+      </div>
+    </section>
+  </main>
+</section>
+
+<!-- ============================================================ -->
+<!-- SECTION 2: Triple Cross Top 10                              -->
+<!-- ============================================================ -->
+<section class="page-section section-screen" id="section-screen">
+  <div class="section-tag">Section 2</div>
+  <div class="section-divider">
+    <h2>PER · PBR + Forward Top 10</h2>
+    <p class="section-sub">시총 3,000억+ 보통주 universe에서 4팩터(Value 60% + Growth 40%) Z-Score 정규화 → 상위 10종목</p>
+  </div>
+
+  <div class="algo-pipeline">
+    <div class="algo-pipeline-title">어떻게 구했나 — 알고리즘 6단계</div>
+    <ol class="algo-steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Universe 필터</div>
+          <div class="step-desc">시총 3,000억+ 보통주 (우선주·리츠·스팩 제외) · 5Y PER 검증(적자분기 ≤ 4Q) · Forward PER + 컨센 목표가 보유 → <b>303종목</b></div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">4팩터 raw 계산</div>
+          <div class="step-desc">
+            <b>s1_per</b> = (avg_5y − cur)/avg_5y · <b>s1_pbr</b> = 같은 패턴 PBR ·
+            <b>s3_per</b> = (cur − fwd)/cur · <b>upside</b> = (target − cur)/cur
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">Rank → Z-Score 정규화</div>
+          <div class="step-desc">팩터별 오름차순 rank → Z-Score (universe 303개 내 정규화). 결측치는 skipna.</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">그룹 합산 → 재정규화</div>
+          <div class="step-desc">
+            <b>Value</b> = s1_per_z + s1_pbr_z · <b>Growth</b> = s3_per_z + upside_z<br>
+            각 그룹 raw 합 → 다시 Z-Score (그룹 점수)
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <div class="step-title">가중 합산 → Top 10</div>
+          <div class="step-desc"><b>total_score = Value × 0.60 + Growth × 0.40</b><br>상위 10종목 추출 · 티어 (Hidden Gem ≥+2.33σ / Strong Buy ≥+1.65σ / Buy ≥+0.84σ)</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <div class="step-title">AI 서브에이전트 정성 분석</div>
+          <div class="step-desc">
+            <code>.claude/agents/</code> 3종(fundamental-analyst · risk-analyst · synthesizer) +
+            WebSearch로 사업 모멘텀·리스크 보강 · 모든 정성 항목 출처 태그 필수 · <b>점수에는 영향 없음</b>
+          </div>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <div class="screen-meta-row">
+    <div class="signal-legend">
+      <span class="sig-pill value"><b>Value</b> <small>5Y avg 대비 PER · PBR 저평가</small></span>
+      <span class="sig-pill growth"><b>Growth</b> <small>Fwd PER 개선 · 목표가 상승여력</small></span>
+      <span class="sig-pill"><b>Z-Score</b> <small>≥ +1.65 상위 5%</small></span>
+    </div>
+    <div class="screen-meta" id="screen-meta">분석 중...</div>
+  </div>
+
+  <div class="screen-cards" id="screen-cards"></div>
+  <p class="empty-state" id="screen-empty" style="display:none">
+    아직 시그널을 통과한 종목이 없습니다.
+  </p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SECTION 3: 종목 검색                                         -->
+<!-- ============================================================ -->
+<section class="page-section section-search" id="section-search">
+  <div class="section-tag">Section 3</div>
+  <div class="section-divider">
+    <h2>종목 검색</h2>
+    <p class="section-sub">universe 통과 종목에서 종목명/코드로 검색 → 클릭 시 PER · PBR 차트 + 4팩터 시그널 분석</p>
+  </div>
+
+  <div class="search-controls">
+    <div class="search-input-wrap">
+      <input type="search" id="search-input" placeholder="종목명 또는 6자리 코드 (예: 삼성전자, 005930)" autocomplete="off">
+      <span class="search-icon-img">🔍</span>
+    </div>
+    <select id="search-sort">
+      <option value="rank">PER · PBR + Forward 점수 높은 순</option>
+      <option value="market_cap">시가총액 큰 순</option>
+      <option value="cur_per">현재 PER 낮은 순</option>
+      <option value="upside">상승여력 큰 순</option>
+      <option value="name">이름 순</option>
+    </select>
+    <span class="search-count" id="search-count">— 종목</span>
+  </div>
+
+  <div class="search-results" id="search-results"></div>
+  <p class="empty-state" id="search-empty" style="display:none">검색 결과가 없습니다.</p>
+</section>
+
+<script src="app.js?v=14"></script>
+</body>
+</html>
