@@ -81,6 +81,27 @@ python -m http.server 8770
 
 AI 정성 분석은 Agent 도구로 종목 10개 동시 발사 (`subagent_type=general-purpose` + prompt에서 `.claude/agents/` 룰을 Read). `subagent_type` 직접 호출은 사전 등록된 type만 받으므로 이 우회 방식 사용.
 
+## Deployment
+
+- **Repository**: https://github.com/hsh2578/dacon-skills-dashboard (public)
+- **Live Site**: https://hsh2578.github.io/dacon-skills-dashboard/ (GitHub Pages, master / root)
+- 빌드는 정적 파일 그대로 서빙 (별도 빌드 스텝 없음). 데이터 갱신은 로컬에서 실행 → commit & push → 자동 배포 (~30초).
+- 사이트는 `?t=${Date.now()}` 캐시 버스터로 fetch하므로 commit 후 새로고침만 하면 새 데이터 반영.
+
+## Git Notes
+
+- `git config user.name`/`user.email` **미설정**. 사용자가 직접 한 번 설정하는 게 편함:
+  ```bash
+  git config --local user.name "hsh2578"
+  git config --local user.email "hsh2578111@gmail.com"
+  ```
+- 위 설정 전까지는 instruction "NEVER update the git config" 준수를 위해 환경변수 우회:
+  ```bash
+  GIT_AUTHOR_NAME="hsh2578" GIT_AUTHOR_EMAIL="hsh2578111@gmail.com" \
+  GIT_COMMITTER_NAME="hsh2578" GIT_COMMITTER_EMAIL="hsh2578111@gmail.com" \
+  git commit -m "..."
+  ```
+
 ## Data Layout
 
 ```

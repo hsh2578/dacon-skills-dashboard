@@ -1,0 +1,360 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
+
+@page {
+  size: A4;
+  margin: 18mm 16mm;
+}
+
+body {
+  font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.55;
+  color: #1c1f24;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: 22pt;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  margin: 0 0 8px;
+  color: #1c1f24;
+  border-bottom: 2px solid #1c1f24;
+  padding-bottom: 8px;
+}
+
+h2 {
+  font-size: 15pt;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 24px 0 10px;
+  color: #1c1f24;
+  page-break-after: avoid;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 4px;
+}
+
+h3 {
+  font-size: 12pt;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  margin: 18px 0 6px;
+  color: #374151;
+  page-break-after: avoid;
+}
+
+h4 {
+  font-size: 11pt;
+  font-weight: 600;
+  margin: 12px 0 4px;
+  color: #4b5563;
+}
+
+p { margin: 0 0 8px; }
+
+blockquote {
+  border-left: 3px solid #f59e0b;
+  background: #fffbeb;
+  padding: 10px 14px;
+  margin: 10px 0;
+  color: #1c1f24;
+  font-size: 10.5pt;
+}
+
+ul, ol { margin: 6px 0 10px; padding-left: 22px; }
+li { margin-bottom: 3px; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0 14px;
+  font-size: 9.5pt;
+  page-break-inside: avoid;
+}
+th {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  padding: 6px 8px;
+  text-align: left;
+  font-weight: 700;
+  color: #1c1f24;
+}
+td {
+  border: 1px solid #e5e7eb;
+  padding: 6px 8px;
+  vertical-align: top;
+}
+
+code {
+  font-family: 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
+  font-size: 9pt;
+  background: #f3f4f6;
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: #6d28d9;
+}
+
+pre {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 9pt;
+  line-height: 1.45;
+  overflow-x: auto;
+  page-break-inside: avoid;
+}
+pre code { background: transparent; padding: 0; color: #1c1f24; }
+
+hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 18px 0;
+}
+
+strong { color: #1c1f24; font-weight: 700; }
+
+a { color: #2563eb; text-decoration: none; }
+
+/* 첫 페이지 헤더 (제목 + 메타) */
+h1 + ul {
+  margin: 6px 0 16px;
+  padding-left: 18px;
+  font-size: 9.5pt;
+  color: #6b7280;
+}
+
+/* 페이지 나누기 방지 */
+table, pre, blockquote { page-break-inside: avoid; }
+h1, h2, h3 { page-break-after: avoid; }
+
+/* ============================================================ */
+/* 다이어그램 — 옵션 A. 가로 흐름 파이프라인                     */
+/* ============================================================ */
+.pipeline {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 14px 0 20px;
+  page-break-inside: avoid;
+}
+.pipeline-step {
+  flex: 1 1 110px;
+  min-width: 110px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #f9fafb;
+  text-align: center;
+}
+.pipeline-step-ai {
+  background: #faf5ff;
+  border-color: #e9d5ff;
+}
+.step-num {
+  font-size: 8.5pt;
+  font-weight: 700;
+  color: #f59e0b;
+  letter-spacing: 0.05em;
+  margin-bottom: 3px;
+}
+.step-name {
+  font-size: 10pt;
+  font-weight: 700;
+  color: #1c1f24;
+  margin-bottom: 2px;
+  letter-spacing: -0.01em;
+}
+.step-detail {
+  font-size: 8.5pt;
+  color: #6b7280;
+  line-height: 1.35;
+}
+.pipeline-arrow {
+  align-self: center;
+  color: #9ca3af;
+  font-size: 14pt;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ============================================================ */
+/* 다이어그램 — 옵션 B. 트리 계층                                */
+/* ============================================================ */
+.site-tree {
+  margin: 14px 0 20px;
+  page-break-inside: avoid;
+}
+.tree-node {
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 4px;
+}
+.tree-root {
+  background: #1c1f24;
+  color: #fff;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 8px;
+}
+.tree-root:first-child { margin-top: 0; }
+.node-tag {
+  font-size: 8.5pt;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #fbbf24;
+}
+.node-name {
+  font-size: 11pt;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
+}
+.tree-children {
+  margin-left: 20px;
+  border-left: 2px solid #e5e7eb;
+  padding-left: 14px;
+}
+.tree-leaf {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+.leaf-tag {
+  display: inline-block;
+  font-size: 8pt;
+  font-weight: 700;
+  color: #6b7280;
+  background: #fff;
+  padding: 1px 6px;
+  border-radius: 3px;
+  border: 1px solid #d1d5db;
+  margin-right: 8px;
+  letter-spacing: 0.04em;
+}
+.leaf-name {
+  display: inline;
+  font-size: 10.5pt;
+  font-weight: 700;
+  color: #1c1f24;
+}
+.leaf-detail {
+  margin-top: 3px;
+  font-size: 9pt;
+  color: #6b7280;
+}
+
+/* ============================================================ */
+/* 다이어그램 — 옵션 C. Top 10 카드 모형                         */
+/* ============================================================ */
+.card-mockup {
+  max-width: 280px;
+  margin: 14px auto 20px;
+  border: 1px solid #fcd34d;
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #fffbeb 0%, #fff7ed 100%);
+  page-break-inside: avoid;
+}
+.card-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.card-rank {
+  font-size: 11pt;
+  font-weight: 700;
+  color: #6b7280;
+}
+.card-tier {
+  font-size: 8.5pt;
+  font-weight: 700;
+  background: #16a34a;
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+.card-name {
+  font-size: 13pt;
+  font-weight: 800;
+  color: #1c1f24;
+  margin: 6px 0 2px;
+  letter-spacing: -0.02em;
+}
+.card-meta {
+  font-size: 8.5pt;
+  color: #6b7280;
+  margin-bottom: 10px;
+}
+.card-section {
+  border-top: 1px dashed #e5e7eb;
+  padding-top: 8px;
+  margin-top: 8px;
+}
+.card-factors {
+  display: flex;
+  gap: 4px;
+  border-top: none;
+  padding-top: 0;
+  margin-top: 8px;
+}
+.factor {
+  flex: 1;
+  text-align: center;
+  font-size: 8pt;
+  font-weight: 700;
+  padding: 4px 0;
+  border-radius: 4px;
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+.factor.on {
+  background: #ecfdf5;
+  color: #047857;
+}
+.kv {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9pt;
+  padding: 2px 0;
+}
+.kv span { color: #6b7280; }
+.kv b { color: #1c1f24; font-variant-numeric: tabular-nums; }
+.group-row {
+  display: grid;
+  grid-template-columns: 44px 1fr 38px;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 5px;
+  font-size: 9pt;
+}
+.group-row span { color: #6b7280; font-weight: 600; }
+.group-row b { text-align: right; font-variant-numeric: tabular-nums; color: #1c1f24; }
+.bar {
+  height: 6px;
+  background: #f3f4f6;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.fill {
+  height: 100%;
+  background: #16a34a;
+}
+.card-total {
+  margin-top: 10px;
+  padding: 6px 10px;
+  background: #fff;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 9pt;
+}
+.card-total span { color: #6b7280; }
+.card-total b {
+  font-size: 13pt;
+  font-weight: 800;
+  color: #1c1f24;
+  font-variant-numeric: tabular-nums;
+}

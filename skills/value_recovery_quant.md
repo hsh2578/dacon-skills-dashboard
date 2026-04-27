@@ -1,0 +1,245 @@
+---
+name: value_recovery_quant
+version: 1.0.0
+type: main_rulebook
+description: 한국 주식 보통주 가치투자 종목 발굴 메인 룰북. 시가총액 3,000억 이상 universe에서 5년 평균 PER·PBR 저평가(Value)와 Forward PER 개선·컨센서스 상승여력(Growth)을 4팩터 Z-Score 가중합산으로 결합해 Top 10을 자동 추출합니다.
+output: data/screens/triple_cross.json
+implementation: scripts/apply_triple_cross.py
+---
+
+# value_recovery_quant — 메인 룰북
+
+## 1. 핵심 컨셉
+
+가치투자의 본질은 "현재 가격이 가치 대비 어디 위치해 있는가"의 판단입니다. 다만 단순히 싸기만 한 종목은 함정일 수 있습니다. 이익이 영원히 회복되지 않는 Value Trap이 존재하기 때문입니다.
+
+본 룰북은 이 문제를 두 시간축으로 풉니다. 과거 5년 평균 대비 현재가 얼마나 싼지(Value)와, 시장이 미래 12개월 이익 개선과 상승 여력을 어떻게 보고 있는지(Growth)를 동시에 봅니다. 두 축이 함께 양호한 종목, 즉 "역사적으로 싸지만 시장이 회복을 가격에 반영하기 시작한" 종목만 골라냅니다.
+
+## 2. 데이터 소스
+
+| 데이터 | 출처 | 필드 | 갱신 주기 | 인증 |
+|---|---|---|---|---|
+| KOSPI · KOSDAQ 시가총액·PER·PBR·배당·종가 | pykrx | get_market_fundamental_by_ticker | 일별 | KRX_ID/PW (로컬 페치만) |
+| Forward PER | 네이버 Wisereport | HTML 스크래핑 | 분기 | 불필요 |
+| 컨센서스 평균 목표가 | 네이버 Wisereport | 동일 | 분기 | 불필요 |
+| broker_count (커버리지) | 네이버 Wisereport | 동일 | 분기 | 불필요 |
+| S&P 500 PER (참고용) | multpl, yfinance | 월별 | 월 | 불필요 |
+
+PER·PBR은 모두 TTM(Trailing Twelve Months) 기준입니다. KRX와 네이버가 모두 이 표준을 따르므로 데이터 일관성이 보장됩니다. 페치는 모두 로컬에서 실행되며, 결과 JSON만 GitHub에 커밋되어 사이트가 정적으로 서빙합니다. API 키는 사이트에 노출되지 않습니다.
+
+## 3. 1차 필터 — Universe 정의
+
+전체 KOSPI·KOSDAQ 보통주 약 2,300종목 중에서 분석 가능한 종목만 추립니다. 통과하지 못한 종목은 분석 자체에서 제외됩니다.
+
+| 필터 | 임계값 | 제외 사유 |
+|---|---|---|
+| 시가총액 | 3,000억 원 이상 | 유동성 부족과 이상치 방지, 소형주 노이즈 차단 |
+| 종목 형태 | 보통주 (우선주·리츠·스팩 제외) | PER 정의가 통일된 표본만 사용 |
+| 5년 PER 검증 | 적자 분기 4분기 이하 | 적자가 너무 많으면 5년 평균 PER이 의미를 잃음 |
+| Forward PER | 보유 필수 | 4팩터 중 하나의 입력 |
+| 컨센 평균 목표가 | 보유 필수 | 4팩터 중 하나의 입력 |
+
+필터를 통과한 universe는 303종목입니다. 본 룰북의 모든 분석은 이 안에서 이루어집니다. 미통과 종목은 `data/universe.json`의 excluded 배열에 사유와 함께 기록됩니다.
+
+분석에서 제외되는 universe 외 종목도 사이트의 PER·PBR 시계열 차트에는 표시될 수 있습니다. 검증 통과한 모든 종목의 60개월 PER·PBR이 매트릭스(`data/matrix/`)로 별도 페치되어, 검색 페이지에서 fallback으로 사용됩니다. 즉 4팩터 점수는 303종목 한정이지만, PER·PBR 시계열 조회는 사실상 무제한입니다.
+
+## 4. 점수화 룰
+
+`scripts/apply_triple_cross.py`가 다음 6단계를 순차 실행합니다.
+
+### 4.1 4팩터 raw 계산
+
+| 팩터 | 정의 | 양수일 때 의미 | 그룹 |
+|---|---|---|---|
+| s1_per | (5Y 평균 PER − 현재 PER) ÷ 5Y 평균 PER | 자기 역사 대비 PER 저평가 | Value |
+| s1_pbr | (5Y 평균 PBR − 현재 PBR) ÷ 5Y 평균 PBR | 자산가치 대비 PBR 저평가 | Value |
+| s3_per | (현재 PER − Forward PER) ÷ 현재 PER | 향후 12개월 이익 개선 반영 | Growth |
+| upside | (컨센 평균 목표가 − 현재가) ÷ 현재가 | 증권사 컨센 상승 여력 | Growth |
+
+앞 두 팩터는 과거 5년 평균 대비 현재 위치를, 뒤 두 팩터는 현재 대비 미래 위치를 측정합니다. 두 시간축을 동시에 만족해야 "역사적으로 싸면서 회복도 진행 중"인 종목이 됩니다.
+
+### 4.2 Rank → Z-Score 정규화
+
+처음에는 단순한 임계값 통과 방식을 썼습니다. "5년 평균보다 낮으면 통과, 아니면 탈락" 같은 식입니다. 그러나 이 방식은 절벽 효과를 만들었습니다. 평균 14.1과 현재 14.0은 통과시키고 14.2는 탈락시키는데, 두 종목의 차이가 실질적으로는 거의 없는 상황에서 결과가 극단적으로 갈렸습니다. 종목 간 강도 차이도 사라졌습니다.
+
+해결책으로 각 팩터를 universe 안의 순위로 변환한 뒤 Z-Score로 다시 변환하는 방식을 도입했습니다.
+
+```python
+def zscore_from_rank(series):
+    pct = series.rank(pct=True).clip(0.001, 0.999)
+    return scipy.stats.norm.ppf(pct)
+
+for factor in ["s1_per", "s1_pbr", "s3_per", "upside"]:
+    df[f"{factor}_z"] = zscore_from_rank(df[factor])
+```
+
+순위 기반 Z-Score는 두 가지 장점이 있습니다. 첫째, 분포가 자동으로 정규분포에 가까워져 그룹 간 합산이 안전합니다. 둘째, 원본 raw 값에 outlier가 있어도 영향을 거의 받지 않습니다. 별도 Winsorize 처리가 필요 없습니다.
+
+### 4.3 그룹 합산과 재정규화
+
+```python
+df["value_score"]  = zscore(df["s1_per_z"] + df["s1_pbr_z"])
+df["growth_score"] = zscore(df["s3_per_z"] + df["upside_z"])
+```
+
+각 그룹은 두 팩터를 합한 뒤 다시 Z-Score로 정규화합니다. 두 팩터 합의 표준편차는 약 √2이므로, 한 번 더 Z-Score를 거쳐야 그룹 간 분포 표준편차가 1로 맞춰집니다. 이렇게 해야 Value 그룹과 Growth 그룹의 점수를 같은 스케일에서 비교할 수 있습니다.
+
+### 4.4 가중 합산
+
+```python
+df["total_score"] = df["value_score"] * 0.60 + df["growth_score"] * 0.40
+```
+
+가중치는 Value 60%, Growth 40%입니다. 결정 근거는 신뢰도 차이입니다.
+
+| 그룹 | 데이터 성격 | 신뢰도 |
+|---|---|---|
+| Value (5Y 평균 PER·PBR) | 과거 60개월 누적 평균이라는 안정된 앵커 | 높음 (노이즈 작음) |
+| Growth (Forward PER·컨센 목표가) | 증권사 추정치, 분기마다 변동 | 중간 (노이즈 큼) |
+
+신뢰도가 높은 쪽에 더 많은 비중을 두는 것이 합리적이라고 판단했습니다. 다만 이 6:4 가중치는 룰북의 결정값이지만, 동시에 사용자가 자기 신념대로 변경할 수 있는 파라미터이기도 합니다. 더 적극적인 투자자는 5:5나 4:6으로, 더 보수적인 투자자는 7:3으로 조정할 수 있습니다.
+
+### 4.5 티어 분류
+
+| 등급 | 임계값 | universe 상위 비율 |
+|---|---|---|
+| Hidden Gem | total_score ≥ +2.33σ | 1% |
+| Strong Buy | total_score ≥ +1.65σ | 5% |
+| Buy | total_score ≥ +0.84σ | 20% |
+| Watch | total_score ≥ 0σ | 50% |
+| Weak | total_score < 0σ | 하위 50% |
+
+표준 정규분포의 임계값을 그대로 사용했습니다. 본 시점(2026-04-27 기준) Top 10 종목 중 9종목이 Strong Buy 이상에 해당합니다.
+
+### 4.6 Value Trap 안전 가드
+
+별도 hard rule로 Value Trap 후보를 점수에서 배제하지는 않습니다. 정규화 분포를 보존하기 위해서입니다. 대신 AI 서브에이전트(`risk_analyst`)가 다음 조건을 자동 감지해 리스크 카드에 HIGH severity로 표시합니다.
+
+| 조건 | 의미 | 표시 방법 |
+|---|---|---|
+| Forward PER > Current PER × 1.3 | 시장이 이익 둔화를 가격에 반영 중 | 정성 리스크 카드에 [정량] 태그로 명시 |
+
+이 방식은 정량 점수에는 영향을 주지 않으면서 정성적 경고만 띄우는 절충입니다. 최종 판단은 사용자에게 맡깁니다.
+
+## 5. 시각화 룰
+
+본 룰북의 출력은 사이트의 두 위치에 표시됩니다.
+
+### 5.1 메인 페이지 Top 10 카드
+
+각 카드 한 장에 다음 정보가 위에서 아래로 적층됩니다.
+
+| 영역 | 데이터 |
+|---|---|
+| 헤더 | 순위 (#1 ~ #10), 티어 배지 |
+| 종목명 | 종목명, 코드, 시장(KOSPI/KOSDAQ), 현재가 |
+| 4팩터 시그널 | 4개 팩터 막대, Z-Score 양수면 강조 색 |
+| 정량 수치 | 현재 PER, 5Y 평균, Forward PER, 상승여력 |
+| 그룹 점수 | Value/Growth 막대 + Z 값 |
+| 종합 점수 | total_score (Z-Score 종합) |
+| AI 분석 토글 | 클릭 시 정성 분석 펼침 (별도 룰북 출력) |
+
+티어별 카드 배경 색상은 다음과 같이 구분됩니다.
+
+| 티어 | 배경 |
+|---|---|
+| Hidden Gem | amber 그라데이션 + 광택 효과 |
+| Strong Buy | 녹색 톤 강조 |
+| Buy | 황색 톤 약함 |
+| Watch / Weak | 무채색 |
+
+### 5.2 종목 상세 페이지 시그널 카드
+
+stock.html의 시그널 영역에 동일 데이터가 더 큰 캔버스로 표시됩니다. universe 303종목 중 #N위 라벨을 함께 노출해 전체에서의 위치를 강조합니다. 4팩터 정규화 점수는 4개 카드로 분리되어 양수일 때 녹색 박스로 강조됩니다.
+
+### 5.3 알고리즘 투명성
+
+메인 페이지 Top 10 카드 위에 "어떻게 구했나 — 알고리즘 6단계" 박스가 항상 노출됩니다. Universe 필터부터 가중 합산까지 6단계가 시각적으로 표시되어, 평가자나 사용자가 점수의 도출 과정을 한눈에 파악할 수 있습니다.
+
+### 5.4 데이터 부족 시 처리
+
+| 상황 | 처리 |
+|---|---|
+| Forward PER 또는 컨센 목표가 없음 | universe 통과 못함 → UI에서 표시 안 됨 |
+| 5Y PER 검증 미달 | universe.json의 excluded 배열로 분류 |
+| AI 정성 분석(`ai_notes.json`) 없음 | 카드 펼침 영역에 미생성 안내 표시 |
+
+## 6. 인사이트 생성 룰
+
+본 룰북은 정량 출력까지만 정의합니다. 정성 분석(투자 포인트, 리스크 등)은 별도 서브에이전트 룰북(`agents/fundamental_analyst.md`, `agents/risk_analyst.md`, `agents/synthesizer.md`)에 위임됩니다. 본 섹션에서는 정량 시그널의 자동 코멘트 생성 룰만 다룹니다.
+
+### 6.1 카드 자동 코멘트 템플릿
+
+```python
+def auto_comment(row):
+    parts = []
+    if row.s1_per_z > 0.5:
+        parts.append(f"5Y 평균 PER 대비 -{row.s1_per_raw*100:.1f}% 저평가 (Z={row.s1_per_z:+.2f}σ)")
+    if row.s3_per_z > 0.5:
+        parts.append(f"Forward PER {row.forward_per:.2f}로 -{row.s3_per_raw*100:.1f}% 하향")
+    if row.upside_z > 0.5:
+        parts.append(f"증권사 {row.broker_count}곳 평균 목표 +{row.upside_raw*100:.1f}%")
+    return " · ".join(parts) if parts else "정규화 통과 시그널 없음"
+```
+
+모든 수치는 `top[i]` 객체에서 직접 인용됩니다. 외부 정보가 섞이지 않으므로 환각의 여지가 없습니다.
+
+### 6.2 3-소스 원칙
+
+본 룰북의 모든 출력은 다음 세 출처만 인용 가능합니다.
+
+| 소스 | 적용 영역 | 태그 |
+|---|---|---|
+| 사전 페치 정량 | pykrx, 네이버 컨센, multpl, yfinance에서 페치된 JSON | [정량] |
+| Tool Call 결과 | WebSearch (정성 룰북에서만 사용) | [출처: WebSearch · YYYY-MM] |
+| 룰 정의 자체 | 본 룰북에 적힌 임계값, 가중치, 공식 | (출처 표기 불필요) |
+
+LLM이 학습 단계에서 외운 수치는 절대 인용하지 않습니다. 이 규칙이 정량 출력의 신뢰성을 담보합니다.
+
+### 6.3 자동 코멘트 검증
+
+향후 추가될 자동 코멘트 단위 테스트는 다음을 확인합니다.
+
+- 코멘트 안의 모든 숫자가 입력 row의 필드 값과 일치하는지
+- 단위(%, σ, 원)가 정확한지
+- 외부 회사명이나 뉴스가 인용되어 있지 않은지
+
+이 검증을 통과한 코멘트만 카드에 표시됩니다.
+
+---
+
+## 부록 A — 룰북 버전 기록
+
+| 버전 | 변경 내용 | 날짜 |
+|---|---|---|
+| v0.1 | 초기 컨셉, 3시그널 (역사적 저평가 + 회복 모멘텀 + 미래 이익) | 2026-04-15 |
+| v0.2 | S2 회복 모멘텀 제거 (PER 6M min과 노이즈 충돌) | 2026-04-20 |
+| v0.3 | hard rule을 Z-Score 정규화로 대체 (절벽 효과 제거) | 2026-04-22 |
+| v0.4 | Value Trap hard rule 제거 (정성 경고로 전환) | 2026-04-23 |
+| v1.0 | 4팩터 Value 60% + Growth 40% 가중합 정식화 | 2026-04-27 |
+| v1.1 (계획) | EPS Revision Momentum 팩터 추가 검토, 자동 코멘트 카드 표시 | — |
+
+## 부록 B — 적용 결과 (2026-04-27 시점)
+
+| 항목 | 값 |
+|---|---|
+| universe 크기 | 303 |
+| 분석 종목 수 | 303 |
+| 랭킹 종목 수 | 303 |
+| Strong Buy 이상 통과 (Z ≥ +1.65σ) | 14 (universe 상위 4.6%) |
+| Top 10 평균 total_score | +1.27σ |
+| Top 10 티어 분포 | Strong Buy 9 + Buy 1 |
+
+상세 결과는 `data/screens/triple_cross.json`에 저장됩니다.
+
+## 부록 C — 사용 예시
+
+본 룰북은 슬래시 커맨드로 한 줄 실행됩니다.
+
+| 명령 | 동작 | 소요 시간 |
+|---|---|---|
+| /update-data | 시장 지수, 매트릭스, 점수, AI 분석 (universe 제외) | 약 12분 |
+| /update-data --full | universe 재구축 포함 | 약 30분 |
+| /update-data --skip-ai | AI 분석 건너뛰고 정량만 | 약 10분 |
+
+명령 한 줄로 본 룰북이 적용되어 `data/screens/triple_cross.json`이 갱신되고, GitHub에 커밋하면 약 30초 만에 사이트에 반영됩니다.

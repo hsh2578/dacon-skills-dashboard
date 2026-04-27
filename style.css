@@ -773,6 +773,72 @@ main {
   color: #6d28d9;
 }
 
+/* ============================================================ */
+/* 푸터 — 평가자/사용자가 사이트만 봐도 핵심 파악                 */
+/* ============================================================ */
+.site-footer {
+  margin-top: 48px;
+  padding: 32px 24px 24px;
+  background: #1c1f24;
+  color: #e5e7eb;
+}
+.footer-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+@media (max-width: 768px) {
+  .footer-inner { grid-template-columns: 1fr; }
+}
+.footer-block h3 {
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: #fbbf24;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.footer-block p {
+  margin: 0 0 8px;
+  font-size: 12px;
+  line-height: 1.65;
+  color: #d1d5db;
+}
+.footer-block p b {
+  color: #fff;
+}
+.footer-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.75;
+  color: #d1d5db;
+}
+.footer-list li { margin-bottom: 3px; }
+.footer-list b { color: #fff; }
+.footer-list a {
+  color: #93c5fd;
+  text-decoration: none;
+  border-bottom: 1px dashed #93c5fd66;
+}
+.footer-list a:hover { color: #fbbf24; border-bottom-color: #fbbf24; }
+.footer-meta {
+  grid-column: 1 / -1;
+  margin-top: 12px;
+  padding-top: 14px;
+  border-top: 1px solid #374151;
+  font-size: 10px;
+  color: #9ca3af;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+.footer-meta a {
+  color: #93c5fd;
+  text-decoration: none;
+}
+
 .ai-more-note {
   margin-top: 6px;
   padding: 5px 8px;
