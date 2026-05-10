@@ -4,6 +4,7 @@
 """
 import io
 import json
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -21,27 +22,50 @@ HEADERS = {
 
 MULTPL_URLS = {
     "per": "https://www.multpl.com/s-p-500-pe-ratio/table/by-month",
-    "pbr": "https://www.multpl.com/s-p-500-price-to-book/table/by-month",
+    # PBR은 multpl이 by-month를 사실상 제공 안 함 → by-year로 받아 월 단위로 forward fill
+    "pbr": "https://www.multpl.com/s-p-500-price-to-book/table/by-year",
     "div_yield": "https://www.multpl.com/s-p-500-dividend-yield/table/by-month",
 }
 
 
 def _fetch_multpl(url: str) -> pd.Series:
+    """multpl 테이블을 직접 파싱. pd.read_html은 multpl의 rowspan 구조를 잘못 해석함."""
     resp = requests.get(url, headers=HEADERS, timeout=30)
     resp.raise_for_status()
-    df = pd.read_html(io.StringIO(resp.text))[0]
-    df.columns = ["date", "value"]
-    df["date"] = pd.to_datetime(df["date"], errors="coerce")
-    df["value"] = (
-        df["value"].astype(str)
-        .str.replace("%", "", regex=False)
-        .str.replace(",", "", regex=False)
-        .str.replace("†", "", regex=False)
-        .str.strip()
-        .str.extract(r"(-?\d+\.?\d*)")[0]
+    # 모든 <tr>의 첫 td(date)와 두 번째 td(value, 내부에 <abbr> 등 포함 가능) 추출
+    row_pattern = re.compile(
+        r"<tr[^>]*>\s*<td[^>]*>([^<]+)</td>\s*<td[^>]*>(.*?)</td>\s*</tr>",
+        re.IGNORECASE | re.DOTALL,
     )
-    df["value"] = pd.to_numeric(df["value"], errors="coerce")
-    return df.dropna().set_index("date")["value"].sort_index()
+    raw_rows = []
+    for m in row_pattern.finditer(resp.text):
+        date_txt = m.group(1).strip()
+        val_txt = m.group(2).strip()
+        if not date_txt or not val_txt:
+            continue
+        # value 정리 (%, ,, †, 공백 제거 후 숫자만 추출)
+        clean = val_txt.replace("%", "").replace(",", "").replace("†", "").strip()
+        num_m = re.search(r"-?\d+\.?\d*", clean)
+        if not num_m:
+            continue
+        try:
+            v = float(num_m.group(0))
+        except ValueError:
+            continue
+        raw_rows.append((date_txt, v))
+    if not raw_rows:
+        return pd.Series(dtype=float)
+    df = pd.DataFrame(raw_rows, columns=["date", "value"])
+    # pandas to_datetime이 'Apr 1, 2026' 같은 single-day 형식을 못 잡으므로 dateutil 사용
+    from dateutil import parser as _dateparser
+    def _parse(s):
+        try:
+            return _dateparser.parse(s)
+        except (ValueError, TypeError):
+            return pd.NaT
+    df["date"] = df["date"].apply(_parse)
+    df = df.dropna(subset=["date"])
+    return df.set_index("date")["value"].sort_index()
 
 
 def _to_month_end(series: pd.Series) -> pd.Series:
@@ -81,9 +105,13 @@ def fetch_sp500_monthly(years: int = 10) -> dict:
     print("  yfinance ^GSPC", flush=True)
     close = _fetch_yf_close_monthly("^GSPC", years)
 
-    df = pd.DataFrame(metrics)
+    # PER, div_yield는 월별. PBR은 연 1회. close는 월별.
+    # 월 인덱스로 통일하고, PBR은 forward fill로 매월 채움.
+    df = pd.DataFrame({"per": metrics["per"], "div_yield": metrics["div_yield"]})
     df["close"] = close
-    df = df.sort_index().dropna(subset=["per", "pbr", "div_yield"], how="all")
+    df = df.sort_index().dropna(subset=["per", "div_yield"], how="all")
+    pbr_yearly = metrics["pbr"].sort_index()
+    df["pbr"] = pbr_yearly.reindex(df.index, method="ffill")
 
     return {
         "name": "S&P 500",
