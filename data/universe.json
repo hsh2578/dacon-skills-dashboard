@@ -25,7 +25,8 @@
     "excluded_no_forward": 170,
     "excluded_no_target": 13,
     "consensus_fetched_at": "2026-04-27T04:56:56",
-    "price_updated_at": "2026-05-08"
+    "price_updated_at": "2026-05-10T21:21:10",
+    "price_reference_date": "20260508"
   },
   "stocks": [
     {

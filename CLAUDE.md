@@ -75,6 +75,7 @@ python scripts/fetch_universe.py                   # universe 마스터 (시총�
 python scripts/validate_universe_quick.py          # 5Y PER 검증
 python scripts/fetch_consensus.py                  # Naver Wisereport 컨센서스
 python scripts/fetch_matrix.py                     # 매트릭스 PER/PBR (60개월)
+python scripts/refresh_universe_prices.py          # universe.json close 직전 거래일 종가로 갱신 (~30초)
 python scripts/apply_triple_cross.py               # 4팩터 → Top 10
 python scripts/fetch_batch.py --from-screen triple_cross --top-n 10  # Top 10 일별 풀
 
