@@ -2,26 +2,34 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>Skills 기반 가치투자 대시보드 · DACON</title>
+<title>PER · PBR Lens — 한국 주식 시계열 가치 평가 + 4팩터 스크리너</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="style.css?v=21">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="style.css?v=22">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 </head>
 <body>
-<header>
+<header class="site-header">
   <div class="header-inner">
-    <div>
-      <h1>Skills 기반 가치투자 종목 발굴 대시보드</h1>
-      <p class="updated">최근 갱신 <span id="updated">-</span> · DACON 월간 해커톤 · 투자 데이터를 시각화하라 — Skills 기반 대시보드 설계</p>
+    <div class="brand">
+      <h1 class="brand-title"><span class="brand-mark">PER · PBR</span> <span class="brand-light">Lens</span></h1>
+      <p class="brand-sub">한국 주식 시계열 가치 평가 + 4팩터 스크리너</p>
     </div>
     <nav class="header-nav">
       <a href="#section-index">시장 지수</a>
       <a href="#section-screen">Top 10</a>
       <a href="#section-search">종목 검색</a>
     </nav>
+  </div>
+  <div class="header-meta">
+    <span class="dot"></span>
+    <span>최근 갱신 <b id="updated">-</b></span>
+    <span class="sep">·</span>
+    <span>DACON 월간 해커톤 출품작</span>
   </div>
 </header>
 
@@ -242,6 +250,6 @@
   </div>
 </footer>
 
-<script src="app.js?v=14"></script>
+<script src="app.js?v=15"></script>
 </body>
 </html>

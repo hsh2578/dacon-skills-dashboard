@@ -2,19 +2,35 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>종목 PER · PBR</title>
+<title>종목 상세 — PER · PBR Lens</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<link rel="stylesheet" href="style.css?v=20">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="style.css?v=22">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 </head>
 <body>
-<header>
-  <div>
-    <h1 id="stock-title">종목 PER · PBR</h1>
-    <p class="updated">최근 갱신 <span id="updated">-</span> · <a href="index.html" style="color:#2563eb;text-decoration:none">← 지수 대시보드</a></p>
+<header class="site-header site-header-detail">
+  <div class="header-inner">
+    <div class="brand brand-detail">
+      <a class="brand-back" href="index.html" aria-label="대시보드로 돌아가기">←</a>
+      <div>
+        <h1 class="brand-title brand-title-stock" id="stock-title">종목 상세</h1>
+        <p class="brand-sub">PER · PBR Lens · 종목 상세</p>
+      </div>
+    </div>
+    <nav class="header-nav">
+      <a href="index.html#section-index">시장 지수</a>
+      <a href="index.html#section-screen">Top 10</a>
+      <a href="index.html#section-search">종목 검색</a>
+    </nav>
+  </div>
+  <div class="header-meta">
+    <span class="dot"></span>
+    <span>최근 갱신 <b id="updated">-</b></span>
   </div>
 </header>
 
@@ -117,6 +133,6 @@
   </section>
 </main>
 
-<script src="stock.js?v=8"></script>
+<script src="stock.js?v=9"></script>
 </body>
 </html>

@@ -221,6 +221,8 @@ async function loadTripleCross() {
 // 종목 검색 (Section 3)
 // ============================================================
 let searchPool = [];   // 검색 가능한 모든 종목 (universe + 추가 페치된 종목)
+let searchPage = 1;
+const SEARCH_PAGE_SIZE = 30;
 let scoreMap = {};     // code → triple_cross 점수 정보
 
 async function loadSearchPool() {
@@ -273,8 +275,8 @@ function bindSearchControls() {
   const sortEl = document.getElementById('search-sort');
   if (!inputEl || inputEl._bound) return;
   inputEl._bound = true;
-  inputEl.addEventListener('input', (e) => renderSearchResults(e.target.value));
-  sortEl.addEventListener('change', () => renderSearchResults(inputEl.value));
+  inputEl.addEventListener('input', (e) => { searchPage = 1; renderSearchResults(e.target.value); });
+  sortEl.addEventListener('change', () => { searchPage = 1; renderSearchResults(inputEl.value); });
 }
 
 function renderSearchResults(query) {
@@ -308,9 +310,14 @@ function renderSearchResults(query) {
     ? `${filtered.length} / ${searchPool.length} 종목`
     : `${searchPool.length} 종목`;
 
-  // 최대 60개로 제한 (성능)
-  const view = filtered.slice(0, 60);
-  if (view.length === 0) {
+  // 페이지네이션
+  const totalPages = Math.max(1, Math.ceil(filtered.length / SEARCH_PAGE_SIZE));
+  if (searchPage > totalPages) searchPage = totalPages;
+  if (searchPage < 1) searchPage = 1;
+  const start = (searchPage - 1) * SEARCH_PAGE_SIZE;
+  const view = filtered.slice(start, start + SEARCH_PAGE_SIZE);
+
+  if (filtered.length === 0) {
     resultsEl.innerHTML = '';
     emptyEl.style.display = '';
     return;
@@ -350,9 +357,48 @@ function renderSearchResults(query) {
         </div>
       </a>`;
   }).join('');
-  if (filtered.length > 60) {
-    resultsEl.innerHTML += `<p class="srch-more">상위 60개만 표시 — 검색어를 좁혀주세요</p>`;
+  // 페이지네이션 컨트롤
+  if (totalPages > 1) {
+    const fromIdx = start + 1;
+    const toIdx = Math.min(start + SEARCH_PAGE_SIZE, filtered.length);
+    const pages = buildPageButtons(searchPage, totalPages);
+    resultsEl.insertAdjacentHTML('beforeend', `
+      <nav class="srch-pager" aria-label="검색 결과 페이지">
+        <div class="srch-pager-info">${fromIdx}–${toIdx} / ${filtered.length}</div>
+        <div class="srch-pager-controls">
+          <button class="srch-page-btn" data-page="prev" ${searchPage === 1 ? 'disabled' : ''}>이전</button>
+          ${pages.map(p => p === '…'
+            ? `<span class="srch-page-ellipsis">…</span>`
+            : `<button class="srch-page-btn ${p === searchPage ? 'is-active' : ''}" data-page="${p}">${p}</button>`
+          ).join('')}
+          <button class="srch-page-btn" data-page="next" ${searchPage === totalPages ? 'disabled' : ''}>다음</button>
+        </div>
+      </nav>
+    `);
+    resultsEl.querySelectorAll('.srch-page-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const v = btn.getAttribute('data-page');
+        if (v === 'prev') searchPage--;
+        else if (v === 'next') searchPage++;
+        else searchPage = parseInt(v, 10);
+        const inputEl = document.getElementById('search-input');
+        renderSearchResults(inputEl ? inputEl.value : '');
+        document.getElementById('section-search')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
   }
+}
+
+function buildPageButtons(current, total) {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const out = [1];
+  if (current > 4) out.push('…');
+  const lo = Math.max(2, current - 1);
+  const hi = Math.min(total - 1, current + 1);
+  for (let i = lo; i <= hi; i++) out.push(i);
+  if (current < total - 3) out.push('…');
+  out.push(total);
+  return out;
 }
 
 async function load() {
