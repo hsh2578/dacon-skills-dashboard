@@ -155,6 +155,92 @@ dividend_value.md     ──→ data/screens/dividend_value.json (계획)
 
 ---
 
+## Skills.md 메타 명세 — 새 룰북 추가 가이드
+
+본 패키지에 새로운 룰북을 추가하려는 사용자가 따라야 할 메타 규칙입니다. 이 명세를 지키면 사이트의 자동 매핑 파이프라인이 새 룰북을 인식할 수 있습니다.
+
+### 필수 frontmatter
+
+모든 룰북은 .md 파일 최상단에 다음 YAML frontmatter를 포함해야 합니다.
+
+```yaml
+---
+name: <룰북 식별자, snake_case>
+version: <semver, 예: 1.0.0>
+type: main_rulebook | auxiliary_rulebook | agent_rulebook
+description: <한 줄 설명, 100자 이내>
+parent_rulebook: <메인 룰북 경로, 보조 룰북에만 필수>
+output: <결과 JSON 경로, 정량 룰북에만>
+implementation: <Python 스크립트 경로, 구현된 경우>
+tools: <에이전트 룰북에만, 예: WebSearch, Read>
+---
+```
+
+### 메타 필드 검증 룰
+
+| 필드 | 필수 여부 | 검증 룰 |
+|---|---|---|
+| name | 필수 | 영문 소문자 + underscore, 다른 룰북과 중복 금지 |
+| version | 필수 | semver 형식 (1.0.0, 1.1.0 등) |
+| type | 필수 | 위 4종 중 하나 |
+| description | 필수 | 100자 이내, 합쇼체 종결 |
+| parent_rulebook | 보조·에이전트 룰북에만 | 메인 룰북 파일 경로 (skills/ 기준) |
+| output | 정량 룰북에만 | data/screens/{name}.json 형식 |
+| implementation | 구현된 경우만 | scripts/{name}.py 형식 |
+| tools | 에이전트 룰북에만 | Anthropic 도구명 (WebSearch, Read 등) |
+
+### 본문 표준 6섹션 (필수)
+
+frontmatter 다음에는 표준 6섹션이 정확한 순서로 들어가야 합니다.
+
+```markdown
+## 1. 핵심 컨셉
+## 2. 데이터 소스
+## 3. 1차 필터
+## 4. 점수화 룰         (또는 분석 룰)
+## 5. 시각화 룰
+## 6. 인사이트 생성 룰
+```
+
+추가 섹션은 §7 이후에 자유롭게 둘 수 있습니다. 본 패키지 룰북들은 §7 메인 룰북과의 관계, §8 운영 예외 처리를 공통으로 둡니다.
+
+### 자동 매핑 동작
+
+새 룰북이 위 명세를 따르면 다음 자동 처리가 일어납니다.
+
+| 단계 | 자동 동작 |
+|---|---|
+| 1 | 슬래시 커맨드(`/update-data`)가 frontmatter의 `implementation` 필드를 읽어 페치 스크립트 실행 |
+| 2 | 출력 JSON(`output` 필드)이 사이트에서 fetch 가능한 위치에 생성 |
+| 3 | (계획) 사이트 메뉴에 새 룰북 카드 카탈로그 자동 추가 |
+| 4 | (계획) §5 시각화 룰을 읽어 적절한 차트 컴포넌트 선택 |
+
+3, 4번은 v2.0에서 본격 구현 예정인 자동 매핑 단계입니다. 현재 v1.0은 frontmatter 검증과 1, 2번 자동화까지 지원합니다.
+
+### 새 룰북 추가 예시
+
+가상의 "고변동성 모멘텀" 룰북을 추가한다고 가정합니다.
+
+```yaml
+---
+name: high_volatility_momentum
+version: 0.1.0
+type: auxiliary_rulebook
+description: 30일 변동성 상위 종목 중 단기 모멘텀 양호한 종목을 발굴하는 보조 룰북.
+parent_rulebook: value_recovery_quant.md
+output: data/screens/high_volatility_momentum.json
+---
+
+## 1. 핵심 컨셉
+...
+## 6. 인사이트 생성 룰
+...
+```
+
+이 frontmatter만 있으면 본 패키지의 명세를 충족하며, 사이트가 새 룰북을 인식할 준비가 됩니다.
+
+---
+
 ## 라이선스 및 저작권
 
 본 패키지의 .md 문서들은 출품작의 일부이며, 코드 또는 데이터의 재사용·수정·재배포는 출처 표기와 함께 허용됩니다. 외부 데이터 출처(pykrx, 네이버 Wisereport, multpl, yfinance)의 사용 정책은 각 출처의 라이선스를 따릅니다.

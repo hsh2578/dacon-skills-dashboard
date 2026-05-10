@@ -173,4 +173,25 @@ WebSearch 결과에 명시된 사실만 인용합니다. 일반론적 우려는 
 
 본 에이전트는 메인 룰북이 universe 통과시킨 종목에 대해 추가 안전 검증을 수행하는 보조 단계입니다. 본 에이전트의 결과는 메인 룰북의 정량 점수를 변경하지 않습니다. 다만 verdict 매트릭스(`synthesizer`에서 결정)에서 evidence_strength × overall_risk_level의 입력으로 사용되어, 사용자에게 균형 잡힌 판단 근거를 제공합니다.
 
+### 7.1 입출력 인터페이스
+
+| 방향 | 데이터 | 스키마 위치 |
+|---|---|---|
+| 입력 | 종목 컨텍스트 (4팩터 raw·z, 정량 수치, broker_count) | `data/screens/triple_cross.json`의 top[i] 객체 |
+| 입력 | 리스크 정황 검색 결과 | WebSearch 도구 호출 |
+| 출력 | 정성·정량 리스크 + overall_risk_level | 본 룰북 §6.1 |
+| 다음 단계 | synthesizer가 본 출력을 입력으로 사용 | agents/synthesizer.md §2 |
+
 본 에이전트의 결과는 단독으로 사용되지 않고 `fundamental_analyst`의 모멘텀 분석과 함께 `synthesizer`가 통합합니다.
+
+## 8. 운영 예외 처리
+
+| 시나리오 | 처리 룰 |
+|---|---|
+| WebSearch 결과 0건 | 정성 리스크 항목 미작성, overall_risk_level은 정량 리스크만 기준 |
+| 검색 결과가 일반론적 우려뿐 (구체 사실 없음) | 해당 항목 미작성 — 일반론 인용 금지 |
+| 출처 간 충돌 (낙관 vs 비관) | 비관 측 우선 표시 (리스크 분석은 보수적 관점 유지) |
+| 정량 리스크 카테고리 모두 미해당 + 정성 검색 부재 | risks 배열에 NONE 카테고리 1개 항목, severity LOW |
+| WebSearch 도구 호출 실패 | 정량 리스크만 출력, overall_risk_level 산출 |
+| broker_count = 1 또는 컨센 데이터 부재 | CONSENSUS_VERY_THIN 자동 추가, severity MEDIUM |
+| tier == AVOID 또는 is_value_trap == true | 단일 경고 항목 반환 (severity HIGH), 다른 분석 실행 안 함 |
