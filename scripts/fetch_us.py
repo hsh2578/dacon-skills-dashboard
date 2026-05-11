@@ -29,42 +29,44 @@ MULTPL_URLS = {
 
 
 def _fetch_multpl(url: str) -> pd.Series:
-    """multpl 테이블을 직접 파싱. pd.read_html은 multpl의 rowspan 구조를 잘못 해석함."""
+    """multpl 테이블을 BeautifulSoup으로 직접 파싱.
+    pd.read_html이 rowspan/abbr 등을 잘못 해석하는 문제를 회피.
+    """
+    from bs4 import BeautifulSoup
+    from dateutil import parser as _dateparser
+
     resp = requests.get(url, headers=HEADERS, timeout=30)
     resp.raise_for_status()
-    # 모든 <tr>의 첫 td(date)와 두 번째 td(value, 내부에 <abbr> 등 포함 가능) 추출
-    row_pattern = re.compile(
-        r"<tr[^>]*>\s*<td[^>]*>([^<]+)</td>\s*<td[^>]*>(.*?)</td>\s*</tr>",
-        re.IGNORECASE | re.DOTALL,
-    )
+    soup = BeautifulSoup(resp.text, "html.parser")
+
     raw_rows = []
-    for m in row_pattern.finditer(resp.text):
-        date_txt = m.group(1).strip()
-        val_txt = m.group(2).strip()
+    for tr in soup.find_all("tr"):
+        tds = tr.find_all("td")
+        if len(tds) != 2:
+            continue
+        date_txt = tds[0].get_text(strip=True)
+        val_txt = tds[1].get_text(strip=True)
         if not date_txt or not val_txt:
             continue
-        # value 정리 (%, ,, †, 공백 제거 후 숫자만 추출)
+        # value: %, ,, † 제거 후 첫 숫자 추출
         clean = val_txt.replace("%", "").replace(",", "").replace("†", "").strip()
-        num_m = re.search(r"-?\d+\.?\d*", clean)
+        num_m = re.search(r"-?\d+\.?\d+|-?\d+", clean)
         if not num_m:
             continue
         try:
             v = float(num_m.group(0))
         except ValueError:
             continue
-        raw_rows.append((date_txt, v))
+        # date: dateutil로 안전 파싱
+        try:
+            dt = _dateparser.parse(date_txt)
+        except (ValueError, TypeError):
+            continue
+        raw_rows.append((dt, v))
+
     if not raw_rows:
         return pd.Series(dtype=float)
     df = pd.DataFrame(raw_rows, columns=["date", "value"])
-    # pandas to_datetime이 'Apr 1, 2026' 같은 single-day 형식을 못 잡으므로 dateutil 사용
-    from dateutil import parser as _dateparser
-    def _parse(s):
-        try:
-            return _dateparser.parse(s)
-        except (ValueError, TypeError):
-            return pd.NaT
-    df["date"] = df["date"].apply(_parse)
-    df = df.dropna(subset=["date"])
     return df.set_index("date")["value"].sort_index()
 
 
