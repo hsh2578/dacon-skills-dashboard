@@ -11,9 +11,9 @@
     "note": "정성 위주 분석 (투자포인트 4-5개 + 리스크 3-4개). 모든 정성 항목 WebSearch 출처 태그 필수. 정량 점수에는 영향 없음. 2026-05-18 종가 기준 Top 10.",
     "ranking": {
       "ranker": ".claude/agents/ranker.md",
-      "basis": "저평가 해소 가능성 (촉매·이익 회복·Value Trap 판별)",
-      "ranked_at": "2026-05-19T04:23:14",
-      "note": "ai_rank = ranker 재순위 (메인). quant_rank = 4팩터 정량 순위 (후보 선정)."
+      "basis": "저평가 해소 가능성 (촉매 구체성·실적 턴어라운드 강도·Value Trap·단기노이즈 보정·절대밸류)",
+      "ranked_at": "2026-05-19T09:36:53",
+      "note": "ai_rank = ranker 재순위 (메인). quant_rank = 4팩터 정량 순위 (후보 선정). 보강 룰: 촉매/실적 4단계 세분 + 단기노이즈·절대밸류 보정."
     },
     "schema_notes": {
       "undervaluation_cause": "왜 시장이 이 종목을 싸게 보는가 (기존 risks 출처태그 인용 도출). nature=TEMPORARY|STRUCTURAL은 ranker Value Trap 판별 주 입력."
@@ -49,7 +49,7 @@
       },
       "quant_rank": 6,
       "ai_rank": 1,
-      "rerank_reason": "정량·정성 양호 — 키친리스 +41%·인천공항 컨세션 +43% 촉매 + 목표가 일제 상향 [출처: WebSearch · 2026-05]"
+      "rerank_reason": "키친리스 +41%·인천공항 컨세션 +43% 구체 촉매 + 목표가 일제 상향, risk LOW [출처: WebSearch · 2026-05]"
     },
     {
       "code": "285130",
@@ -80,7 +80,7 @@
       },
       "quant_rank": 1,
       "ai_rank": 2,
-      "rerank_reason": "1Q 영업익 +464% QoQ + 재활용 PET 양산 촉매, 자회사 적자는 일시적 [출처: WebSearch · 2026-05]"
+      "rerank_reason": "1Q 영업익 +464% QoQ 강한 턴어라운드 + 친환경 소재 확장, 자회사 적자는 일시적 [출처: WebSearch · 2026-05]"
     },
     {
       "code": "253450",
@@ -111,69 +111,7 @@
       },
       "quant_rank": 7,
       "ai_rank": 3,
-      "rerank_reason": "1Q OP +50% 턴어라운드 + 2Q 라인업·디즈니+ 가시화 [출처: WebSearch · 2026-05]"
-    },
-    {
-      "code": "054210",
-      "ai_notes": {
-        "one_liner": "LG엔솔향 LFP ESS BMS·EV 배터리팩 2026 본격 양산",
-        "investment_points": [
-          "2026년 상반기 EV용 배터리팩 양산 개시 — 양산 준비 막바지 단계 [출처: WebSearch · 2026-04]",
-          "LG엔솔향 LFP ESS 배터리팩 BMS 공급 2026년 본격화 — LG전자 가정용 ESS 철수 공백 해소 [출처: WebSearch · 2026-04]",
-          "LG엔솔향 중대형 배터리팩 매출 2025년 469억 → 2026년 1,606억원 급성장 전망 [출처: WebSearch · 2026-04]",
-          "로봇 고객사와 휴머노이드용 중대형 배터리팩 공동 개발 진행 — 신규 성장축 확보 [출처: WebSearch · 2026-04]",
-          "2026년 매출 8,142억(+15.9% YoY)·영업이익 426억(+40.1% YoY, OPM 5.2%) 컨센 [출처: WebSearch · 2026-04]"
-        ],
-        "risks": [
-          "EV 배터리팩 상반기 양산 일정 지연 시 2026년 매출 가이던스 하향 [출처: WebSearch · 2026-04]",
-          "LG엔솔향 LFP ESS BMS 본격 매출 시점이 2026년으로 이연 — 2025년 매출 공백 잔존 [출처: WebSearch · 2026-04]",
-          "스마트폰 케이스(41%)·전자담배(20%) 레거시 비중 잔존 — 신사업 외 캐시카우 의존도 높음 [출처: WebSearch · 2026-04]",
-          "증권사 4곳만 커버 — 컨센 신뢰구간 보통 폭, 추가 검증 권고 [정량]"
-        ],
-        "undervaluation_cause": {
-          "text": "신사업 LFP ESS BMS·EV 배터리팩 매출 2026년 이연으로 2025 실적 공백 [출처: WebSearch · 2026-04]",
-          "nature": "TEMPORARY"
-        },
-        "verdict": "정량 강세, 리스크 모니터링 권고",
-        "evidence_strength": "STRONG",
-        "risk_level": "MEDIUM",
-        "generated_at": "2026-05-10T19:55:00",
-        "model": "claude-sonnet-4-6"
-      },
-      "quant_rank": 5,
-      "ai_rank": 4,
-      "rerank_reason": "2026 상반기 EV 배터리팩 양산 임박 + LG엔솔 LFP ESS BMS 본격화 [출처: WebSearch · 2026-04]"
-    },
-    {
-      "code": "214150",
-      "ai_notes": {
-        "one_liner": "브라질 직영 + 美 쿼드세이 + 中 볼뉴머 허가 모멘텀",
-        "investment_points": [
-          "美 쿼드세이 2026-03 출시 + 中 볼뉴머 9월 허가 전망 — 양대 시장 동시 개화 [출처: WebSearch · 2026-04]",
-          "1Q26 매출 872억(+13% YoY)·영업이익 372억 — 2Q부터 브라질 연결 + 남미·유럽 가속 [출처: WebSearch · 2026-05]",
-          "브라질 MedSystems 3월 연결 편입 — 직영 전환으로 영업이익률 42.7% 유지 [출처: WebSearch · 2026-05]",
-          "2026 가이던스 매출 4,700억(+40%)·EBITDA 2,469억 — 슈링크/볼뉴머 글로벌 침투 본격화 [출처: WebSearch · 2026-02]",
-          "4팩터 종합 시그널 Z=+1.25σ — universe 303종목 상위권 [정량]"
-        ],
-        "risks": [
-          "中 볼뉴머 9월 허가 일정 지연 또는 美 쿼드세이 초기 판매 부진 시 가이던스 하향 [출처: WebSearch · 2026-04]",
-          "1Q26 컨센서스 하회 — 시장 기대 대비 숨고르기 구간, 하반기 효과 가시화 지연 우려 [출처: WebSearch · 2026-05]",
-          "독일 멀츠 울쎄라·인모드 등 글로벌 HIFU·RF 경쟁사 美 시장 선점 — 슈링크 美 진출 시 가격 경쟁 [출처: WebSearch · 2026-04]",
-          "Forward PER 20.92로 하향 추세지만 현 PER 25.04 절대치 부담 — 신제품 매출 미달성 시 회귀 하방 [정량]"
-        ],
-        "undervaluation_cause": {
-          "text": "1Q26 컨센 하회 숨고르기 + 신제품 쿼드세이·볼뉴머 효과 가시화 지연 [출처: WebSearch · 2026-05]",
-          "nature": "TEMPORARY"
-        },
-        "verdict": "정량 강세, 리스크 모니터링 권고",
-        "evidence_strength": "STRONG",
-        "risk_level": "MEDIUM",
-        "generated_at": "2026-05-15T16:30:00",
-        "model": "claude-sonnet-4-6"
-      },
-      "quant_rank": 10,
-      "ai_rank": 5,
-      "rerank_reason": "美 쿼드세이·中 볼뉴머 허가 촉매, 단 멀츠·인모드 글로벌 경쟁 상존 [출처: WebSearch · 2026-04]"
+      "rerank_reason": "1Q OP +50% 턴어라운드 + 2Q 라인업·디즈니+ 구체 가시화, 단 절대 멀티플 부담 [출처: WebSearch · 2026-05]"
     },
     {
       "code": "080580",
@@ -203,8 +141,8 @@
         "model": "claude-sonnet-4-6"
       },
       "quant_rank": 8,
-      "ai_rank": 6,
-      "rerank_reason": "HBM 사이클 + 2025 영업익 +536% 턴어라운드, 경쟁 심화 상존 [출처: WebSearch · 2026-02]"
+      "ai_rank": 4,
+      "rerank_reason": "2025 영업익 +536% 흑전 + HBM 사이클 진입, 단 PER 절대치 높음·경쟁 상존 [출처: WebSearch · 2026-02]"
     },
     {
       "code": "122870",
@@ -234,29 +172,60 @@
         "model": "claude-sonnet-4-6"
       },
       "quant_rank": 2,
-      "ai_rank": 7,
-      "rerank_reason": "컴백 촉매 강하나 2분기 영업이익 추정 대폭 하향·목표가 일괄 하향 [출처: WebSearch · 2026-05]"
+      "ai_rank": 5,
+      "rerank_reason": "BABYMONSTER 6/26-28 매진·BIGBANG 20주년 등 최강 촉매 — 2Q 마진은 일시적 노이즈 [출처: WebSearch · 2026-05]"
     },
     {
-      "code": "030520",
+      "code": "214150",
       "ai_notes": {
-        "one_liner": "AI 오케스트레이터 전환 + 한컴독스 ARR + 사상 최대 실적",
+        "one_liner": "브라질 직영 + 美 쿼드세이 + 中 볼뉴머 허가 모멘텀",
         "investment_points": [
-          "트윈형 에이전틱 OS 상반기 출시·연내 상용화 — AI 디지털 쌍둥이 24시간 자동 업무 처리 [출처: WebSearch · 2026-04]",
-          "2026년 별도 매출 2,100억·영업이익 600억 가이던스 (각 +20%·+18% YoY) — 단독 매출 2,000억 시대 진입 [출처: WebSearch · 2026-04]",
-          "한컴오피스 2026 개발 중단·자원 AI/웹3 재배치 — AI 라이선스·ARR 모델 전환으로 플랫폼 밸류에이션 리레이팅 추진 [출처: WebSearch · 2026-04]",
-          "2025년 별도 매출 1,753억·영업이익 509억 사상 최대 (+10.2%·+2.4% YoY) — 한컴어시스턴트 공공·금융권 침투 [출처: WebSearch · 2026-02]",
-          "Forward PER 10.88로 현재 14.05 대비 -23% 하향 — 4팩터 종합 Z=+1.28σ [정량]"
+          "美 쿼드세이 2026-03 출시 + 中 볼뉴머 9월 허가 전망 — 양대 시장 동시 개화 [출처: WebSearch · 2026-04]",
+          "1Q26 매출 872억(+13% YoY)·영업이익 372억 — 2Q부터 브라질 연결 + 남미·유럽 가속 [출처: WebSearch · 2026-05]",
+          "브라질 MedSystems 3월 연결 편입 — 직영 전환으로 영업이익률 42.7% 유지 [출처: WebSearch · 2026-05]",
+          "2026 가이던스 매출 4,700억(+40%)·EBITDA 2,469억 — 슈링크/볼뉴머 글로벌 침투 본격화 [출처: WebSearch · 2026-02]",
+          "4팩터 종합 시그널 Z=+1.25σ — universe 303종목 상위권 [정량]"
         ],
         "risks": [
-          "트윈형 에이전틱 OS 상반기 출시·연내 상용화 일정 미달 시 ARR 전환 시나리오 지연 [출처: WebSearch · 2026-04]",
-          "MS 코파일럿·구글 워크스페이스 빅테크 생태계 경쟁 지속 — 일부 공공기관 한컴오피스 대체 검토 [출처: WebSearch · 2026-05]",
-          "AI 리브랜딩 광고선전비·신사업 비용 증가로 SaaS 전환 과정 수익성 일시적 변동성 [출처: WebSearch · 2026-05]",
-          "증권사 4곳 커버 — 컨센 표본 협소로 목표가 30,000~35,000원 신뢰구간 제한적 [정량]"
+          "中 볼뉴머 9월 허가 일정 지연 또는 美 쿼드세이 초기 판매 부진 시 가이던스 하향 [출처: WebSearch · 2026-04]",
+          "1Q26 컨센서스 하회 — 시장 기대 대비 숨고르기 구간, 하반기 효과 가시화 지연 우려 [출처: WebSearch · 2026-05]",
+          "독일 멀츠 울쎄라·인모드 등 글로벌 HIFU·RF 경쟁사 美 시장 선점 — 슈링크 美 진출 시 가격 경쟁 [출처: WebSearch · 2026-04]",
+          "Forward PER 20.92로 하향 추세지만 현 PER 25.04 절대치 부담 — 신제품 매출 미달성 시 회귀 하방 [정량]"
         ],
         "undervaluation_cause": {
-          "text": "MS 코파일럿·구글 빅테크 생태계 경쟁 지속으로 AI 전환 ARR 리레이팅 지연 [출처: WebSearch · 2026-05]",
-          "nature": "STRUCTURAL"
+          "text": "1Q26 컨센 하회 숨고르기 + 신제품 쿼드세이·볼뉴머 효과 가시화 지연 [출처: WebSearch · 2026-05]",
+          "nature": "TEMPORARY"
+        },
+        "verdict": "정량 강세, 리스크 모니터링 권고",
+        "evidence_strength": "STRONG",
+        "risk_level": "MEDIUM",
+        "generated_at": "2026-05-15T16:30:00",
+        "model": "claude-sonnet-4-6"
+      },
+      "quant_rank": 10,
+      "ai_rank": 6,
+      "rerank_reason": "美 쿼드세이 3월·中 볼뉴머 9월 날짜 확정 촉매, 단 현 PER 절대치 부담 [출처: WebSearch · 2026-04]"
+    },
+    {
+      "code": "054210",
+      "ai_notes": {
+        "one_liner": "LG엔솔향 LFP ESS BMS·EV 배터리팩 2026 본격 양산",
+        "investment_points": [
+          "2026년 상반기 EV용 배터리팩 양산 개시 — 양산 준비 막바지 단계 [출처: WebSearch · 2026-04]",
+          "LG엔솔향 LFP ESS 배터리팩 BMS 공급 2026년 본격화 — LG전자 가정용 ESS 철수 공백 해소 [출처: WebSearch · 2026-04]",
+          "LG엔솔향 중대형 배터리팩 매출 2025년 469억 → 2026년 1,606억원 급성장 전망 [출처: WebSearch · 2026-04]",
+          "로봇 고객사와 휴머노이드용 중대형 배터리팩 공동 개발 진행 — 신규 성장축 확보 [출처: WebSearch · 2026-04]",
+          "2026년 매출 8,142억(+15.9% YoY)·영업이익 426억(+40.1% YoY, OPM 5.2%) 컨센 [출처: WebSearch · 2026-04]"
+        ],
+        "risks": [
+          "EV 배터리팩 상반기 양산 일정 지연 시 2026년 매출 가이던스 하향 [출처: WebSearch · 2026-04]",
+          "LG엔솔향 LFP ESS BMS 본격 매출 시점이 2026년으로 이연 — 2025년 매출 공백 잔존 [출처: WebSearch · 2026-04]",
+          "스마트폰 케이스(41%)·전자담배(20%) 레거시 비중 잔존 — 신사업 외 캐시카우 의존도 높음 [출처: WebSearch · 2026-04]",
+          "증권사 4곳만 커버 — 컨센 신뢰구간 보통 폭, 추가 검증 권고 [정량]"
+        ],
+        "undervaluation_cause": {
+          "text": "신사업 LFP ESS BMS·EV 배터리팩 매출 2026년 이연으로 2025 실적 공백 [출처: WebSearch · 2026-04]",
+          "nature": "TEMPORARY"
         },
         "verdict": "정량 강세, 리스크 모니터링 권고",
         "evidence_strength": "STRONG",
@@ -264,9 +233,9 @@
         "generated_at": "2026-05-10T19:55:00",
         "model": "claude-sonnet-4-6"
       },
-      "quant_rank": 9,
-      "ai_rank": 8,
-      "rerank_reason": "실적 사상 최대이나 MS·구글 빅테크 경쟁으로 리레이팅 지연 [출처: WebSearch · 2026-05]"
+      "quant_rank": 5,
+      "ai_rank": 7,
+      "rerank_reason": "LFP ESS BMS·EV 배터리팩 2026 양산 임박, 매출 이연은 일시적 공백 [출처: WebSearch · 2026-04]"
     },
     {
       "code": "035720",
@@ -296,8 +265,39 @@
         "model": "claude-sonnet-4-6"
       },
       "quant_rank": 3,
+      "ai_rank": 8,
+      "rerank_reason": "1Q 영업익 +66% 최대이나 AI 수익화 미검증 + 김범수 항소심 구조적 리스크 [출처: WebSearch · 2026-05]"
+    },
+    {
+      "code": "030520",
+      "ai_notes": {
+        "one_liner": "AI 오케스트레이터 전환 + 한컴독스 ARR + 사상 최대 실적",
+        "investment_points": [
+          "트윈형 에이전틱 OS 상반기 출시·연내 상용화 — AI 디지털 쌍둥이 24시간 자동 업무 처리 [출처: WebSearch · 2026-04]",
+          "2026년 별도 매출 2,100억·영업이익 600억 가이던스 (각 +20%·+18% YoY) — 단독 매출 2,000억 시대 진입 [출처: WebSearch · 2026-04]",
+          "한컴오피스 2026 개발 중단·자원 AI/웹3 재배치 — AI 라이선스·ARR 모델 전환으로 플랫폼 밸류에이션 리레이팅 추진 [출처: WebSearch · 2026-04]",
+          "2025년 별도 매출 1,753억·영업이익 509억 사상 최대 (+10.2%·+2.4% YoY) — 한컴어시스턴트 공공·금융권 침투 [출처: WebSearch · 2026-02]",
+          "Forward PER 10.88로 현재 14.05 대비 -23% 하향 — 4팩터 종합 Z=+1.28σ [정량]"
+        ],
+        "risks": [
+          "트윈형 에이전틱 OS 상반기 출시·연내 상용화 일정 미달 시 ARR 전환 시나리오 지연 [출처: WebSearch · 2026-04]",
+          "MS 코파일럿·구글 워크스페이스 빅테크 생태계 경쟁 지속 — 일부 공공기관 한컴오피스 대체 검토 [출처: WebSearch · 2026-05]",
+          "AI 리브랜딩 광고선전비·신사업 비용 증가로 SaaS 전환 과정 수익성 일시적 변동성 [출처: WebSearch · 2026-05]",
+          "증권사 4곳 커버 — 컨센 표본 협소로 목표가 30,000~35,000원 신뢰구간 제한적 [정량]"
+        ],
+        "undervaluation_cause": {
+          "text": "MS 코파일럿·구글 빅테크 생태계 경쟁 지속으로 AI 전환 ARR 리레이팅 지연 [출처: WebSearch · 2026-05]",
+          "nature": "STRUCTURAL"
+        },
+        "verdict": "정량 강세, 리스크 모니터링 권고",
+        "evidence_strength": "STRONG",
+        "risk_level": "MEDIUM",
+        "generated_at": "2026-05-10T19:55:00",
+        "model": "claude-sonnet-4-6"
+      },
+      "quant_rank": 9,
       "ai_rank": 9,
-      "rerank_reason": "AI 수익화 트래픽뿐 매출 미검증 + 김범수 항소심 구조적 리스크 [출처: WebSearch · 2026-05]"
+      "rerank_reason": "사상 최대 실적이나 MS·구글 빅테크 경쟁으로 ARR 리레이팅 구조적 지연 [출처: WebSearch · 2026-05]"
     },
     {
       "code": "215000",
@@ -329,7 +329,7 @@
       },
       "quant_rank": 4,
       "ai_rank": 10,
-      "rerank_reason": "국내 가맹 -20%·카카오VX 경쟁 잠식 구조적 — 저평가 정당, 회복 지연 [출처: WebSearch · 2026-04]"
+      "rerank_reason": "국내 가맹 -20%·카카오VX 잠식 구조적 + 1Q 영업익 -47% — 저평가 정당 [출처: WebSearch · 2026-04]"
     }
   ]
 }
