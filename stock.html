@@ -9,7 +9,7 @@
 <meta http-equiv="Expires" content="0">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="style.css?v=23">
+<link rel="stylesheet" href="style.css?v=25">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 </head>
 <body>
@@ -73,6 +73,13 @@
       <div class="ai-detail-badges" id="ai-detail-badges"></div>
     </div>
     <div class="ai-detail-oneliner" id="ai-detail-oneliner"></div>
+    <div class="ai-uc" id="ai-detail-uc" style="display:none">
+      <div class="ai-uc-head">
+        <span class="ai-uc-lbl">왜 저평가인가</span>
+        <span class="ai-uc-nat" id="ai-detail-uc-nat"></span>
+      </div>
+      <div class="ai-uc-text" id="ai-detail-uc-text"></div>
+    </div>
     <div class="ai-detail-body">
       <div class="ai-detail-block">
         <h3>투자 포인트</h3>
@@ -133,6 +140,6 @@
   </section>
 </main>
 
-<script src="stock.js?v=9"></script>
+<script src="stock.js?v=10"></script>
 </body>
 </html>

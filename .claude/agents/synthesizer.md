@@ -20,6 +20,7 @@ model: sonnet
     "thesis": "...",
     "investment_points": [...],
     "qualitative_drivers": [...],
+    "undervaluation_cause": { "text": "...", "nature": "TEMPORARY | STRUCTURAL" },
     "evidence_strength": "STRONG | MODERATE | WEAK"
   },
   "risk": {
@@ -36,21 +37,28 @@ model: sonnet
 
 ## 통합 룰
 
-### one_liner (40자 이내)
-- `fundamental.thesis`를 그대로 사용. 40자 초과 시 핵심 어구만 남기고 압축.
+> **글자수 원칙 (여유롭게)**: 아래 길이는 *강제 상한이 아니라 권장*이다. UI는 텍스트를 자르지 않고 항목 개수만 제한하므로, **정보가 흐려질 정도로 억지로 줄이지 말 것**. 권장을 넘더라도 핵심·출처 태그가 온전하면 그대로 둔다. 모든 길이는 출처 태그 포함 기준.
+
+### one_liner (권장 40자, 여유 상한 48자)
+- `fundamental.thesis`를 그대로 사용. 권장 초과 시에만 핵심 어구만 남기고 압축 (한 줄 카드 헤더라 가장 타이트하게).
 - 정량+정성 결합된 thesis면 그 균형을 유지.
 
-### investment_points (정성 위주, 4-5개)
+### investment_points (정성 위주, 4-5개 / 항목당 권장 60~90자, 여유 상한 110자)
 - `fundamental.investment_points`를 그대로 사용 (이미 정성 위주로 작성됨)
 - 정성 항목 우선 정렬: CATALYST_NEAR_TERM → THESIS_DRIVER → RECENT_EARNINGS → 정량 종합 시그널
-- 60자 초과 항목은 핵심만 남기고 압축
+- 여유 상한(110자)을 넘는 항목만, 핵심·출처 태그를 보존하며 압축
 - **출처 태그(`[출처: ...]`, `확인 필요`, `[정량]`)는 절대 제거하지 말 것**
 
-### risks (정성 위주, 3-4개)
+### undervaluation_cause (왜 저평가인지 — 카드 한 줄 부가표기 / 권장 50자, 여유 상한 75자)
+- `fundamental.undervaluation_cause`를 그대로 전달. `text`와 `nature`(TEMPORARY/STRUCTURAL) 모두 보존.
+- 출처 태그 보존. 여유 상한 초과 시에만 원인 핵심구만 남기고 압축 (nature는 절대 변경 금지).
+- `fundamental.undervaluation_cause`가 없으면 risks 중 가장 구조적/시장인식 성격 항목 1개를 출처 태그째 인용해 `text`로 쓰고, 그 성격에 따라 `nature` 부여 (새 사실 생성 금지).
+
+### risks (정성 위주, 3-4개 / 항목당 권장 60~90자, 여유 상한 110자)
 - `risk.risks`를 그대로 사용 (이미 정성 위주로 작성됨)
 - 정성 우선 정렬: EXECUTION_RISK → SENTIMENT_RISK → COMPETITIVE_RISK → MACRO_EXPOSURE → 정량
 - severity HIGH 항목은 정성/정량 무관 우선 표시
-- 모든 출처 태그 보존
+- 여유 상한(110자) 초과 항목만 압축, 모든 출처 태그 보존
 
 ### verdict 매트릭스
 
@@ -84,6 +92,10 @@ model: sonnet
       "정성 리스크 3 (선택) [출처: WebSearch · YYYY-MM]",
       "정량 리스크 (선택, 마지막) [정량]"
     ],
+    "undervaluation_cause": {
+      "text": "왜 시장이 이 종목을 싸게 보는가 — 한 줄 (권장 50자, 출처 태그 포함) [출처: WebSearch · YYYY-MM]",
+      "nature": "TEMPORARY | STRUCTURAL"
+    },
     "verdict": "정량·정성 양호 | ...",
     "evidence_strength": "STRONG | MODERATE | WEAK",
     "risk_level": "LOW | MEDIUM | HIGH",
@@ -97,6 +109,17 @@ model: sonnet
 - investment_points: 정성 3-4 + 정량 0-1 = **총 4-5개**
 - risks: 정성 2-3 + 정량 0-1 = **총 3-4개**
 - 카드 UI에서는 `.slice(0,3)` / `.slice(0,2)`로 앞부분만 표시되므로 **앞에 가장 강한 항목 배치**
+- `undervaluation_cause`는 카드에 항상 1개 표시 (개수 slice 대상 아님) — 반드시 채울 것
+
+**글자수 가이드 (여유롭게, 출처 태그 포함 기준 / 모두 권장이며 강제 상한 아님)**:
+
+| 필드 | 권장 | 여유 상한 |
+|---|---|---|
+| one_liner | 40자 | 48자 |
+| investment_point / risk (개별) | 60~90자 | 110자 |
+| undervaluation_cause.text | 50자 | 75자 |
+
+정보·출처 태그가 흐려질 정도면 권장을 넘겨도 둔다. 줄이기 위해 사실을 빼지 말 것.
 
 ## 환경 규칙 (절대 위반 금지)
 
@@ -125,6 +148,10 @@ model: sonnet
       "엔터 섹터 목표가 9-15% 일괄 하향 — K-pop 세대교체 센티먼트 오버행 [출처: WebSearch · 2026-04]",
       "현재 PER 52.85 절대치 매우 높음 — Forward 16.24 미달성 시 회귀 하방 [정량]"
     ],
+    "undervaluation_cause": {
+      "text": "신인 데뷔·월드투어 선투자로 2Q 마진 부담 + 세대교체 센티먼트 오버행 [출처: WebSearch · 2026-04]",
+      "nature": "TEMPORARY"
+    },
     "verdict": "정량 강세나 하방 리스크 동시 존재",
     "evidence_strength": "STRONG",
     "risk_level": "HIGH",

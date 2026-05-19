@@ -32,6 +32,16 @@ function renderAiBlock(code, ai) {
   const moreNote = (moreP > 0 || moreR > 0)
     ? `<div class="ai-more-note">+${moreP + moreR}개 항목은 상세페이지에서 확인</div>` : '';
 
+  const uc = ai.undervaluation_cause;
+  const ucBlock = (uc && uc.text) ? `
+        <div class="ai-uc">
+          <div class="ai-uc-head">
+            <span class="ai-uc-lbl">왜 저평가인가</span>
+            <span class="ai-uc-nat uc-${(uc.nature || '').toLowerCase()}">${uc.nature === 'STRUCTURAL' ? '구조적 · 회복 지연' : '일시적 · 해소 가능'}</span>
+          </div>
+          <div class="ai-uc-text">${uc.text}</div>
+        </div>` : '';
+
   return `
     <div class="ai-block">
       <button class="ai-toggle" type="button" data-code="${code}" aria-expanded="false">
@@ -40,7 +50,7 @@ function renderAiBlock(code, ai) {
       </button>
       <div class="ai-panel" id="ai-panel-${code}" hidden>
         <div class="ai-oneliner">${ai.one_liner || ''}</div>
-
+${ucBlock}
         <div class="ai-section">
           <div class="ai-section-lbl">투자 포인트</div>
           <ul class="ai-points">${points}</ul>
@@ -111,11 +121,26 @@ async function loadTripleCross() {
     const top = payload.top || [];
     const meta = payload.meta || {};
 
-    // AI 분석 노트 (서브에이전트 결과) — code → ai_notes 매핑
+    // AI 분석 노트 (서브에이전트 결과) — code → ai_notes / 재순위 매핑
     const aiMap = {};
+    const aiRankMap = {};
     if (aiR.ok) {
       const aiDoc = await aiR.json();
-      for (const item of (aiDoc.items || [])) aiMap[item.code] = item.ai_notes;
+      for (const item of (aiDoc.items || [])) {
+        aiMap[item.code] = item.ai_notes;
+        aiRankMap[item.code] = {
+          ai_rank: item.ai_rank,
+          quant_rank: item.quant_rank,
+          rerank_reason: item.rerank_reason,
+        };
+      }
+    }
+
+    // ranker가 부여한 ai_rank가 있으면 그 순서로 카드 재정렬 (저평가 해소 가능성 순)
+    const hasAiRank = top.some(c => aiRankMap[c.code]?.ai_rank);
+    if (hasAiRank) {
+      top.sort((a, b) =>
+        (aiRankMap[a.code]?.ai_rank ?? 99) - (aiRankMap[b.code]?.ai_rank ?? 99));
     }
 
     metaEl.textContent =

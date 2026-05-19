@@ -147,6 +147,18 @@ async function loadAiNotes() {
 
     document.getElementById('ai-detail-oneliner').textContent = ai.one_liner || '';
 
+    const ucEl = document.getElementById('ai-detail-uc');
+    const uc = ai.undervaluation_cause;
+    if (ucEl && uc && uc.text) {
+      ucEl.style.display = '';
+      const natEl = document.getElementById('ai-detail-uc-nat');
+      natEl.textContent = uc.nature === 'STRUCTURAL' ? '구조적 · 회복 지연' : '일시적 · 해소 가능';
+      natEl.className = `ai-uc-nat uc-${(uc.nature || '').toLowerCase()}`;
+      document.getElementById('ai-detail-uc-text').textContent = uc.text;
+    } else if (ucEl) {
+      ucEl.style.display = 'none';
+    }
+
     const evCls = `ev-${(ai.evidence_strength || 'mod').toLowerCase()}`;
     const rkCls = `rk-${(ai.risk_level || 'low').toLowerCase()}`;
     document.getElementById('ai-detail-badges').innerHTML = `
