@@ -149,17 +149,19 @@
       <li>
         <div class="step-num">5</div>
         <div class="step-body">
-          <div class="step-title">가중 합산 → Top 10</div>
-          <div class="step-desc"><b>total_score = Value × 0.60 + Growth × 0.40</b><br>상위 10종목 추출 · 티어 (Hidden Gem ≥+2.33σ / Strong Buy ≥+1.65σ / Buy ≥+0.84σ)</div>
+          <div class="step-title">가중 합산 → Top 10 후보</div>
+          <div class="step-desc"><b>total_score = Value × 0.60 + Growth × 0.40</b><br>상위 10종목을 정량 후보로 추출 (객관·재현 가능). 표시 순위는 6단계에서 결정</div>
         </div>
       </li>
       <li>
         <div class="step-num">6</div>
         <div class="step-body">
-          <div class="step-title">AI 서브에이전트 정성 분석</div>
+          <div class="step-title">AI 정성 분석 → 저평가 해소 가능성 재순위</div>
           <div class="step-desc">
-            <code>.claude/agents/</code> 3종(fundamental-analyst · risk-analyst · synthesizer) +
-            WebSearch로 사업 모멘텀·리스크 보강 · 모든 정성 항목 출처 태그 필수 · <b>점수에는 영향 없음</b>
+            <code>.claude/agents/</code> 4종(fundamental-analyst · risk-analyst · synthesizer · ranker) ·
+            WebSearch로 모멘텀·리스크·<b>저평가 원인(일시적/구조적)</b> 보강 (출처 태그 필수) →
+            <b>ranker</b>가 10종목을 <b>저평가 해소 가능성</b> 순으로 재배열해 표시 순위(#1~#10) 결정 ·
+            <b>4팩터 정량 점수(후보 선정)는 불변</b>
           </div>
         </div>
       </li>

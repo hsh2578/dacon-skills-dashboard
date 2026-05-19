@@ -177,20 +177,12 @@ def main():
         upside_pass = r["upside_z"] is not None and r["upside_z"] > 0
         pass_count = int(s1_pass) + int(s3_pass) + int(upside_pass)
 
-        # 티어 (Z-score 분포 기준)
+        # 티어 — 전 종목 STRONG_BUY로 통일.
+        # (메인 순위는 ranker의 ai_rank(저평가 해소 가능성)이며,
+        #  정량 Z-score 기반 티어 세분(HIDDEN_GEM/BUY/WATCH 등)은
+        #  순위 축과 달라 혼란을 주므로 미사용)
         total = r["total_score"]
-        if pd.isna(total):
-            tier = "MISS"
-        elif total >= 1.65:
-            tier = "HIDDEN_GEM"      # 상위 5%
-        elif total >= 0.84:
-            tier = "STRONG_BUY"      # 상위 20%
-        elif total >= 0.0:
-            tier = "BUY"
-        elif total >= -0.5:
-            tier = "WATCH"
-        else:
-            tier = "WEAK"
+        tier = "MISS" if pd.isna(total) else "STRONG_BUY"
 
         out_records.append({
             "rank": int(r["rank"]),
