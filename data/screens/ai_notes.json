@@ -14,9 +14,9 @@
       "undervaluation_cause": "왜 저평가인지 + 그 성격 (text + nature:TEMPORARY|STRUCTURAL). ranker §4.3 Value Trap 판별 핵심 입력."
     },
     "ranking": {
-      "ranked_at": "2026-06-18T16:29:00",
-      "basis": "저평가 해소 가능성 (촉매 구체성·실적 강도·Value Trap·단기노이즈·절대밸류)",
-      "note": "ranker.md §4.1~§4.7 적용 (촉매 4단계 +3.5/+2.5/+1/-2, 실적 강도, undervaluation_cause.nature, 단기노이즈 보정, 절대밸류 페널티, quant_rank tiebreak)."
+      "ranked_at": "2026-06-18T17:10:00",
+      "basis": "저평가 해소 가능성 (촉매 구체성·실적 강도·피크어닝스·Value Trap·단기노이즈·절대밸류)",
+      "note": "ranker.md §4.1~§4.7 적용 (§4.2.1 피크 어닝스 보정 신설 — 일회성 이익 착시 차단)."
     }
   },
   "items": [
@@ -24,7 +24,7 @@
       "code": "285130",
       "quant_rank": 1,
       "ai_rank": 1,
-      "rerank_reason": "PPWR 2026/8/12 시행 + 별도 OP +464% QoQ — 자회사 적자로 가린 별도 가치 해소 [출처: WebSearch · 2026-05]",
+      "rerank_reason": "PPWR 2026/8/12 시행 + 별도 OP +464% QoQ, 코폴리에스터 반복 성장 — 자회사 적자로 가린 별도 가치 해소 [출처: WebSearch · 2026-05]",
       "ai_notes": {
         "one_liner": "PPWR 수혜 코폴리에스터 + 자회사 적자로 가린 별도 가치",
         "investment_points": [
@@ -55,7 +55,7 @@
       "code": "122870",
       "quant_rank": 3,
       "ai_rank": 2,
-      "rerank_reason": "8/21 빅뱅 20주년 투어·6/26 BABYMONSTER 투어 확정 + OP +104% YoY — 2Q 공백은 일시적 [출처: WebSearch · 2026-06]",
+      "rerank_reason": "8/21 빅뱅 20주년·6/26 BABYMONSTER 투어 확정 + OP +104% YoY 영업레버리지 — 2Q 공백은 일시적 [출처: WebSearch · 2026-06]",
       "ai_notes": {
         "one_liner": "BIGBANG 20주년 완전체 투어 + 신인 IP 본격화",
         "investment_points": [
@@ -114,41 +114,10 @@
       }
     },
     {
-      "code": "263750",
-      "quant_rank": 10,
-      "ai_rank": 4,
-      "rerank_reason": "붉은사막 600만장 + 1Q OP +2,585% 흑자전환 — 선반영이나 PER 57.03 절대치 부담 상존 [출처: WebSearch · 2026-06] [정량]",
-      "ai_notes": {
-        "one_liner": "붉은사막 600만장 흥행 + 분기 최대 실적 흑자 전환",
-        "investment_points": [
-          "붉은사막 출시 83일 만에 글로벌 누적 600만장 돌파 — BEP(약 250만장) 2배 이상 초과, 한국 콘솔 게임 사상 최대 판매 [출처: WebSearch · 2026-06]",
-          "1분기 매출 3,285억·영업이익 2,121억(YoY +2,585%, 영업이익률 64.5%) 창사 이래 최대 분기 실적 — 붉은사막 IP 매출 2,665억 견인 [출처: WebSearch · 2026-05]",
-          "2026 연간 가이던스 매출 8,790억~9,754억·영업이익 4,876억~5,726억 — 검은사막·붉은사막 쌍끌이로 4년 만의 흑자 전환 [출처: WebSearch · 2026-05]",
-          "붉은사막 3분기 대규모 업데이트·크로스세이브 도입 + 차기작 도깨비 개발 병행 — IP 롱런·파이프라인 확장 [출처: WebSearch · 2026-06]",
-          "Forward PER 14.83로 현재 57.03 대비 -74% 하향 — 실적 정상화 반영 시 Growth 그룹 Z=+1.63σ 강세 [정량]"
-        ],
-        "risks": [
-          "붉은사막 이후 콘텐츠 공백 우려 — 유료 DLC는 2027년께, 도깨비·플랜8 차기작은 2~3년 추가 개발 소요 [출처: WebSearch · 2026-06]",
-          "스팀 초기 평가 '복합적~대체로 부정적' 출발 후 '매우 긍정적'(83%)으로 회복 — 후속 업데이트 실행 차질 시 유저 이탈 리스크 [출처: WebSearch · 2026-06]",
-          "붉은사막 흥행 기대가 주가에 상당 부분 선반영 — 실적 반등에도 주가 모멘텀 정체, 목표가 23,000~100,000원 편차 극심 [출처: WebSearch · 2026-06]",
-          "현재 PER 57.03 절대치 매우 높음 — Forward 14.83 미달성 또는 흥행 둔화 시 회귀 하방 [정량]"
-        ],
-        "undervaluation_cause": {
-          "text": "붉은사막 흥행 기대 선반영 + 신작 출시 후 콘텐츠 공백·차기작 공백 우려로 모멘텀 정체 [출처: WebSearch · 2026-06]",
-          "nature": "TEMPORARY"
-        },
-        "verdict": "정량 강세나 하방 리스크 동시 존재",
-        "evidence_strength": "STRONG",
-        "risk_level": "HIGH",
-        "generated_at": "2026-06-18T14:00:00",
-        "model": "claude-sonnet-4-6"
-      }
-    },
-    {
       "code": "189300",
       "quant_rank": 8,
-      "ai_rank": 5,
-      "rerank_reason": "6월 말 美공장 개소 + 1Q 흑자전환 — LEO 비용 정점 통과, 단 PER 135.77 절대치 부담 [출처: WebSearch · 2026-05] [정량]",
+      "ai_rank": 4,
+      "rerank_reason": "6월 말 美공장 개소 + 1Q 흑자전환, 수주잔고 4,286억 역대 최대로 이익 뒷받침 — 단 PER 135.77 부담 [출처: WebSearch · 2026-05] [정량]",
       "ai_notes": {
         "one_liner": "비용 터널 통과 + LEO 흑자전환 + 美방산 거점",
         "investment_points": [
@@ -176,10 +145,41 @@
       }
     },
     {
+      "code": "263750",
+      "quant_rank": 10,
+      "ai_rank": 5,
+      "rerank_reason": "붉은사막 600만장 1Q OP +2,585%이나 흥행 선반영·차기작 공백으로 피크 어닝스 + PER 57.03 부담 [출처: WebSearch · 2026-06] [정량]",
+      "ai_notes": {
+        "one_liner": "붉은사막 600만장 흥행 + 분기 최대 실적 흑자 전환",
+        "investment_points": [
+          "붉은사막 출시 83일 만에 글로벌 누적 600만장 돌파 — BEP(약 250만장) 2배 이상 초과, 한국 콘솔 게임 사상 최대 판매 [출처: WebSearch · 2026-06]",
+          "1분기 매출 3,285억·영업이익 2,121억(YoY +2,585%, 영업이익률 64.5%) 창사 이래 최대 분기 실적 — 붉은사막 IP 매출 2,665억 견인 [출처: WebSearch · 2026-05]",
+          "2026 연간 가이던스 매출 8,790억~9,754억·영업이익 4,876억~5,726억 — 검은사막·붉은사막 쌍끌이로 4년 만의 흑자 전환 [출처: WebSearch · 2026-05]",
+          "붉은사막 3분기 대규모 업데이트·크로스세이브 도입 + 차기작 도깨비 개발 병행 — IP 롱런·파이프라인 확장 [출처: WebSearch · 2026-06]",
+          "Forward PER 14.83로 현재 57.03 대비 -74% 하향 — 실적 정상화 반영 시 Growth 그룹 Z=+1.63σ 강세 [정량]"
+        ],
+        "risks": [
+          "붉은사막 이후 콘텐츠 공백 우려 — 유료 DLC는 2027년께, 도깨비·플랜8 차기작은 2~3년 추가 개발 소요 [출처: WebSearch · 2026-06]",
+          "스팀 초기 평가 '복합적~대체로 부정적' 출발 후 '매우 긍정적'(83%)으로 회복 — 후속 업데이트 실행 차질 시 유저 이탈 리스크 [출처: WebSearch · 2026-06]",
+          "붉은사막 흥행 기대가 주가에 상당 부분 선반영 — 실적 반등에도 주가 모멘텀 정체, 목표가 23,000~100,000원 편차 극심 [출처: WebSearch · 2026-06]",
+          "현재 PER 57.03 절대치 매우 높음 — Forward 14.83 미달성 또는 흥행 둔화 시 회귀 하방 [정량]"
+        ],
+        "undervaluation_cause": {
+          "text": "붉은사막 흥행 기대 선반영 + 신작 출시 후 콘텐츠 공백·차기작 공백 우려로 모멘텀 정체 [출처: WebSearch · 2026-06]",
+          "nature": "TEMPORARY"
+        },
+        "verdict": "정량 강세나 하방 리스크 동시 존재",
+        "evidence_strength": "STRONG",
+        "risk_level": "HIGH",
+        "generated_at": "2026-06-18T14:00:00",
+        "model": "claude-sonnet-4-6"
+      }
+    },
+    {
       "code": "112610",
       "quant_rank": 7,
       "ai_rank": 6,
-      "rerank_reason": "PTC 2026/6 착공 데드라인 수주 재개 기대 — 정책 선반영·PER 52.27 절대치로 회복 가시성 제한 [출처: WebSearch · 2026-05] [정량]",
+      "rerank_reason": "PTC 2026/6 착공 데드라인 수주 재개 기대이나 정책 선반영·실적은 컨센 부합 + PER 52.27 부담 [출처: WebSearch · 2026-05] [정량]",
       "ai_notes": {
         "one_liner": "미국 육상풍력 수주 재개 + 하부구조물 턴어라운드",
         "investment_points": [
@@ -210,7 +210,7 @@
       "code": "051500",
       "quant_rank": 9,
       "ai_rank": 7,
-      "rerank_reason": "온라인·키친리스 신사업이 본업 OP -28.9% 마진 둔화 만회 중 — 실행 지연 시 해소 지연 [출처: WebSearch · 2026-06]",
+      "rerank_reason": "온라인 +17%·키친리스 +41% 신사업이 본업 OP -28.9% 마진 둔화 만회 중 — 실행 지연 시 해소 지연 [출처: WebSearch · 2026-06]",
       "ai_notes": {
         "one_liner": "온라인·키친리스 신사업 본격화 + 마켓보로 인수",
         "investment_points": [
@@ -241,7 +241,7 @@
       "code": "035720",
       "quant_rank": 2,
       "ai_rank": 8,
-      "rerank_reason": "AI 수익화 2027년 지연 + 김범수 항소심 구조적 리스크 + PER 36.45 절대치 — 멀티플 압박 지속 [출처: WebSearch · 2026-05] [정량]",
+      "rerank_reason": "AI 수익화 2027년 지연 + 김범수 항소심 구조적 리스크 + PER 36.45 — 멀티플 압박 지속 [출처: WebSearch · 2026-05] [정량]",
       "ai_notes": {
         "one_liner": "챗GPT 포 카카오 1100만 + Q1 역대 최대 + 올트먼 협력",
         "investment_points": [
@@ -272,7 +272,7 @@
       "code": "253450",
       "quant_rank": 5,
       "ai_rank": 9,
-      "rerank_reason": "제작비 인플레·광고 침체로 목표 멀티플 추세적 하향 구조 + PER 74.2 — 가이던스 +82% Hit Ratio 의존 [출처: WebSearch · 2026-04] [정량]",
+      "rerank_reason": "제작비 인플레·광고 침체로 목표 멀티플 추세적 하향 구조 + PER 74.2 — 관망 권고 [출처: WebSearch · 2026-04] [정량]",
       "ai_notes": {
         "one_liner": "편성 회복 + 넷플릭스 재계약 마진 + 2026 OP +82% 가이던스",
         "investment_points": [
