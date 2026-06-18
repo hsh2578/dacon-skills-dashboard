@@ -76,6 +76,14 @@ python scripts/fetch_batch.py --from-screen triple_cross --top-n 10
 
 상세페이지에 PER/PBR 차트뿐 아니라 시가총액·주가까지 보여주기 위해 Top 10 종목만 일별 풀 데이터 페치. 결과: `data/stocks/{code}.json` 10개 + `data/stocks/_index.json`.
 
+## 5.5단계 — Top 10 재무 추이 페치 (DART, ~30초)
+
+```bash
+python scripts/fetch_financials.py
+```
+
+OpenDART 공식 API로 Top 10 종목의 매출·영업이익·순이익 5~6년 추이 + 마진을 페치. "싼 게 정당한가(이익 무너지는 중 = 구조적 함정)/일시적인가(이익 멀쩡 = 기회)"의 **데이터 근거**가 되어 6단계 AI 정성·ranker Value Trap 판별을 뒷받침한다. 결과: `data/financials/{code}.json` 10개 + `data/financials/_index.json` (+ 최초 1회 `_dart_corpmap.json` 캐시 생성). `.env`의 `DART_API_KEY` 필요.
+
 ## 6단계 — AI 정성 분석 (~2분, `--skip-ai` 시 건너뜀)
 
 `--skip-ai` 호출 시 이 단계 **건너뜁니다**.
