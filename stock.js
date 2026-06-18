@@ -171,6 +171,18 @@ async function loadAiNotes() {
     document.getElementById('ai-detail-points').innerHTML = points;
     document.getElementById('ai-detail-risks').innerHTML = risks;
 
+    const watchEl = document.getElementById('ai-detail-watch');
+    const watch = ai.watch || [];
+    if (watchEl && watch.length) {
+      watchEl.style.display = '';
+      document.getElementById('ai-detail-watch-list').innerHTML =
+        watch.map(w => `<li>${escapeHtml(w)}</li>`).join('');
+    } else if (watchEl) {
+      watchEl.style.display = 'none';
+    }
+
+    renderFinChart(code);
+
     document.getElementById('ai-detail-verdict').textContent = ai.verdict || '';
 
     const metaParts = [];
@@ -186,6 +198,61 @@ async function loadAiNotes() {
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+async function renderFinChart(code) {
+  const wrap = document.getElementById('ai-detail-fin');
+  if (!wrap) return;
+  try {
+    const r = await fetch(`data/financials/${code}.json?t=${Date.now()}`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const fin = await r.json();
+    const annual = (fin.annual || []).filter(a => a.revenue != null || a.op_margin != null);
+    if (annual.length < 2) { wrap.style.display = 'none'; return; }
+    wrap.style.display = '';
+
+    const css = getComputedStyle(document.documentElement);
+    const accent = (css.getPropertyValue('--accent') || '#2b6cb0').trim();
+    const muted = (css.getPropertyValue('--text-muted') || '#888').trim();
+    const up = (css.getPropertyValue('--kr-up') || '#e31b1b').trim();
+
+    const years = annual.map(a => String(a.year));
+    const revenue = annual.map(a => a.revenue != null ? a.revenue / 1e8 : null);  // 억원
+    const opm = annual.map(a => a.op_margin != null ? +(a.op_margin * 100).toFixed(1) : null);
+
+    const traces = [
+      {
+        type: 'bar', name: '매출 (억원)', x: years, y: revenue,
+        marker: { color: accent, opacity: 0.55 },
+        hovertemplate: '%{x}<br>매출 %{y:,.0f}억<extra></extra>',
+      },
+      {
+        type: 'scatter', mode: 'lines+markers', name: '영업이익률 (%)',
+        x: years, y: opm, yaxis: 'y2',
+        line: { color: up, width: 2.5 }, marker: { size: 6 },
+        connectgaps: true,
+        hovertemplate: '%{x}<br>OPM %{y:.1f}%<extra></extra>',
+      },
+    ];
+    const layout = {
+      height: 250,
+      margin: { l: 56, r: 52, t: 10, b: 30 },
+      paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+      font: { family: 'Pretendard, sans-serif', size: 11, color: muted },
+      barmode: 'group', showlegend: true,
+      legend: { orientation: 'h', y: 1.18, x: 0, font: { size: 11 } },
+      xaxis: { showgrid: false },
+      yaxis: { title: '', zeroline: false, gridcolor: 'rgba(128,128,128,0.12)' },
+      yaxis2: {
+        overlaying: 'y', side: 'right', ticksuffix: '%',
+        zeroline: true, zerolinecolor: 'rgba(128,128,128,0.35)', showgrid: false,
+      },
+    };
+    Plotly.react('fin-chart', traces, layout, { displayModeBar: false, responsive: true });
+  } catch (e) {
+    console.warn('[financials] 로드 실패:', e.message);
+    wrap.style.display = 'none';
+  }
 }
 
 async function loadFromMatrix(code) {

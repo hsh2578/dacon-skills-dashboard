@@ -1092,6 +1092,73 @@ main {
 .ai-detail-block .ai-points li::marker { color: #059669; }
 .ai-detail-block .ai-risks li::marker { color: #dc2626; }
 
+/* 재무 추이 (DART) */
+.ai-fin {
+  background: white;
+  border-radius: 10px;
+  padding: 12px 16px 6px;
+  margin-bottom: 14px;
+}
+.ai-fin-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.ai-fin-lbl {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+  letter-spacing: 0.04em;
+}
+.ai-fin-sub {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  letter-spacing: -0.01em;
+}
+.fin-chart { width: 100%; min-height: 250px; }
+
+/* 숏 논거 ↔ 반박 듀얼 */
+.ai-duel .ai-bear { border-left: 3px solid #dc2626; }
+.ai-duel .ai-bull { border-left: 3px solid #059669; }
+.ai-duel .ai-bear h3 { color: #b91c1c; }
+.ai-duel .ai-bull h3 { color: #047857; }
+
+/* Watch · 모니터링 지표 */
+.ai-watch {
+  background: white;
+  border-radius: 10px;
+  border-left: 3px solid #d97706;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+}
+.ai-watch h3 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #b45309;
+  letter-spacing: 0.04em;
+}
+.ai-watch-sub {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: -0.01em;
+}
+.ai-watch-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.65;
+}
+.ai-watch-list li {
+  margin-bottom: 6px;
+  color: #374151;
+  font-variant-numeric: tabular-nums;
+}
+.ai-watch-list li::marker { color: #d97706; }
+
 .ai-detail-verdict {
   background: white;
   padding: 10px 14px;

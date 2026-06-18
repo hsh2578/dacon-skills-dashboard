@@ -9,53 +9,22 @@
       ".claude/agents/ranker.md"
     ],
     "stocks_analyzed": 10,
-    "note": "정성 위주 분석 (투자포인트 4-5개 + 리스크 3-4개 + undervaluation_cause). 모든 정성 항목 WebSearch 출처 태그 필수. quant_rank=4팩터 정량 후보, ai_rank=ranker 재순위(저평가 해소 가능성).",
+    "note": "정성 위주 분석 (투자포인트 4-5개 + 리스크 3-4개 + undervaluation_cause). 모든 정성 항목 WebSearch 출처 태그 필수. quant_rank=4팩터 정량 후보, ai_rank=ranker 재순위(저평가 해소 가능성). watch=모니터링 지표(기존 촉매·리스크·재무에서 파생, 신규 사실 없음).",
     "schema_notes": {
       "undervaluation_cause": "왜 저평가인지 + 그 성격 (text + nature:TEMPORARY|STRUCTURAL). ranker §4.3 Value Trap 판별 핵심 입력."
     },
     "ranking": {
-      "ranked_at": "2026-06-18T17:10:00",
-      "basis": "저평가 해소 가능성 (촉매 구체성·실적 강도·피크어닝스·Value Trap·단기노이즈·절대밸류)",
-      "note": "ranker.md §4.1~§4.7 적용 (§4.2.1 피크 어닝스 보정 신설 — 일회성 이익 착시 차단)."
+      "ranked_at": "2026-06-18T18:30:00",
+      "basis": "저평가 해소 가능성 (촉매·실적·피크어닝스·Value Trap·재무추세·단기노이즈·절대밸류)",
+      "note": "ranker.md §4.1~§4.7 + DART 재무 추세 교차검증(§4.3) 적용. fundamental-analyst·ranker가 data/financials/ 영업이익률 추세로 nature 판정."
     }
   },
   "items": [
     {
-      "code": "285130",
-      "quant_rank": 1,
-      "ai_rank": 1,
-      "rerank_reason": "PPWR 2026/8/12 시행 + 별도 OP +464% QoQ, 코폴리에스터 반복 성장 — 자회사 적자로 가린 별도 가치 해소 [출처: WebSearch · 2026-05]",
-      "ai_notes": {
-        "one_liner": "PPWR 수혜 코폴리에스터 + 자회사 적자로 가린 별도 가치",
-        "investment_points": [
-          "유럽 PPWR 포장재 규제 2026/8/12 시행 — rPET·코폴리에스터 수요 구조적 확대, RecyClass 재활용 적합성 인증 확보로 직접 수혜 [출처: WebSearch · 2026-05]",
-          "코폴리에스터 2030년 45만톤 증설 + 원료 재활용 비중 2030년 100% 전환 추진 — 친환경 소재 세계 1위 목표 [출처: WebSearch · 2026-05]",
-          "중동전쟁發 신재 PET 가격 급등 vs rPET 가격 안정으로 리사이클 경제성 개선 + 코폴리에스터 판가인상 본격화 [출처: WebSearch · 2026-03]",
-          "1Q26 별도 매출 3,857억 역대 최대(+11.1% YoY), 별도 영업이익 212억(+464% QoQ) — 코폴리에스터·의약품 주력 성장세 지속 [출처: WebSearch · 2026-05]",
-          "4팩터 종합 시그널 Z=+1.71σ — universe 303종목 상위권, Value(+1.67σ)·Growth(+1.77σ) 동시 강세 [정량]"
-        ],
-        "risks": [
-          "1Q26 별도 영업이익 42.6% YoY 감소 — 유가·공급망 불안에 따른 원료 원가·운영비 상승으로 마진 압박 [출처: WebSearch · 2026-05]",
-          "연결 기준 1Q26 영업손실 189억 — 자회사 SK바이오사이언스 백신 사업 적자가 연결 실적 변동성 키움 [출처: WebSearch · 2026-05]",
-          "코폴리에스터 증설·국내 재활용 공장 2026년 완공 등 친환경 투자 실행 지연 시 리레이팅 모멘텀 후퇴 [출처: WebSearch · 2026-05]",
-          "중동전쟁 장기화 시 리사이클 수혜와 원가 부담이 상충 — 가동률·판가 시나리오 민감 [출처: WebSearch · 2026-03]"
-        ],
-        "undervaluation_cause": {
-          "text": "자회사 SK바이오사이언스 백신 적자가 연결 실적 끌어내려 흑자·성장하는 별도 사업 가치를 가림 [출처: WebSearch · 2026-05]",
-          "nature": "TEMPORARY"
-        },
-        "verdict": "정량 강세, 리스크 모니터링 권고",
-        "evidence_strength": "STRONG",
-        "risk_level": "MEDIUM",
-        "generated_at": "2026-06-18T00:00:00",
-        "model": "claude-opus-4-8"
-      }
-    },
-    {
       "code": "122870",
       "quant_rank": 3,
-      "ai_rank": 2,
-      "rerank_reason": "8/21 빅뱅 20주년·6/26 BABYMONSTER 투어 확정 + OP +104% YoY 영업레버리지 — 2Q 공백은 일시적 [출처: WebSearch · 2026-06]",
+      "ai_rank": 1,
+      "rerank_reason": "8/21 빅뱅20주년·6/26 베몬 투어 확정 + 1Q OP +104% YoY, 적자→OPM13% 마진정상화 — 2Q 공백 일시적 [출처: WebSearch · 2026-06] [출처: DART · 2025]",
       "ai_notes": {
         "one_liner": "BIGBANG 20주년 완전체 투어 + 신인 IP 본격화",
         "investment_points": [
@@ -79,14 +48,55 @@
         "evidence_strength": "STRONG",
         "risk_level": "MEDIUM",
         "generated_at": "2026-06-18T10:00:00",
-        "model": "claude-opus-4-8"
+        "model": "claude-opus-4-8",
+        "watch": [
+          "8/21~ 빅뱅 20주년 투어 회차별 매진·관객 동원 [출처: WebSearch · 2026-06]",
+          "2Q 영업이익률 13% 회복 지속 여부 [출처: DART · 2025]",
+          "신인 보이그룹 하반기 데뷔 일정 확정 [출처: WebSearch · 2026-04]"
+        ]
+      }
+    },
+    {
+      "code": "285130",
+      "quant_rank": 1,
+      "ai_rank": 2,
+      "rerank_reason": "PPWR 2026/8/12 시행 + 별도 OP +464% QoQ — 자회사 적자로 가린 별도 가치, 별도매출 회복 확증 [출처: WebSearch · 2026-05] [출처: DART · 2025]",
+      "ai_notes": {
+        "one_liner": "PPWR 수혜 코폴리에스터 + 자회사 적자로 가린 별도 가치",
+        "investment_points": [
+          "유럽 PPWR 포장재 규제 2026/8/12 시행 — rPET·코폴리에스터 수요 구조적 확대, RecyClass 재활용 적합성 인증 확보로 직접 수혜 [출처: WebSearch · 2026-05]",
+          "코폴리에스터 2030년 45만톤 증설 + 원료 재활용 비중 2030년 100% 전환 추진 — 친환경 소재 세계 1위 목표 [출처: WebSearch · 2026-05]",
+          "중동전쟁發 신재 PET 가격 급등 vs rPET 가격 안정으로 리사이클 경제성 개선 + 코폴리에스터 판가인상 본격화 [출처: WebSearch · 2026-03]",
+          "1Q26 별도 매출 3,857억 역대 최대(+11.1% YoY), 별도 영업이익 212억(+464% QoQ) — 코폴리에스터·의약품 주력 성장세 지속 [출처: WebSearch · 2026-05]",
+          "4팩터 종합 시그널 Z=+1.71σ — universe 303종목 상위권, Value(+1.67σ)·Growth(+1.77σ) 동시 강세 [정량]"
+        ],
+        "risks": [
+          "1Q26 별도 영업이익 42.6% YoY 감소 — 유가·공급망 불안에 따른 원료 원가·운영비 상승으로 마진 압박 [출처: WebSearch · 2026-05]",
+          "연결 기준 1Q26 영업손실 189억 — 자회사 SK바이오사이언스 백신 사업 적자가 연결 실적 변동성 키움 [출처: WebSearch · 2026-05]",
+          "코폴리에스터 증설·국내 재활용 공장 2026년 완공 등 친환경 투자 실행 지연 시 리레이팅 모멘텀 후퇴 [출처: WebSearch · 2026-05]",
+          "중동전쟁 장기화 시 리사이클 수혜와 원가 부담이 상충 — 가동률·판가 시나리오 민감 [출처: WebSearch · 2026-03]"
+        ],
+        "undervaluation_cause": {
+          "text": "자회사 SK바이오사이언스 백신 적자가 연결 실적 끌어내려 흑자·성장하는 별도 사업 가치를 가림 [출처: WebSearch · 2026-05]",
+          "nature": "TEMPORARY"
+        },
+        "verdict": "정량 강세, 리스크 모니터링 권고",
+        "evidence_strength": "STRONG",
+        "risk_level": "MEDIUM",
+        "generated_at": "2026-06-18T00:00:00",
+        "model": "claude-opus-4-8",
+        "watch": [
+          "PPWR 8/12 시행 후 코폴리에스터·rPET 판가·수주 [출처: WebSearch · 2026-05]",
+          "연결 영업손익 흑자 전환 = SK바이오사이언스 적자 축소 [출처: DART · 2025]",
+          "별도 영업이익 회복 지속 (1Q +464% QoQ) [출처: WebSearch · 2026-05]"
+        ]
       }
     },
     {
       "code": "054210",
       "quant_rank": 6,
       "ai_rank": 3,
-      "rerank_reason": "6월 말 체리향 EV 배터리팩 양산 + 순이익 +62.5% 가이던스 — 전자담배 사이클 디레이팅 정상화 [출처: WebSearch · 2026-06]",
+      "rerank_reason": "6월말 EV배터리팩 양산 + 순익 +62.5% 가이던스, OPM 회복(2.9→7.5%) — 전자담배 사이클 디레이팅 정상화 [출처: WebSearch · 2026-06] [출처: DART · 2025]",
       "ai_notes": {
         "one_liner": "EV·ESS 배터리팩 신사업 본격화 + 전자담배 기기 매출 회복",
         "investment_points": [
@@ -110,14 +120,19 @@
         "evidence_strength": "STRONG",
         "risk_level": "MEDIUM",
         "generated_at": "2026-06-18T00:00:00",
-        "model": "claude-opus-4-8"
+        "model": "claude-opus-4-8",
+        "watch": [
+          "6월말 체리向 EV 배터리팩 양산 개시 확인 [출처: WebSearch · 2026-06]",
+          "북미 ESS 수주 본격화 여부 [출처: WebSearch · 2026-06]",
+          "영업이익률 회복 지속 (2025 5.7%) [출처: DART · 2025]"
+        ]
       }
     },
     {
       "code": "189300",
       "quant_rank": 8,
       "ai_rank": 4,
-      "rerank_reason": "6월 말 美공장 개소 + 1Q 흑자전환, 수주잔고 4,286억 역대 최대로 이익 뒷받침 — 단 PER 135.77 부담 [출처: WebSearch · 2026-05] [정량]",
+      "rerank_reason": "6월말 美공장 개소 + 수주잔고 4,286억·OPM 흑전(-7.5→3.7%) 뒷받침 — 단 PER 135.77 부담 [출처: WebSearch · 2026-05] [출처: DART · 2025] [정량]",
       "ai_notes": {
         "one_liner": "비용 터널 통과 + LEO 흑자전환 + 美방산 거점",
         "investment_points": [
@@ -141,45 +156,19 @@
         "evidence_strength": "MODERATE",
         "risk_level": "MEDIUM",
         "generated_at": "2026-06-18T14:00:00",
-        "model": "claude-sonnet-4-6"
-      }
-    },
-    {
-      "code": "263750",
-      "quant_rank": 10,
-      "ai_rank": 5,
-      "rerank_reason": "붉은사막 600만장 1Q OP +2,585%이나 흥행 선반영·차기작 공백으로 피크 어닝스 + PER 57.03 부담 [출처: WebSearch · 2026-06] [정량]",
-      "ai_notes": {
-        "one_liner": "붉은사막 600만장 흥행 + 분기 최대 실적 흑자 전환",
-        "investment_points": [
-          "붉은사막 출시 83일 만에 글로벌 누적 600만장 돌파 — BEP(약 250만장) 2배 이상 초과, 한국 콘솔 게임 사상 최대 판매 [출처: WebSearch · 2026-06]",
-          "1분기 매출 3,285억·영업이익 2,121억(YoY +2,585%, 영업이익률 64.5%) 창사 이래 최대 분기 실적 — 붉은사막 IP 매출 2,665억 견인 [출처: WebSearch · 2026-05]",
-          "2026 연간 가이던스 매출 8,790억~9,754억·영업이익 4,876억~5,726억 — 검은사막·붉은사막 쌍끌이로 4년 만의 흑자 전환 [출처: WebSearch · 2026-05]",
-          "붉은사막 3분기 대규모 업데이트·크로스세이브 도입 + 차기작 도깨비 개발 병행 — IP 롱런·파이프라인 확장 [출처: WebSearch · 2026-06]",
-          "Forward PER 14.83로 현재 57.03 대비 -74% 하향 — 실적 정상화 반영 시 Growth 그룹 Z=+1.63σ 강세 [정량]"
-        ],
-        "risks": [
-          "붉은사막 이후 콘텐츠 공백 우려 — 유료 DLC는 2027년께, 도깨비·플랜8 차기작은 2~3년 추가 개발 소요 [출처: WebSearch · 2026-06]",
-          "스팀 초기 평가 '복합적~대체로 부정적' 출발 후 '매우 긍정적'(83%)으로 회복 — 후속 업데이트 실행 차질 시 유저 이탈 리스크 [출처: WebSearch · 2026-06]",
-          "붉은사막 흥행 기대가 주가에 상당 부분 선반영 — 실적 반등에도 주가 모멘텀 정체, 목표가 23,000~100,000원 편차 극심 [출처: WebSearch · 2026-06]",
-          "현재 PER 57.03 절대치 매우 높음 — Forward 14.83 미달성 또는 흥행 둔화 시 회귀 하방 [정량]"
-        ],
-        "undervaluation_cause": {
-          "text": "붉은사막 흥행 기대 선반영 + 신작 출시 후 콘텐츠 공백·차기작 공백 우려로 모멘텀 정체 [출처: WebSearch · 2026-06]",
-          "nature": "TEMPORARY"
-        },
-        "verdict": "정량 강세나 하방 리스크 동시 존재",
-        "evidence_strength": "STRONG",
-        "risk_level": "HIGH",
-        "generated_at": "2026-06-18T14:00:00",
-        "model": "claude-sonnet-4-6"
+        "model": "claude-sonnet-4-6",
+        "watch": [
+          "6월말 美 캘리포니아 공장 가동·방산 조달 수주 [출처: WebSearch · 2026-06]",
+          "원웹·유텔셋 LEO 서비스 확산 속도 [출처: WebSearch · 2026-05]",
+          "영업이익률 흑자 정상화 지속 (2025 3.7%) [출처: DART · 2025]"
+        ]
       }
     },
     {
       "code": "112610",
       "quant_rank": 7,
-      "ai_rank": 6,
-      "rerank_reason": "PTC 2026/6 착공 데드라인 수주 재개 기대이나 정책 선반영·실적은 컨센 부합 + PER 52.27 부담 [출처: WebSearch · 2026-05] [정량]",
+      "ai_rank": 5,
+      "rerank_reason": "PTC 2026/6 착공 데드라인 수주 재개 + OPM 추세 상승(3.1→10.9%) — 단 정책 선반영·PER 52.27 부담 [출처: WebSearch · 2026-05] [출처: DART · 2025] [정량]",
       "ai_notes": {
         "one_liner": "미국 육상풍력 수주 재개 + 하부구조물 턴어라운드",
         "investment_points": [
@@ -203,14 +192,19 @@
         "evidence_strength": "MODERATE",
         "risk_level": "HIGH",
         "generated_at": "2026-06-18T14:00:00",
-        "model": "claude-sonnet-4-6"
+        "model": "claude-sonnet-4-6",
+        "watch": [
+          "PTC 2026/6 착공 데드라인 전후 미국 타워 수주 [출처: WebSearch · 2026-05]",
+          "3Q 유럽 해상풍력 하부구조물(TP) 수주 [출처: WebSearch · 2026-05]",
+          "AMPC 보조금 정책 변화 [출처: WebSearch · 2026-02]"
+        ]
       }
     },
     {
       "code": "051500",
       "quant_rank": 9,
-      "ai_rank": 7,
-      "rerank_reason": "온라인 +17%·키친리스 +41% 신사업이 본업 OP -28.9% 마진 둔화 만회 중 — 실행 지연 시 해소 지연 [출처: WebSearch · 2026-06]",
+      "ai_rank": 6,
+      "rerank_reason": "온라인+17%·키친리스+41% 신사업이 본업 OPM 추세하락(2.9→1.3%) 만회 중 — 재무가 함정 방향 [출처: WebSearch · 2026-06] [출처: DART · 2025]",
       "ai_notes": {
         "one_liner": "온라인·키친리스 신사업 본격화 + 마켓보로 인수",
         "investment_points": [
@@ -234,14 +228,19 @@
         "evidence_strength": "MODERATE",
         "risk_level": "MEDIUM",
         "generated_at": "2026-06-18T00:00:00",
-        "model": "claude-opus-4-8"
+        "model": "claude-opus-4-8",
+        "watch": [
+          "본업 식자재 영업이익률 반등 여부 (1Q 1.3% 저점) [출처: DART · 2025]",
+          "온라인·키친리스 신사업 매출 성장 지속 [출처: WebSearch · 2026-05]",
+          "마켓보로 '식봄' 플랫폼 거래액 [출처: WebSearch · 2026-03]"
+        ]
       }
     },
     {
       "code": "035720",
       "quant_rank": 2,
-      "ai_rank": 8,
-      "rerank_reason": "AI 수익화 2027년 지연 + 김범수 항소심 구조적 리스크 + PER 36.45 — 멀티플 압박 지속 [출처: WebSearch · 2026-05] [정량]",
+      "ai_rank": 7,
+      "rerank_reason": "1Q OP +66%·OPM 회복에도 AI 수익화 2027 지연 + 김범수 항소심 구조적 리스크 + PER 36.45 [출처: WebSearch · 2026-05] [정량]",
       "ai_notes": {
         "one_liner": "챗GPT 포 카카오 1100만 + Q1 역대 최대 + 올트먼 협력",
         "investment_points": [
@@ -265,14 +264,55 @@
         "evidence_strength": "STRONG",
         "risk_level": "HIGH",
         "generated_at": "2026-06-18T00:00:00",
-        "model": "claude-opus-4-8"
+        "model": "claude-opus-4-8",
+        "watch": [
+          "AI(카나나·챗GPT 제휴) 매출 기여 시점 [출처: WebSearch · 2026-04]",
+          "김범수 항소심 진행 (6/24~ 공판) [출처: WebSearch · 2026-06]",
+          "영업이익률 회복 지속 (2025 9%) [출처: DART · 2025]"
+        ]
+      }
+    },
+    {
+      "code": "263750",
+      "quant_rank": 10,
+      "ai_rank": 8,
+      "rerank_reason": "붉은사막 1Q OP +2,585%이나 연간적자 속 분기만 급등=피크어닝스·선반영 + PER 57.03 [출처: WebSearch · 2026-06] [출처: DART · 2025] [정량]",
+      "ai_notes": {
+        "one_liner": "붉은사막 600만장 흥행 + 분기 최대 실적 흑자 전환",
+        "investment_points": [
+          "붉은사막 출시 83일 만에 글로벌 누적 600만장 돌파 — BEP(약 250만장) 2배 이상 초과, 한국 콘솔 게임 사상 최대 판매 [출처: WebSearch · 2026-06]",
+          "1분기 매출 3,285억·영업이익 2,121억(YoY +2,585%, 영업이익률 64.5%) 창사 이래 최대 분기 실적 — 붉은사막 IP 매출 2,665억 견인 [출처: WebSearch · 2026-05]",
+          "2026 연간 가이던스 매출 8,790억~9,754억·영업이익 4,876억~5,726억 — 검은사막·붉은사막 쌍끌이로 4년 만의 흑자 전환 [출처: WebSearch · 2026-05]",
+          "붉은사막 3분기 대규모 업데이트·크로스세이브 도입 + 차기작 도깨비 개발 병행 — IP 롱런·파이프라인 확장 [출처: WebSearch · 2026-06]",
+          "Forward PER 14.83로 현재 57.03 대비 -74% 하향 — 실적 정상화 반영 시 Growth 그룹 Z=+1.63σ 강세 [정량]"
+        ],
+        "risks": [
+          "붉은사막 이후 콘텐츠 공백 우려 — 유료 DLC는 2027년께, 도깨비·플랜8 차기작은 2~3년 추가 개발 소요 [출처: WebSearch · 2026-06]",
+          "스팀 초기 평가 '복합적~대체로 부정적' 출발 후 '매우 긍정적'(83%)으로 회복 — 후속 업데이트 실행 차질 시 유저 이탈 리스크 [출처: WebSearch · 2026-06]",
+          "붉은사막 흥행 기대가 주가에 상당 부분 선반영 — 실적 반등에도 주가 모멘텀 정체, 목표가 23,000~100,000원 편차 극심 [출처: WebSearch · 2026-06]",
+          "현재 PER 57.03 절대치 매우 높음 — Forward 14.83 미달성 또는 흥행 둔화 시 회귀 하방 [정량]"
+        ],
+        "undervaluation_cause": {
+          "text": "붉은사막 흥행 기대 선반영 + 신작 출시 후 콘텐츠 공백·차기작 공백 우려로 모멘텀 정체 [출처: WebSearch · 2026-06]",
+          "nature": "TEMPORARY"
+        },
+        "verdict": "정량 강세나 하방 리스크 동시 존재",
+        "evidence_strength": "STRONG",
+        "risk_level": "HIGH",
+        "generated_at": "2026-06-18T14:00:00",
+        "model": "claude-sonnet-4-6",
+        "watch": [
+          "붉은사막 분기 매출 감소율 = 출시효과 소멸 속도 [출처: WebSearch · 2026-06]",
+          "3Q 대규모 업데이트·크로스세이브 유저 유지 [출처: WebSearch · 2026-06]",
+          "연간 영업이익 흑자 전환 여부 (2023~25 적자) [출처: DART · 2025]"
+        ]
       }
     },
     {
       "code": "253450",
       "quant_rank": 5,
       "ai_rank": 9,
-      "rerank_reason": "제작비 인플레·광고 침체로 목표 멀티플 추세적 하향 구조 + PER 74.2 — 관망 권고 [출처: WebSearch · 2026-04] [정량]",
+      "rerank_reason": "제작비 인플레·광고 침체로 OPM 추세하락(10.8→5.7%)·매출 감소, 목표멀티플 추세 하향 + PER 74.2 — 관망 [출처: WebSearch · 2026-04] [출처: DART · 2025] [정량]",
       "ai_notes": {
         "one_liner": "편성 회복 + 넷플릭스 재계약 마진 + 2026 OP +82% 가이던스",
         "investment_points": [
@@ -296,14 +336,19 @@
         "evidence_strength": "MODERATE",
         "risk_level": "HIGH",
         "generated_at": "2026-06-18T00:00:00",
-        "model": "claude-sonnet-4-6"
+        "model": "claude-sonnet-4-6",
+        "watch": [
+          "하반기 텐트폴 Hit Ratio·편성 회복 [출처: WebSearch · 2026-03]",
+          "영업이익률 추세 반등 여부 (10.8→5.7% 하락) [출처: DART · 2025]",
+          "국내 방송광고 업황 [출처: WebSearch · 2026-04]"
+        ]
       }
     },
     {
       "code": "215000",
       "quant_rank": 4,
       "ai_rank": 10,
-      "rerank_reason": "국내 스크린골프 포화·골프열풍 쇠퇴 구조적 부진 + 1Q OP -47.4% — 해외 성장도 비용 동반 [출처: WebSearch · 2026-01]",
+      "rerank_reason": "스크린골프 포화·골프열풍 쇠퇴로 OPM 추세하락(24.5→14.1%)·매출 감소 + 1Q OP -47.4% 구조적 부진 [출처: WebSearch · 2026-01] [출처: DART · 2025]",
       "ai_notes": {
         "one_liner": "국내 스크린골프 포화, 해외·GDR 신제품이 반등 변수",
         "investment_points": [
@@ -327,7 +372,12 @@
         "evidence_strength": "MODERATE",
         "risk_level": "HIGH",
         "generated_at": "2026-06-18T00:00:00",
-        "model": "claude-opus-4-8"
+        "model": "claude-opus-4-8",
+        "watch": [
+          "해외 매출 비중 30% 진입·성장 지속 [출처: WebSearch · 2026-04]",
+          "국내 스크린골프 매출 감소 멈춤 여부 [출처: DART · 2025]",
+          "영업이익률 하락 추세 진정 (24→14%) [출처: DART · 2025]"
+        ]
       }
     }
   ]
