@@ -197,13 +197,14 @@ data/
 - 사이트는 `ai_rank` 순으로 카드 정렬. "왜 저평가인가" 블록(`.ai-uc`)이 nature별 색(일시적=초록 #059669 / 구조적=빨강 #dc2626, `:has()` 셀렉터)으로 표시 — app.js `renderAiBlock`, stock.js `loadAiNotes`, stock.html `#ai-detail-uc`.
 - `data/matrix/`는 universe 통과 후보 모든 종목용 fallback (검색 페이지에서 어떤 종목이든 PER/PBR 차트 표시)
 - `data/stocks/{code}.json`은 Top 10만 (일별 페치 비용 때문에 풀 데이터는 Top 10 한정)
-- `data/financials/{code}.json`은 OpenDART(`DART_API_KEY`) 공식 재무. `fnlttSinglAcntAll` + account_id 표준 태그(`ifrs-full_Revenue`/`dart_OperatingIncomeLoss`/`ifrs-full_ProfitLoss`)로 매칭, CFS(연결) 우선·OFS(별도) 폴백. 각 item: `{code, corp_code, source, annual:[{year,revenue,op_income,op_margin,net_income,net_margin,fs_div}], latest_quarter}`. `_dart_corpmap.json`은 code→corp_code 캐시 (corpCode.xml 1회 다운). 우선 Top 10, `--universe`로 확장 가능. 적자·금융사는 마진 자연 결측 허용.
+- `data/financials/{code}.json`은 OpenDART(`DART_API_KEY`) 공식 재무. `fnlttSinglAcntAll` + account_id 표준 태그(`ifrs-full_Revenue`/`dart_OperatingIncomeLoss`/`ifrs-full_ProfitLoss`)로 매칭, CFS(연결) 우선·OFS(별도) 폴백. 각 item: `{code, corp_code, source, annual:[{year,revenue,op_income,op_margin,net_income,net_margin,fs_div}], latest_quarter}`. `_dart_corpmap.json`은 code→corp_code 캐시 (corpCode.xml 1회 다운). 적자·금융사는 마진 자연 결측 허용.
+  - `/update-data`는 매번 **Top 10만** 페치. **universe 전체**(303종목)는 `python scripts/fetch_financials.py --universe`를 가끔(주1회 정도) 따로 실행 — 그래야 검색→상세에서 Top 10이 아닌 종목도 `stock.html`의 독립 **재무 추이 섹션**(`#fin-section`, `renderFinChart`)이 표시됨. 이 섹션은 `ai_notes` 없이 `data/financials/{code}.json`만 있으면 렌더된다 (Top 10은 AI 섹션 + 재무 섹션 둘 다).
 
 ## Data Fetch 트러블슈팅 메모
 
 외부 사이트 HTML 구조가 변경되어 페치가 깨지는 일이 가끔 있습니다. 다음 두 가지만 알아 두면 빠르게 대응 가능:
 
-- **`scripts/fetch_us.py::_fetch_multpl`** — multpl.com 테이블 파싱을 **BeautifulSoup**로 처리 (이전 `pd.read_html`이 rowspan/abbr 구조 오해해서 1709개 행을 NaT 처리한 사고가 있었음). 페치 시 `_fetch_multpl(url)` 결과를 직접 출력해서 행 수·last value 점검하면 문제 즉시 식별.
+- **`scripts/fetch_us.py::_fetch_multpl`** — multpl.com 테이블 파싱을 **BeautifulSoup**로 처리 (이전 `pd.read_html`이 rowspan/abbr 구조 오해해서 1709개 행을 NaT 처리한 사고가 있었음). 페치 시 `_fetch_multpl(url)` 결과를 직접 출력해서 행 수·last value 점검하면 문제 즉시 식별. **S&P 종가는 FRED(`FRED_API_KEY`) 우선·yfinance 폴백** (`_fetch_fred_sp500_monthly`, `meta.close_source`로 확인). PER/PBR/배당은 FRED 미제공이라 multpl 유지. **KRX 공식 OpenAPI(`KRX_API_KEY`)는 PER/PBR을 주지 않음**(시세·시총·기본정보만) — PER/PBR 매트릭스는 pykrx(`KRX_ID`/`KRX_PW` 로그인) 전용. 그래서 KRX 로그인 전환 불가.
 - **`scripts/verify_data.py`** — `/update-data` 7단계로 자동 호출. 임계값 위반 시 exit 1로 commit/push **자동 차단**. 임계값: 시장 지수 fresh 7일 (sp500은 multpl yearly PBR 특성상 90일 허용), non-null 80%, universe.close 무효 ≤ 5%, 매트릭스 coverage ≥ 50% (적자 종목 자연 NaN 고려), Top 10 current_price > 0. 검증 실패하면 stderr 메시지가 어느 데이터 어느 임계값인지 정확히 알려줌.
 
 새 데이터 출처 추가 시 `verify_data.py`에 해당 검증 룰도 추가하면 stale 사고를 미리 차단.

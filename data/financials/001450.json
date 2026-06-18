@@ -1,0 +1,45 @@
+{
+  "code": "001450",
+  "corp_code": "00164973",
+  "source": "OpenDART",
+  "fetched_at": "2026-06-18T16:40:22",
+  "unit": "원",
+  "annual": [
+    {
+      "year": 2023,
+      "revenue": null,
+      "op_income": 743483371764,
+      "op_margin": null,
+      "net_income": 574444959462,
+      "net_margin": null,
+      "fs_div": "CFS"
+    },
+    {
+      "year": 2024,
+      "revenue": null,
+      "op_income": 1244069529604,
+      "op_margin": null,
+      "net_income": 850533055882,
+      "net_margin": null,
+      "fs_div": "CFS"
+    },
+    {
+      "year": 2025,
+      "revenue": null,
+      "op_income": 1260994493599,
+      "op_margin": null,
+      "net_income": 1019820047983,
+      "net_margin": null,
+      "fs_div": "CFS"
+    }
+  ],
+  "latest_quarter": {
+    "period": "2026-1Q(누적)",
+    "revenue": null,
+    "op_income": 324494379640,
+    "op_margin": null,
+    "net_income": 236446287868,
+    "net_margin": null,
+    "fs_div": "CFS"
+  }
+}

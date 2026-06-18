@@ -91,6 +91,14 @@ UI·분석 룰 변경 없음. 단독 실행·검증 가능.
 - FRED/BOK 거시 보강 — 코어 목표 아님
 - DCF/내재가치, Porter 5 Forces, 내부자·헤지펀드 — 데이터 없음·환각 위험, 텐배거 프롬프트에서 의도적 제외
 
+## 부록 — 후속 API 확장 결정 (2026-06-18 추가)
+
+Phase 1~3 완료 후 세 가지 후속을 검토, 실현가능성 검증 후 결정:
+
+- **universe 전체 재무 (채택)**: `fetch_financials.py --universe`로 303종목 페치. UI는 재무 차트를 AI 카드 밖 독립 `#fin-section`으로 분리해 검색→상세의 모든 종목이 표시. `/update-data`는 Top 10만, universe는 주1회 별도 실행.
+- **KRX 공식 OpenAPI 전환 (기각)**: 검증 결과 OpenAPI(`AUTH_KEY`, data-dbg.krx.co.kr)는 시세·시총·기본정보만 제공하고 **PER/PBR 미제공**(엔드포인트 404, 기본정보 필드에 없음). PER/PBR/배당은 data.krx.co.kr 마켓플레이스 웹 보드 전용 = pykrx가 로그인 스크래핑하는 데이터. 전환 시 핵심 손실 + pykrx는 안정적이라 동기 약함 → **스킵**. `KRX_ID`/`KRX_PW` 계속 필수.
+- **FRED S&P 보강 (부분 채택)**: FRED는 S&P 가격지수만, PER/PBR 미제공. → 종가만 FRED(공식) 우선·yfinance 폴백(`_fetch_fred_sp500_monthly`, `meta.close_source`). PER/PBR/배당은 multpl 유지.
+
 ## 5. 성공 기준 (Phase 1)
 - `python scripts/fetch_financials.py` 실행 시 Top 10 중 정상 상장사 전부 `data/financials/{code}.json` 생성, 각 `annual` ≥ 3개년, revenue/op_income/net_income·마진 계산됨.
 - `verify_data.py` 통과.

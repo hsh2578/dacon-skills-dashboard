@@ -128,6 +128,7 @@ async function load() {
   render();
   loadTripleCrossSignal();
   loadAiNotes();
+  renderFinChart(code);
 }
 
 async function loadAiNotes() {
@@ -181,8 +182,6 @@ async function loadAiNotes() {
       watchEl.style.display = 'none';
     }
 
-    renderFinChart(code);
-
     document.getElementById('ai-detail-verdict').textContent = ai.verdict || '';
 
     const metaParts = [];
@@ -201,7 +200,7 @@ function escapeHtml(s) {
 }
 
 async function renderFinChart(code) {
-  const wrap = document.getElementById('ai-detail-fin');
+  const wrap = document.getElementById('fin-section');
   if (!wrap) return;
   try {
     const r = await fetch(`data/financials/${code}.json?t=${Date.now()}`);

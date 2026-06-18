@@ -1,0 +1,45 @@
+{
+  "code": "323410",
+  "corp_code": "01133217",
+  "source": "OpenDART",
+  "fetched_at": "2026-06-18T16:36:49",
+  "unit": "원",
+  "annual": [
+    {
+      "year": 2023,
+      "revenue": 2494045000000,
+      "op_income": 478485000000,
+      "op_margin": 0.1919,
+      "net_income": 354912000000,
+      "net_margin": 0.1423,
+      "fs_div": "OFS"
+    },
+    {
+      "year": 2024,
+      "revenue": 2945621000000,
+      "op_income": 606880000000,
+      "op_margin": 0.206,
+      "net_income": 440065000000,
+      "net_margin": 0.1494,
+      "fs_div": "OFS"
+    },
+    {
+      "year": 2025,
+      "revenue": 3086291000000,
+      "op_income": 649371000000,
+      "op_margin": 0.2104,
+      "net_income": 480280000000,
+      "net_margin": 0.1556,
+      "fs_div": "OFS"
+    }
+  ],
+  "latest_quarter": {
+    "period": "2026-1Q(누적)",
+    "revenue": 819336000000,
+    "op_income": 157614000000,
+    "op_margin": 0.1924,
+    "net_income": 187296000000,
+    "net_margin": 0.2286,
+    "fs_div": "OFS"
+  }
+}
