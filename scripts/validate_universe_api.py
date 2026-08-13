@@ -21,6 +21,7 @@ from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import feeds  # noqa: E402
 from ttm import latest_annual_eps, recent_stacs, ttm_eps  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -42,13 +43,19 @@ MIN_VALID_Q = 12     # 최소 유효 분기 (3년치)
 
 
 def load_ratios():
-    """실전 캐시 우선, 없으면 모의 캐시."""
-    for nm in ("_kis_ratio_q_real.json", "_kis_ratio_q_paper.json", "_kis_ratio_q.json"):
-        p = CACHE_DIR / nm
-        if p.exists():
-            print(f"  KIS 캐시: {nm}")
-            return json.loads(p.read_text(encoding="utf-8"))
-    sys.exit("[ERROR] KIS 캐시 없음. fetch_matrix_kis.py 를 먼저 실행하세요.")
+    """접속한 계정의 캐시만 읽는다. **폴백하지 않는다.**
+
+    예전에는 실전 → 모의 → 무접미 순으로 훑었다. 실전 캐시가 없으면 모의투자
+    계정의 작은 데이터셋으로 조용히 내려앉았고, 오류도 경고도 없이 그 결과가
+    그대로 4팩터 모집단이 됐다. 지금은 없으면 그냥 실패한다.
+    """
+    p = feeds.kis_ratio_cache_path()
+    if not p.exists():
+        sys.exit(f"[ERROR] {p.name} 없음 (계정: {feeds.KIS_ACCOUNT}). "
+                 "fetch_matrix_kis.py 를 먼저 실행하세요.")
+    data = json.loads(p.read_text(encoding="utf-8"))
+    print(f"  KIS 캐시: {p.name} ({feeds.KIS_ACCOUNT} 계정 · {len(data)}종목)")
+    return data
 
 
 def main():

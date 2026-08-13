@@ -19,8 +19,6 @@ import json
 import os
 import re
 import sys
-import time
-import urllib.request
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -37,59 +35,14 @@ if hasattr(sys.stdout, "reconfigure"):
         pass
 
 
-def load_env(path: Path) -> None:
-    if not path.exists():
-        return
-    for line in path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        k, v = line.split("=", 1)
-        os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from feeds import krx, short_code  # noqa: E402,F401
+from ttm import amount as _amt  # noqa: E402
 
-
-load_env(ROOT / ".env")
-load_env(ROOT.parent / ".env")
-
-KRX_KEY = os.environ.get("KRX_API_KEY")
-if not KRX_KEY:
-    sys.stderr.write("[ERROR] KRX_API_KEY 미설정. .env 확인.\n")
-    sys.exit(2)
-
-KRX_BASE = "http://data-dbg.krx.co.kr/svc/apis/"
-KRX_SLEEP = 0.3
 MIN_MARKET_CAP_억 = 2000
 
 SPAC_PATTERN = re.compile(r"스팩|SPAC|기업인수목적", re.IGNORECASE)
 REIT_PATTERN = re.compile(r"리츠|REIT|부동산투자", re.IGNORECASE)
-
-
-def _amt(s):
-    s = str(s if s is not None else "").replace(",", "").strip()
-    if s in ("", "-"):
-        return None
-    try:
-        return float(s)
-    except ValueError:
-        return None
-
-
-def krx(svc: str, bas_dd: str, retry: int = 3):
-    url = f"{KRX_BASE}{svc}?basDd={bas_dd}"
-    last = None
-    for attempt in range(retry):
-        try:
-            req = urllib.request.Request(url, headers={"AUTH_KEY": KRX_KEY})
-            with urllib.request.urlopen(req, timeout=30) as r:
-                return json.loads(r.read().decode("utf-8")).get("OutBlock_1") or []
-        except Exception as e:
-            last = e
-            time.sleep(KRX_SLEEP * (attempt + 2))
-    raise last
-
-
-def short_code(isu_cd: str) -> str:
-    return isu_cd[3:9] if len(isu_cd) > 9 else isu_cd
 
 
 def resolve_business_date(max_back: int = 10):
@@ -103,7 +56,6 @@ def resolve_business_date(max_back: int = 10):
         except Exception as e:
             print(f"  [WARN] {ds}: {e}", file=sys.stderr)
         d -= timedelta(days=1)
-        time.sleep(KRX_SLEEP)
     return None
 
 
@@ -122,7 +74,6 @@ def collect(bas_dd: str):
                 "market_cap_억": round(cap / 100_000_000, 1),
                 "close": close,
             })
-        time.sleep(KRX_SLEEP)
     return rows
 
 

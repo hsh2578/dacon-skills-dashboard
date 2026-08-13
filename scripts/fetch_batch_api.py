@@ -25,7 +25,6 @@ fetch_matrix_kis.py가 이미 만들어 둔 캐시를 재사용한다:
 5년 기준이므로 일관성을 위해 캐시 범위를 따른다.
 """
 import argparse
-import importlib.util
 import json
 import os
 import sys
@@ -47,31 +46,25 @@ if hasattr(sys.stdout, "reconfigure"):
     except Exception:
         pass
 
-# TTM/공시시차 로직은 fetch_matrix_kis.py 것을 그대로 재사용 (중복 정의 방지)
-_spec = importlib.util.spec_from_file_location(
-    "_fmk", Path(__file__).resolve().parent / "fetch_matrix_kis.py")
-_fmk = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(_fmk)
-
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import feeds  # noqa: E402
 from naver_consensus import fetch_naver_data  # noqa: E402
-
-
-def _load(name):
-    p = CACHE_DIR / name
-    if not p.exists():
-        return None
-    return json.loads(p.read_text(encoding="utf-8"))
+from ttm import bps_at, disclosed_stac, ttm_eps  # noqa: E402
 
 
 def load_caches():
-    daily = _load("_krx_close_daily.json")
+    daily = feeds.load_cache("_krx_close_daily.json")
     if not daily:
         sys.exit("[ERROR] _krx_close_daily.json 없음. "
                  "fetch_matrix_kis.py --daily 를 먼저 실행하세요.")
-    shares = _load("_krx_shares_monthly.json") or {}
-    ratios = (_load("_kis_ratio_q_real.json") or _load("_kis_ratio_q_paper.json")
-              or _load("_kis_ratio_q.json") or {})
+    shares = feeds.load_cache("_krx_shares_monthly.json")
+    # 계정을 명시해 읽는다. 예전에는 real → paper → 무접미 순으로 폴백해서,
+    # 실전 캐시가 없으면 모의투자 데이터로 조용히 내려앉았다.
+    ratio_path = feeds.kis_ratio_cache_path()
+    if not ratio_path.exists():
+        sys.exit(f"[ERROR] {ratio_path.name} 없음 (계정: {feeds.KIS_ACCOUNT}). "
+                 "fetch_matrix_kis.py 를 먼저 실행하세요.")
+    ratios = feeds.load_cache(ratio_path.name)
     # 월별 주식수를 YYYYMM 키로 정규화
     shares_by_ym = {}
     for ds, m in shares.items():
@@ -99,11 +92,11 @@ def build_one(code, name, daily, shares_by_ym, ratios):
         out_close.append(int(round(px_adj)))
         out_cap.append(int(round(px * n_t / 100_000_000)) if n_t else None)
 
-        stac = _fmk.pick_stac(series, ds) if series else None
-        eps = _fmk.ttm_eps(series, stac) if stac else None
-        bps = _fmk._amt((series.get(stac) or {}).get("bps")) if stac else None
+        stac = disclosed_stac(series, ds) if series else None
+        eps = ttm_eps(series, stac) if stac else None
+        bps = bps_at(series, stac) if stac else None
         out_per.append(round(px_adj / eps, 2) if (eps and eps > 0) else None)
-        out_pbr.append(round(px_adj / bps, 2) if (bps and bps > 0) else None)
+        out_pbr.append(round(px_adj / bps, 2) if bps else None)
 
     try:
         naver = fetch_naver_data(code) or {}

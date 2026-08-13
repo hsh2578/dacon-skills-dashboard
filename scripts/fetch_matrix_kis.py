@@ -32,13 +32,13 @@ import os
 import sys
 import threading
 import time
-import urllib.error
-import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import feeds  # noqa: E402
+from feeds import krx, short_code  # noqa: E402
 from ttm import (ANNUAL_LAG_DAYS, QUARTER_LAG_DAYS,  # noqa: E402
                  amount, bps_at, disclosed_stac, ttm_eps)
 
@@ -56,44 +56,17 @@ if hasattr(sys.stdout, "reconfigure"):
         pass
 
 
-def load_env(path: Path) -> None:
-    if not path.exists():
-        return
-    for line in path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        k, v = line.split("=", 1)
-        os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
-
-
-load_env(ROOT / ".env")
-load_env(ROOT.parent / ".env")
-
-KRX_KEY = os.environ.get("KRX_API_KEY")
-# 시세·재무 조회는 실전 전용 키(KIS_REAL_*)를 쓴다. KIS_APP_KEY는 모의투자 매매용이라
-# 조회 목적에 맞지 않는다(모의 키로 실전 서버를 호출하면 500). 없으면 기존 키로 폴백.
-KIS_KEY = os.environ.get("KIS_REAL_APP_KEY") or os.environ.get("KIS_APP_KEY")
-KIS_SECRET = os.environ.get("KIS_REAL_APP_SECRET") or os.environ.get("KIS_APP_SECRET")
-KIS_BASE = os.environ.get("KIS_REAL_BASE_URL") or os.environ.get("KIS_BASE_URL")
-if not (KRX_KEY and KIS_KEY and KIS_SECRET and KIS_BASE):
-    sys.stderr.write("[ERROR] KRX_API_KEY / KIS_REAL_APP_KEY / KIS_REAL_APP_SECRET / "
-                     "KIS_REAL_BASE_URL 필요.\n")
-    sys.exit(2)
-
-KRX_BASE = "http://data-dbg.krx.co.kr/svc/apis/"
-KRX_SLEEP = 0.3
-KRX_WORKERS = 4           # 일별 수집 동시성. 보수적으로 — 지속 부하 차단 이력 있음.
-KIS_SLEEP = 0.25          # KIS는 순차 호출만. 병렬로 때리면 막힌다(오늘 DART에서 겪음).
+KRX_WORKERS = 4           # 일별 수집 동시성. 총 호출률 상한은 feeds.KRX 가 강제한다.
 LOOKBACK_MONTHS = 60
-_SRV = "real" if "openapivts" not in (KIS_BASE or "") else "paper"
-TOKEN_PATH = CACHE_DIR / f"_kis_token_{_SRV}.json"   # 서버별 분리 (토큰 혼용 방지)
-RATIO_PATH = CACHE_DIR / f"_kis_ratio_q_{_SRV}.json"
+
+TOKEN_PATH = feeds.kis_token_path()
+RATIO_PATH = feeds.kis_ratio_cache_path()   # 계정별 분리. 폴백 없음.
 CLOSE_PATH = CACHE_DIR / "_krx_close_monthly.json"
 DAILY_PATH = CACHE_DIR / "_krx_close_daily.json"
 SHRS_PATH = CACHE_DIR / "_krx_shares_monthly.json"
 
 # 공시 시차(QUARTER_LAG_DAYS / ANNUAL_LAG_DAYS)와 TTM 판정은 ttm.py 소유.
+# KRX/KIS 호출·속도 제한·토큰은 feeds.py 소유.
 
 
 # ------------------------------------------------------------------ 공통
@@ -101,29 +74,7 @@ SHRS_PATH = CACHE_DIR / "_krx_shares_monthly.json"
 _amt = amount   # KRX 응답의 숫자 문자열 파싱 (ttm.py와 동일 규칙)
 
 
-def _jget(url, headers, timeout=30, retry=3, backoff=0.8):
-    last = None
-    for attempt in range(retry):
-        try:
-            req = urllib.request.Request(url, headers=headers)
-            with urllib.request.urlopen(req, timeout=timeout) as r:
-                return json.loads(r.read().decode("utf-8"))
-        except Exception as e:
-            last = e
-            time.sleep(backoff * (attempt + 1))
-    raise last
-
-
 # ------------------------------------------------------------- KRX 종가
-
-def krx(svc: str, bas_dd: str):
-    d = _jget(f"{KRX_BASE}{svc}?basDd={bas_dd}", {"AUTH_KEY": KRX_KEY})
-    return d.get("OutBlock_1") or []
-
-
-def short_code(isu_cd: str) -> str:
-    return isu_cd[3:9] if len(isu_cd) > 9 else isu_cd
-
 
 def resolve_trading_day(d: datetime, max_back: int = 10):
     for _ in range(max_back):
@@ -134,7 +85,6 @@ def resolve_trading_day(d: datetime, max_back: int = 10):
         except Exception as e:
             print(f"    [WARN] {ds}: {e}", file=sys.stderr)
         d -= timedelta(days=1)
-        time.sleep(KRX_SLEEP)
     return None
 
 
@@ -183,7 +133,6 @@ def fetch_closes_daily(months: int, refresh: bool, workers: int = KRX_WORKERS):
                         c[short_code(r["ISU_CD"])] = px
             except Exception as e:
                 print(f"    [WARN] {ds} {svc}: {e}", file=sys.stderr)
-            time.sleep(KRX_SLEEP)
         return ds, c
 
     def record(res):
@@ -274,7 +223,6 @@ def fetch_closes(months: int, refresh: bool):
                         c[short_code(r["ISU_CD"])] = px
             except Exception as e:
                 print(f"    [WARN] {ds} {svc}: {e}", file=sys.stderr)
-            time.sleep(KRX_SLEEP)
         if c:
             cache[ds] = c
             dates.append(ds)
@@ -286,32 +234,6 @@ def fetch_closes(months: int, refresh: bool):
 
 # ------------------------------------------------------------- KIS 재무비율
 
-def kis_token() -> str:
-    """24h 유효. 재발급은 분당 제한(403)이 있어 반드시 캐싱한다."""
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    if TOKEN_PATH.exists():
-        c = json.loads(TOKEN_PATH.read_text(encoding="utf-8"))
-        if time.time() - c.get("issued", 0) < 20 * 3600:
-            return c["token"]
-    body = json.dumps({"grant_type": "client_credentials",
-                       "appkey": KIS_KEY, "appsecret": KIS_SECRET}).encode()
-    for attempt in range(5):
-        try:
-            req = urllib.request.Request(KIS_BASE + "/oauth2/tokenP", data=body,
-                                         headers={"content-type": "application/json"},
-                                         method="POST")
-            with urllib.request.urlopen(req, timeout=30) as r:
-                t = json.loads(r.read()).get("access_token")
-            if t:
-                TOKEN_PATH.write_text(json.dumps({"token": t, "issued": time.time()}),
-                                      encoding="utf-8")
-                return t
-        except Exception as e:
-            print(f"  토큰 재시도 {attempt+1}/5 ({repr(e)[:60]})", file=sys.stderr)
-            time.sleep(20)
-    sys.exit("[ERROR] KIS 토큰 발급 실패")
-
-
 def fetch_ratios(codes, token, refresh: bool):
     """{code: {stac_yymm: {eps, bps}}} — 분기(누적) 시계열. 종목당 1콜."""
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -322,21 +244,14 @@ def fetch_ratios(codes, token, refresh: bool):
 
     todo = [c for c in codes if c not in data]
     print(f"  신규 조회 {len(todo)}종목")
-    H = {"authorization": f"Bearer {token}", "appkey": KIS_KEY,
-         "appsecret": KIS_SECRET, "content-type": "application/json",
-         "tr_id": "FHKST66430300"}
     t0 = time.time()
     for i, code in enumerate(todo):
-        q = f"FID_DIV_CLS_CODE=1&fid_cond_mrkt_div_code=J&fid_input_iscd={code}"
         try:
-            out = _jget(f"{KIS_BASE}/uapi/domestic-stock/v1/finance/financial-ratio?{q}",
-                        H).get("output") or []
+            series = feeds.kis_quarterly_ratios(code, token)
         except Exception:
-            out = []
-        if out:
-            data[code] = {o["stac_yymm"]: {"eps": o.get("eps"), "bps": o.get("bps")}
-                          for o in out if o.get("stac_yymm")}
-        time.sleep(KIS_SLEEP)
+            series = {}
+        if series:
+            data[code] = series
         if (i + 1) % 50 == 0 or i + 1 == len(todo):
             el = time.time() - t0
             print(f"  [{i+1:>4}/{len(todo)}] KIS · 경과 {el:.0f}s "
@@ -365,7 +280,6 @@ def fetch_shares(dates, refresh: bool):
                         s[short_code(r["ISU_CD"])] = n
             except Exception as e:
                 print(f"    [WARN] {ds} {svc}: {e}", file=sys.stderr)
-            time.sleep(KRX_SLEEP)
         if s:
             cache[ds] = s
         if (i + 1) % 20 == 0 or i + 1 == len(todo):
@@ -488,7 +402,7 @@ def main():
         uni_codes = {s["code"] for s in (u.get("stocks") or []) if s.get("code")}
     codes = resolve_codes(args, uni_codes, all_codes)
     print(f"[2/3] KIS 재무비율 · 대상 {len(codes)}종목")
-    ratios = fetch_ratios(codes, kis_token(), args.refresh_ratio)
+    ratios = fetch_ratios(codes, feeds.kis_token(), args.refresh_ratio)
     print(f"  → {len(ratios)}종목 확보\n")
 
     print("[3/3] 매트릭스 조립")

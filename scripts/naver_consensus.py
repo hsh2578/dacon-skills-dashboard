@@ -115,14 +115,28 @@ def fetch_naver_data(code: str) -> Dict:
         try:
             t = tables[11]
             if len(t) >= 2:
+                # **헤더 라벨로 매칭한다** — 위치로 읽으면 안 된다.
+                # 실제 열 순서는 투자의견 · 목표주가 · EPS · PER · 추정기관수 인데
+                # 이전 구현은 첫 칸을 broker_count, 마지막을 consensus_score로 읽어
+                # 둘이 서로 뒤바뀌어 있었다(삼성전자 broker_count 4 = 실은 투자의견 4.0).
+                # multpl 파싱 사고와 같은 부류라 라벨 기반으로 바꿨다.
+                labels = [str(v).strip() for v in t.iloc[0]]
                 row = t.iloc[1]
-                out["consensus"]["summary"] = {
-                    "broker_count": _to_int(row.iloc[1]),
-                    "avg_target_price": _to_int(row.iloc[2]),
-                    "avg_eps_forward": _to_int(row.iloc[3]),
-                    "avg_per_forward": _to_float(row.iloc[4]),
-                    "consensus_score": _to_int(row.iloc[5]),
+                field_map = {
+                    "투자의견": ("consensus_score", _to_float),
+                    "목표주가(원)": ("avg_target_price", _to_int),
+                    "EPS(원)": ("avg_eps_forward", _to_int),
+                    "PER(배)": ("avg_per_forward", _to_float),
+                    "추정기관수": ("broker_count", _to_int),
                 }
+                summary = {k: None for k, _ in field_map.values()}
+                for i, label in enumerate(labels):
+                    if label in field_map:
+                        key, conv = field_map[label]
+                        summary[key] = conv(row.iloc[i])
+                # 커버리지가 없으면 셀 전체가 "최근3개월 이내에 제시된 의견이 없습니다"
+                # 라는 문장이라 숫자 변환이 전부 None이 된다 — 정상 경로다.
+                out["consensus"]["summary"] = summary
         except Exception:
             pass
 

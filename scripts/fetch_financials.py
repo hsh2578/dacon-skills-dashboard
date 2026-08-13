@@ -22,7 +22,6 @@ import json
 import os
 import sys
 import time
-import urllib.request
 import zipfile
 from datetime import datetime
 from pathlib import Path
@@ -36,14 +35,15 @@ os.environ.setdefault("PYTHONUTF8", "1")
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import feeds  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
-ENV_PATH = ROOT / ".env"
 SCREEN_PATH = ROOT / "data" / "screens" / "triple_cross.json"
 UNIVERSE_PATH = ROOT / "data" / "universe.json"
 OUT_DIR = ROOT / "data" / "financials"
 CORPMAP_PATH = OUT_DIR / "_dart_corpmap.json"
 
-DART_BASE = "https://opendart.fss.or.kr/api"
 REPRT_ANNUAL = "11011"  # 사업보고서
 # 분기 보고서 우선순위 (최근 분기 스냅샷, 누적 기준)
 REPRT_QUARTERS = [("11014", "3Q"), ("11012", "반기"), ("11013", "1Q")]
@@ -58,26 +58,9 @@ OP_INCOME_NAMES = {"영업이익", "영업이익(손실)"}
 NET_INCOME_NAMES = {"당기순이익", "당기순이익(손실)"}
 
 
-def load_env(path: Path) -> None:
-    if not path.exists():
-        return
-    for line in path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        k, v = line.split("=", 1)
-        os.environ.setdefault(k.strip(), v.strip())
-
-
-def _get(url: str, timeout: int = 25):
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return r.read()
-
-
 def build_corpmap(key: str) -> dict:
     """corpCode.xml(zip) 다운로드 → {stock_code: corp_code} (상장사만)."""
-    raw = _get(f"{DART_BASE}/corpCode.xml?crtfc_key={key}")
+    raw = feeds.dart_bytes("corpCode.xml")
     zf = zipfile.ZipFile(io.BytesIO(raw))
     xml_name = next(n for n in zf.namelist() if n.lower().endswith(".xml"))
     root = ET.fromstring(zf.read(xml_name))
@@ -141,15 +124,10 @@ def _margin(num, den):
 def fetch_report(key: str, corp_code: str, bsns_year: int, reprt_code: str):
     """전체재무제표(fnlttSinglAcntAll). CFS(연결) 우선, 비면 OFS(별도). (rows, fs_div) 반환."""
     for fs in ("CFS", "OFS"):
-        url = (
-            f"{DART_BASE}/fnlttSinglAcntAll.json?crtfc_key={key}"
-            f"&corp_code={corp_code}&bsns_year={bsns_year}"
-            f"&reprt_code={reprt_code}&fs_div={fs}"
-        )
-        d = json.loads(_get(url))
+        d = feeds.dart_json("fnlttSinglAcntAll.json", corp_code=corp_code,
+                            bsns_year=bsns_year, reprt_code=reprt_code, fs_div=fs)
         if d.get("status") == "000" and d.get("list"):
             return d["list"], fs
-        time.sleep(0.15)
     return None, None
 
 
@@ -190,11 +168,9 @@ def fetch_annual_series(key: str, corp_code: str, this_year: int):
             annual.update(extract_annual_from_report(rows, cand, fs))
             anchor = cand
             break
-        time.sleep(0.2)
     if anchor is None:
         return []
     # 2) 두 번째 보고서: 앵커-3 (3개년 추가, 겹침 없음)
-    time.sleep(0.2)
     rows2, fs2 = fetch_report(key, corp_code, anchor - 3, REPRT_ANNUAL)
     if rows2:
         for y, v in extract_annual_from_report(rows2, anchor - 3, fs2).items():
@@ -220,7 +196,6 @@ def fetch_latest_quarter(key: str, corp_code: str, this_year: int):
     for year in (this_year, this_year - 1):
         for reprt_code, label in REPRT_QUARTERS:
             rows, fs = fetch_report(key, corp_code, year, reprt_code)
-            time.sleep(0.15)
             if not rows:
                 continue
             rev = _cum(rows, REVENUE_IDS, REVENUE_NAMES)
@@ -259,11 +234,8 @@ def main():
     ap.add_argument("--refresh-corpmap", action="store_true", help="corp_code 매핑 강제 갱신")
     args = ap.parse_args()
 
-    load_env(ENV_PATH)
-    key = os.environ.get("DART_API_KEY")
-    if not key:
-        sys.stderr.write("[ERROR] DART_API_KEY 미설정. .env 확인.\n")
-        sys.exit(1)
+    feeds.require("DART_KEY")
+    key = feeds.DART_KEY
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     corpmap = load_or_build_corpmap(key, args.refresh_corpmap)
@@ -309,7 +281,6 @@ def main():
         print(f"  [{i}/{len(targets)}] {name}({code}) — {len(annual)}개년({yrs}) 저장")
         index.append({"code": code, "years": len(annual)})
         ok += 1
-        time.sleep(0.2)
 
     (OUT_DIR / "_index.json").write_text(
         json.dumps(
