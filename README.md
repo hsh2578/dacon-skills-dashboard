@@ -83,11 +83,11 @@ Top 10 종목에 대해 정성 모멘텀과 리스크를 자동 생성합니다.
 | 단계 | 스크립트 | 출력 |
 |---|---|---|
 | 1 | `fetch_kr.py` + `fetch_us.py` (병렬) | 시장 지수 시계열 |
-| 2 | `fetch_universe.py` 등 (`--full`만) | universe.json |
-| 3 | `fetch_matrix.py` | matrix/{per,pbr}_monthly.json |
-| 4 | `refresh_universe_prices.py` + `apply_triple_cross.py` | 직전 거래일 종가로 universe.close 갱신 + 4팩터 Top 10 |
-| 5 | `fetch_batch.py --top-n 10` | Top 10 일별 풀 데이터 |
-| 6 | Agent tool ×10 (병렬) | ai_notes.json |
+| 2 | `fetch_universe_api.py` → `validate_universe_api.py` → `fetch_consensus.py` (`--full`만) | universe.json |
+| 3 | `fetch_matrix_kis.py --daily --all --replace` | matrix/{per,pbr}_monthly.json (TTM) |
+| 4 | `apply_triple_cross.py` | 4팩터 Top 20 |
+| 5 | `fetch_batch_api.py --top-n 20` + `fetch_financials.py` | Top 20 일별 풀 + DART 재무 |
+| 6 | Agent tool ×20 (병렬) → `ranker` | ai_notes.json |
 | 7 | `verify_data.py` | 페치 결과 sanity 검증, 임계값 위반 시 commit 차단 |
 | 8 | 완료 보고 | (마크다운 표) |
 
@@ -154,20 +154,21 @@ dacon-skills-dashboard/
 │
 ├── scripts/                       Python 페치·점수·검증 파이프라인
 │   ├── fetch_kr.py / fetch_us.py
-│   ├── fetch_universe.py / validate_universe_quick.py / fetch_consensus.py
-│   ├── fetch_matrix.py
-│   ├── refresh_universe_prices.py ◀ universe.close 빠른 갱신 (~30초)
+│   ├── fetch_universe_api.py / validate_universe_api.py / fetch_consensus.py
+│   ├── fetch_matrix_kis.py        ◀ KRX 일별 종가 + KIS 분기 EPS/BPS → TTM 매트릭스
 │   ├── apply_triple_cross.py      ◀ 4팩터 점수
-│   ├── fetch_batch.py             ◀ Top 10 일별 풀
+│   ├── fetch_batch_api.py         ◀ Top 20 일별 풀
+│   ├── fetch_financials.py        ◀ DART 재무 추이
 │   └── verify_data.py             ◀ 페치 결과 sanity 검증
 │
 ├── data/                          정적 JSON (commit 후 GitHub Pages 자동 서빙)
 │   ├── kospi.json kosdaq.json sp500.json
-│   ├── universe.json              universe 303종목 + 컨센
-│   ├── matrix/{per,pbr}_monthly.json   60개월 매트릭스
-│   ├── screens/triple_cross.json  4팩터 점수 + Top 10
-│   ├── screens/ai_notes.json      AI 정성 분석
-│   └── stocks/{code}.json         Top 10 일별 풀
+│   ├── universe.json              universe 통과 종목 + 컨센
+│   ├── matrix/{per,pbr}_monthly.json   60개월 TTM 매트릭스 (전 종목)
+│   ├── screens/triple_cross.json  4팩터 점수 + Top 20
+│   ├── screens/ai_notes.json      AI 정성 분석 + ranker 재순위
+│   ├── stocks/{code}.json         Top 20 일별 풀
+│   └── financials/{code}.json     DART 재무 추이
 │
 ├── index.html stock.html app.js stock.js style.css   정적 사이트
 └── docs/기획서_초안.md / .pdf      DACON 제출용 기획서

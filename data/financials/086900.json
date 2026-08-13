@@ -2,7 +2,7 @@
   "code": "086900",
   "corp_code": "00580199",
   "source": "OpenDART",
-  "fetched_at": "2026-08-13T23:24:07",
+  "fetched_at": "2026-08-13T23:55:01",
   "unit": "원",
   "annual": [
     {
@@ -62,11 +62,11 @@
   ],
   "latest_quarter": {
     "period": "2026-반기(누적)",
-    "revenue": 68702321979,
-    "op_income": 4764632327,
-    "op_margin": 0.0694,
-    "net_income": 3127722615,
-    "net_margin": 0.0455,
+    "revenue": 129389827665,
+    "op_income": 12136833293,
+    "op_margin": 0.0938,
+    "net_income": 11006841422,
+    "net_margin": 0.0851,
     "fs_div": "CFS"
   }
 }

@@ -1,26 +1,29 @@
 ---
-description: 시장 지수·universe 매트릭스·Top 10 점수·AI 정성 분석 — 모든 데이터를 오늘 자로 갱신
+description: 시장 지수·universe·매트릭스·Top 20 점수·AI 정성 분석 — 모든 데이터를 오늘 자로 갱신
 argument-hint: [--full | --skip-ai]
 allowed-tools: Bash, Agent, Read, Write, Glob, Grep
 ---
 
-# /update-data — 전체 데이터 일일 갱신
+# /update-data — 전체 데이터 갱신
 
-당신은 이 명령이 호출되면 다음 워크플로우를 **순서대로** 실행합니다. 각 단계 시작 전에 한 줄 진행 상황을 사용자에게 알리고, 단계 끝나면 결과 한 줄 보고하세요.
+이 명령이 호출되면 아래 워크플로우를 **순서대로** 실행합니다. 각 단계 시작 전에 한 줄 알리고, 끝나면 결과 한 줄 보고하세요.
 
-## 옵션 처리
+> **폐기된 스크립트를 절대 호출하지 마세요.** `fetch_universe.py` · `validate_universe_quick.py` ·
+> `fetch_matrix.py` · `fetch_batch.py` · `refresh_universe_prices.py` · `fetch_stock_kr.py` 는
+> pykrx(data.krx.co.kr 스크래핑) 기반이라 2026-08-13 KRX IP 차단을 유발했고 삭제됐습니다.
+> 아래 `*_api` / `*_kis` 계열만 사용합니다.
 
-호출 인자(`$ARGUMENTS`)에 따라 모드 결정:
+## 옵션
 
-- `--full`: 모든 단계 (universe 재구축 포함, ~30분)
-- `--skip-ai`: 6번 AI 정성 분석 건너뜀 (정량 데이터만, ~10분)
-- 기본 (인자 없음): universe 건너뜀 + 나머지 모두 (~12분)
+- `--full` : universe 재구축까지 전부 (~25분)
+- `--skip-ai` : AI 정성 분석 건너뜀 (정량만, ~10분)
+- 기본 : universe 재구축 건너뜀 + 나머지 전부 (~15분)
 
-universe는 종목 마스터·5Y PER 검증·컨센서스로, 거의 변동 없으니 주 1회 정도면 충분. 매일 갱신은 시장 지수·매트릭스·점수·AI만으로 OK.
+universe(종목 마스터·5Y 검증·컨센서스)는 변동이 느려 주 1회면 충분합니다.
 
-## 1단계 — 시장 지수 갱신 (~3분)
+## 1단계 — 시장 지수 (~3분)
 
-다음 두 명령을 한 메시지에 **병렬 Bash 호출**:
+두 명령을 한 메시지에 **병렬 Bash 호출**:
 
 ```bash
 python scripts/fetch_kr.py
@@ -29,166 +32,146 @@ python scripts/fetch_kr.py
 python scripts/fetch_us.py
 ```
 
-KOSPI/KOSDAQ 일별 PER/PBR (증분 갱신) + S&P 500 월별 (multpl + yfinance) → `data/kospi.json`, `data/kosdaq.json`, `data/sp500.json`.
+`fetch_kr.py`는 KOSPI/KOSDAQ **지수** PER/PBR용으로 아직 pykrx를 씁니다 — 대체재가 없는 유일한 잔존 의존입니다. 종목 단위 대량 조회가 아니라 지수 2건 요청이라 차단 위험이 낮습니다. 실패하면 그대로 보고하고 나머지 단계는 계속 진행하세요(Section 1만 stale해집니다).
 
-## 2단계 — Universe 재구축 (~15분, `--full` 시에만)
+## 2단계 — universe 재구축 (`--full` 시에만, ~5분)
 
-`--full`이 아니면 이 단계 **건너뜁니다**. 기존 `data/universe.json` 그대로 사용.
+`--full`이 아니면 **건너뜁니다**. 기존 `data/universe.json`을 그대로 씁니다.
 
-`--full` 호출 시 순차 실행 (각 명령 끝나야 다음):
+순차 실행 (각 명령이 끝나야 다음):
 
 ```bash
-python scripts/fetch_universe.py
+python scripts/fetch_universe_api.py
 ```
 ```bash
-python scripts/validate_universe_quick.py
+python scripts/validate_universe_api.py
 ```
 ```bash
 python scripts/fetch_consensus.py
 ```
 
-시총 2,000억+ 보통주 마스터 → 5Y PER 검증 (적자분기 ≤ 4Q) → Naver Wisereport 컨센서스 (Forward + 목표가). 결과: `data/universe.json` 갱신. `fetch_universe.py`의 기본값이 2,000억이므로 인자 없이 실행한다 (`--min-cap`으로 변경 가능).
+시총 2,000억+ 보통주(KRX 공식 API) → 5Y 실적 검증(KIS 분기 EPS, 적자분기 ≤ 4Q) → 네이버 컨센서스(Forward PER·목표주가). 결과 ~300종목.
 
-## 3단계 — PER/PBR 매트릭스 갱신 (~3분)
+`validate_universe_api.py`는 KIS 캐시를 읽으므로 **3단계보다 먼저 돌면 캐시가 비어 실패**할 수 있습니다. 최초 실행이거나 캐시가 없으면 3단계를 먼저 돌리고 2단계로 돌아오세요.
+
+## 3단계 — PER/PBR 매트릭스 (~3분, 최초 ~20분)
 
 ```bash
-python scripts/fetch_matrix.py
+python scripts/fetch_matrix_kis.py --months 60 --daily --all --replace
 ```
 
-universe 전체 종목의 월별 PER/PBR 60개월 매트릭스 → `data/matrix/per_monthly.json`, `data/matrix/pbr_monthly.json`. 종목 검색 페이지의 PER/PBR 차트가 이 데이터로 그려짐.
+KRX 공식 API 일별 종가 → 월평균(최신 달만 최신 종가) + KIS 분기 EPS/BPS로 **TTM** PER/PBR 산출. 수정주가 보정 포함. 결과: `data/matrix/{per,pbr}_monthly.json`.
 
-## 4단계 — Top 10 점수 추출 (~30초)
+- `--daily` 최초 1회는 1,300거래일 수집으로 ~15분. 이후 캐시 증분이라 수십 초.
+- `--all` 전 종목(검색 페이지 fallback). universe만 필요하면 생략 가능.
+- `--replace` 정식 경로에 기록. 빼면 `*_ttm.json`으로 나갑니다.
+- 캐시는 `data/.cache/` (gitignore, API 토큰 포함 — **절대 커밋 금지**).
 
-먼저 `universe.json`의 close 필드를 직전 거래일 종가로 갱신합니다. `--full` 모드가 아닐 때 universe.json은 변경되지 않지만, 그 안의 close 필드는 `apply_triple_cross.py`가 사용하므로 stale되면 Top 10의 가격·upside가 옛 값이 됩니다. 가벼운 시장 일괄 호출(2회)로 30초 안에 갱신.
+## 4단계 — Top 20 점수 (~30초)
 
 ```bash
-python scripts/refresh_universe_prices.py
 python scripts/apply_triple_cross.py
 ```
 
-4팩터 (s1_per / s1_pbr / s3_per / upside) Z-Score 정규화 → 그룹 합산 → 가중 합산 (Value 60% + Growth 40%) → Top 10. 결과: `data/screens/triple_cross.json`.
+4팩터(s1_per·s1_pbr·s3_per·upside) Z-Score → 그룹 합산 → 가중합(Value 60 + Growth 40) → 상위 `TOP_N`(현재 20). 결과: `data/screens/triple_cross.json`.
 
-## 5단계 — Top 10 일별 풀 페치 (~3분)
+## 5단계 — Top 20 일별 풀 + 재무 (~2분)
 
 ```bash
-python scripts/fetch_batch.py --from-screen triple_cross --top-n 10
+python scripts/fetch_batch_api.py --top-n 20
 ```
-
-상세페이지에 PER/PBR 차트뿐 아니라 시가총액·주가까지 보여주기 위해 Top 10 종목만 일별 풀 데이터 페치. 결과: `data/stocks/{code}.json` 10개 + `data/stocks/_index.json`.
-
-## 5.5단계 — Top 10 재무 추이 페치 (DART, ~30초)
-
 ```bash
 python scripts/fetch_financials.py
 ```
 
-OpenDART 공식 API로 Top 10 종목의 매출·영업이익·순이익 5~6년 추이 + 마진을 페치. "싼 게 정당한가(이익 무너지는 중 = 구조적 함정)/일시적인가(이익 멀쩡 = 기회)"의 **데이터 근거**가 되어 6단계 AI 정성·ranker Value Trap 판별을 뒷받침한다. 결과: `data/financials/{code}.json` 10개 + `data/financials/_index.json` (+ 최초 1회 `_dart_corpmap.json` 캐시 생성). `.env`의 `DART_API_KEY` 필요.
+앞 단계 캐시를 재사용하므로 KRX 신규 호출이 없습니다(네이버 컨센서스만 종목당 1회). 재무는 OpenDART.
 
-> **universe 전체 재무**: 매 갱신엔 Top 10만 페치한다. 검색→상세에서 어떤 종목이든 재무 추이를 보이려면 `python scripts/fetch_financials.py --universe`를 **가끔**(fetch_universe처럼 주1회 정도) 따로 실행한다 (303종목, ~10분). 상세페이지의 재무 섹션은 Top 10이 아니어도 `data/financials/{code}.json`만 있으면 표시된다.
+> **universe 전체 재무**: `python scripts/fetch_financials.py --universe`를 가끔(주 1회) 따로 실행해야 검색→상세에서 Top 20 밖 종목도 재무 추이 섹션이 보입니다.
 
-## 6단계 — AI 정성 분석 (~2분, `--skip-ai` 시 건너뜀)
+## 6단계 — AI 정성 분석 (`--skip-ai` 시 건너뜀, ~10분)
 
-`--skip-ai` 호출 시 이 단계 **건너뜁니다**.
+Agent 도구로 직접 호출합니다.
 
-이 단계는 bash가 아니라 **Agent 도구로 직접 호출**합니다. 다음 절차:
+### 6-1. 컨텍스트 추출
 
-### 6-1. Top 10 컨텍스트 추출
-
-`data/screens/triple_cross.json` 읽고 `top` 배열에서 10개 종목 컨텍스트 구성. 각 종목에서 다음 필드만 추출:
+`data/screens/triple_cross.json`의 `top` 배열에서 종목별로 다음을 뽑아 `data/screens/_top20_context.json`에 저장:
 
 ```json
-{
-  "name": "...", "code": "...", "rank": N, "tier": "...",
-  "valuation": { "current_per": ..., "avg_5y_per": ..., "current_pbr": ..., "avg_5y_pbr": ..., "forward_per": ..., "fwd_year": "...", "avg_target_price": ..., "broker_count": ... },
-  "factors": { "s1_per_raw": ..., "s1_per_z": ..., "s1_pbr_raw": ..., "s1_pbr_z": ..., "s3_per_raw": ..., "s3_per_z": ..., "upside_raw": ..., "upside_z": ... },
-  "scores": { "value_score": ..., "growth_score": ..., "total_score": ... }
-}
+{"name","code","rank","tier","market_cap_억",
+ "valuation":{"current_price","current_per","avg_5y_per","current_pbr","avg_5y_pbr","forward_per","fwd_year","avg_target_price","broker_count"},
+ "factors":{"s1_per_raw","s1_per_z","s1_pbr_raw","s1_pbr_z","s3_per_raw","s3_per_z","upside_raw","upside_z"},
+ "scores":{"value_score","growth_score","total_score"}}
 ```
 
-### 6-2. Agent 도구로 10개 병렬 발사
+### 6-2. 종목별 Agent 병렬 발사
 
-**한 메시지에 10개 Agent tool call**을 동시에 보냅니다 (subagent_type=`general-purpose`). 각 종목 prompt 템플릿:
+**한 메시지에 최대 10개씩**, `subagent_type=general-purpose`. 프롬프트:
 
 ```
-Triple Cross Top 10 종목의 ai_notes JSON을 정성 위주로 작성합니다.
+Triple Cross Top 20 중 **{종목명}({코드})** 의 ai_notes JSON을 작성합니다.
 
-먼저 다음 3개 .claude/agents/ 정의 파일을 Read로 정독하고 룰을 그대로 따르세요:
-- C:/Users/hsh/Desktop/vibecoding/dacon-skills-dashboard/.claude/agents/fundamental-analyst.md
-- C:/Users/hsh/Desktop/vibecoding/dacon-skills-dashboard/.claude/agents/risk-analyst.md
-- C:/Users/hsh/Desktop/vibecoding/dacon-skills-dashboard/.claude/agents/synthesizer.md
+룰 파일 3개를 Read로 정독하고 그대로 따르세요:
+- .claude/agents/fundamental-analyst.md
+- .claude/agents/risk-analyst.md
+- .claude/agents/synthesizer.md
 
-WebSearch 3-5회로 종목의 최근 분기 ~ 6개월 이내 모멘텀(컴백·신작·신제품·M&A·정책·실적·가이던스)과 리스크(가이던스 하향·실행 지연·소송·경쟁)를 다각도 조사하세요.
+데이터:
+- 정량: data/screens/_top20_context.json 의 code="{코드}"
+- 재무(DART): data/financials/{코드}.json
 
-종목 컨텍스트:
-{종목 JSON 인라인}
+**undervaluation_cause.text 규격: 180~260자(2~3문장), 상한 320자.**
+(1) 시장이 싸게 보는 직접 원인 (2) 재무 궤적이 뒷받침/반박하는지 (3) 해소 조건.
+영업이익률·매출 추세 숫자 필수 인용.
 
-규칙:
-- investment_points 4-5개 (정성 3-4 + 정량 종합 시그널 0-1, 정량 마지막)
-- risks 3-4개 (정성 2-3 + 정량 0-1, 정량 마지막)
-- 정성 항목 모두 [출처: WebSearch · YYYY-MM] 또는 확인 필요 태그
-- 정량 항목 [정량] 태그
-- WebSearch 결과만 인용, 일반 추측 금지
-- 퀀트 리서치 리포트체
+PER/PBR은 TTM(최근 4개 분기) 기준입니다. WebSearch 3-5회로 최근 분기~6개월
+모멘텀·리스크를 조사하세요.
 
-출력: 마지막 메시지에 ```json ... ``` 코드 블록 하나, synthesizer.md 출력 스키마 (code + ai_notes 객체). 코드 블록 외 텍스트 금지.
+규칙: investment_points 4-5개 · risks 3-4개 · 정성 항목 전부
+`[출처: WebSearch · YYYY-MM]` 또는 `확인 필요` 태그 · 정량 `[정량]` ·
+퀀트 리포트체 · 이모지 금지.
+
+출력: ```json ... ``` 코드 블록 하나만 (code + ai_notes). 코드 블록 외 텍스트 금지.
 ```
 
-### 6-3. 결과 합쳐서 저장
+종목별 특이사항(5년 평균 PER이 비정상적으로 높음, Forward PER > 현재 PER, 상장 이력 짧음 등)은 프롬프트에 명시해 에이전트가 검증하도록 하세요.
 
-10개 에이전트 결과에서 각각 JSON 코드 블록 파싱 → 단일 객체로 병합:
+### 6-3. 병합 후 ranker 재순위
 
-```json
-{
-  "meta": {
-    "generated_at": "<현재 ISO8601>",
-    "model": "claude-sonnet-4-6",
-    "rule_files": [".claude/agents/fundamental-analyst.md", ".claude/agents/risk-analyst.md", ".claude/agents/synthesizer.md"],
-    "stocks_analyzed": 10,
-    "note": "정성 위주 분석 (투자포인트 4-5개 + 리스크 3-4개). 모든 정성 항목 WebSearch 출처 태그 필수. 정량 점수에는 영향 없음."
-  },
-  "items": [
-    { "code": "...", "ai_notes": { ... } },
-    ...
-  ]
-}
-```
+결과를 `data/screens/ai_notes.json`에 병합(`{meta, items:[{code, name, quant_rank, ai_notes}]}`)한 뒤, `ranker` 룰로 Agent 1개를 돌려 `ai_rank`/`rerank_reason`을 산출하고 items를 `ai_rank` 순으로 정렬합니다.
 
-`Write` 도구로 `data/screens/ai_notes.json`에 저장.
+ranker 프롬프트에 반드시 포함할 것:
+- `.claude/agents/ranker.md` 정독
+- 입력: `ai_notes.json` · `_top20_context.json` · `data/financials/{code}.json`
+- **nature(§4.3)를 1차 축으로 쓰되 그룹 내부 순서와 경계는 촉매 임박도(§4.1)·피크 어닝스(§4.2.1)·절대 밸류(§4.5)가 결정하도록** 지시. 과거 실행에서 ai_rank가 nature와 100% 일치해 §4.3이 다른 룰을 압도한 적이 있습니다.
+- 새 사실 생성 금지, 4팩터 점수 변경 금지
 
-## 7단계 — 데이터 검증 (sanity check)
+## 7단계 — 검증
 
 ```bash
 python scripts/verify_data.py
 ```
 
-페치된 데이터의 누락·stale 비율을 자동 체크. 임계값 초과 시 exit 1로 종료해서 후속 commit/push가 자동 차단됩니다. 시장 지수 fresh, universe.close 무효 비율, 매트릭스 coverage, Top 10 current_price, ai_notes 항목 수를 점검.
+임계값 위반 시 exit 1로 후속 commit/push가 차단됩니다.
 
 ## 8단계 — 완료 보고
 
-다음 항목을 사용자에게 마크다운 표로 보고:
+마크다운 표로 보고: 시장 지수 · universe(수) · 매트릭스(종목수) · Top 20 1위 · 일별 풀 · 재무 · AI 분석 · 검증 결과.
 
-| 단계 | 결과 |
-|---|---|
-| 시장 지수 (KOSPI/KOSDAQ/S&P 500) | 갱신 ✓ |
-| Universe (`--full` 시) | 갱신 ✓ 또는 건너뜀 |
-| 매트릭스 PER/PBR | N개 종목, 60개월 |
-| Top 10 점수 | 1위 {name}({code}) Z={total} |
-| Top 10 일별 풀 데이터 | 10/10 |
-| AI 정성 분석 | 갱신 ✓ 또는 건너뜀 |
-
-브라우저 캐시는 자동 무효화됩니다 (사이트가 fetch 시 `?t=Date.now()`로 강제 새로고침). 사용자는 페이지 새로고침만 하면 새 데이터 표시.
+브라우저 캐시는 사이트가 `?t=Date.now()`로 버스팅하므로 새로고침만 하면 반영됩니다.
 
 ## 실패 처리
 
-- 어떤 단계라도 실패하면 즉시 사용자에게 알리고 멈춥니다 (다음 단계가 이전 단계 데이터에 의존하므로)
-- KRX 인증 실패 (KRX_ID/KRX_PW 미설정) → `.env` 확인 안내
-- WebSearch 결과 부족 → 그 종목은 정성 항목 적게 반환 (룰에 명시됨)
-- Naver 차단 → fetch_consensus.py가 ThreadPool 3 + sleep으로 회피하지만, 추가 차단 시 `time.sleep(60)` 후 재시도
+- 단계 실패 시 즉시 보고하고 멈춥니다(후속 단계가 앞 결과에 의존).
+- 단, **1단계 `fetch_kr.py` 실패는 예외** — 지수만 stale해지므로 보고 후 계속 진행.
+- KRX 공식 API 실패 → `.env`의 `KRX_API_KEY` 확인.
+- KIS 토큰 403 → 토큰 재발급은 분당 제한이 있습니다. `data/.cache/_kis_token_real.json`이 24h 캐시되므로 잠시 후 재시도.
+- DART `ConnectionReset` → 과호출 신호. 순차·저속으로만 재시도하세요.
+- 네이버 차단 → `fetch_consensus.py`가 ThreadPool 3 + sleep으로 회피하지만, 추가 차단 시 60초 대기 후 재시도.
 
-## 시간 비용 요약
+## 시간 요약
 
-| 모드 | 단계 | 예상 시간 |
+| 모드 | 단계 | 예상 |
 |---|---|---|
-| 기본 | 1·3·4·5·6 | ~12-13분 (4단계에 refresh_universe_prices 30초 추가) |
-| `--full` | 1·2·3·4·5·6 | ~30분 (2단계에 가격 갱신 포함되므로 4단계의 refresh 생략 가능) |
-| `--skip-ai` | 1·3·4·5 | ~10-11분 |
+| 기본 | 1·3·4·5·6·7 | ~15분 |
+| `--full` | 전체 | ~25분 |
+| `--skip-ai` | 1·3·4·5·7 | ~8분 |

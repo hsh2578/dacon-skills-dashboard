@@ -62,7 +62,7 @@ pykrx(data.krx.co.kr 스크래핑)로 KRX IP가 1일 차단된 뒤 공식 경로
 
 1. **Universe 필터**: 시총 2,000억+ 보통주 (우선주·리츠·스팩 제외) · 5Y PER 검증 (적자분기 ≤ 4Q) · Forward PER + 컨센 목표가 보유
 
-> **시총 컷 이력**: 2026-05 제출 당시엔 **3,000억**(→303종목)이었고, 2026-08-13 **2,000억으로 변경**했다. 2026년 6월 급등·8월 급락으로 3,000억 통과 종목이 816→672로 18% 줄면서 모집단이 과하게 축소된 게 이유다. `scripts/fetch_universe.py`의 기본값은 원래부터 `MIN_MARKET_CAP_억 = 2000`이었고 4월 실행 때만 `--min-cap 3000`을 수동으로 넘겼던 것이라, 이제 코드·문서·명령이 모두 2,000억으로 일치한다.
+> **시총 컷 이력**: 2026-05 제출 당시엔 **3,000억**(→303종목)이었고, 2026-08-13 **2,000억으로 변경**했다. 2026년 6월 급등·8월 급락으로 3,000억 통과 종목이 816→672로 18% 줄면서 모집단이 과하게 축소된 게 이유다. 옛 `fetch_universe.py`의 기본값도 원래부터 `MIN_MARKET_CAP_억 = 2000`이었고 4월 실행 때만 `--min-cap 3000`을 수동으로 넘겼던 것이라, 이제 코드(`fetch_universe_api.py`)·문서·명령이 모두 2,000억으로 일치한다.
 > **제출 원본인 `docs/기획서_초안.md`/`.pdf`는 3,000억 그대로 보존**한다(심사받은 기록). `skills/` 룰북은 재사용 가능한 산출물이므로 2,000억으로 갱신됨.
 2. **4팩터 raw**:
    - `s1_per` = (avg_5y_per − cur)/avg_5y_per (Value)
@@ -145,9 +145,14 @@ python scripts/verify_data.py                      # 페치 결과 sanity 검증
 #   --replace     정식 경로(per_monthly.json)에 기록. 생략하면 *_ttm.json
 #   --krx-workers 일별 수집 동시성 (기본 4). 순차 대비 4배.
 
-# 폐기 (pykrx 의존 — KRX 차단 유발. 참고용으로만 남김)
-#   fetch_universe.py / validate_universe_quick.py / fetch_matrix.py
-#   fetch_batch.py / refresh_universe_prices.py
+# 삭제됨 (pykrx 의존 — 2026-08-13 KRX IP 차단 유발. 되살리지 말 것)
+#   fetch_universe.py → fetch_universe_api.py
+#   validate_universe_quick.py → validate_universe_api.py
+#   fetch_matrix.py → fetch_matrix_kis.py
+#   fetch_batch.py → fetch_batch_api.py
+#   refresh_universe_prices.py → fetch_universe_api.py가 종가까지 갱신
+#   fetch_stock_kr.py → fetch_batch_api.py
+# 이력은 커밋 히스토리에 남아 있다 (git log -- scripts/fetch_matrix.py).
 
 # 사이트 로컬 서버 (정적 호스팅 시뮬레이션)
 python -m http.server 8770

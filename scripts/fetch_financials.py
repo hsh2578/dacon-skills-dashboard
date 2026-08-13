@@ -203,16 +203,29 @@ def fetch_annual_series(key: str, corp_code: str, this_year: int):
 
 
 def fetch_latest_quarter(key: str, corp_code: str, this_year: int):
-    """최근 분기 보고서 1건(누적 기준) 스냅샷. best-effort."""
+    """최근 분기 보고서 1건(누적 기준) 스냅샷. best-effort.
+
+    손익계산서 금액 필드가 두 개다:
+      thstrm_amount      당기 **3개월** (해당 분기 단독)
+      thstrm_add_amount  당기 **누적** (기초부터)
+    1Q는 둘이 같지만 반기·3Q부터 갈린다. 이전 구현은 thstrm_amount(단독)를
+    쓰면서 라벨만 "(누적)"으로 붙여, 반기보고서 종목의 매출이 연간의 0.28배로
+    나왔다(정상 누적이면 ~0.5). 2026-08-13 실측에서 5종목이 이 상태였다.
+    누적을 우선 쓰고 없을 때만 단독으로 폴백한다.
+    """
+    def _cum(rows, ids, names):
+        v = _pick(rows, ids, names, "thstrm_add_amount")
+        return v if v is not None else _pick(rows, ids, names, "thstrm_amount")
+
     for year in (this_year, this_year - 1):
         for reprt_code, label in REPRT_QUARTERS:
             rows, fs = fetch_report(key, corp_code, year, reprt_code)
             time.sleep(0.15)
             if not rows:
                 continue
-            rev = _pick(rows, REVENUE_IDS, REVENUE_NAMES, "thstrm_amount")
-            op = _pick(rows, OP_INCOME_IDS, OP_INCOME_NAMES, "thstrm_amount")
-            net = _pick(rows, NET_INCOME_IDS, NET_INCOME_NAMES, "thstrm_amount")
+            rev = _cum(rows, REVENUE_IDS, REVENUE_NAMES)
+            op = _cum(rows, OP_INCOME_IDS, OP_INCOME_NAMES)
+            net = _cum(rows, NET_INCOME_IDS, NET_INCOME_NAMES)
             if rev is None and op is None and net is None:
                 continue
             return {

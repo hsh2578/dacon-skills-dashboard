@@ -2,7 +2,7 @@
   "code": "009900",
   "corp_code": "00173078",
   "source": "OpenDART",
-  "fetched_at": "2026-08-13T23:24:31",
+  "fetched_at": "2026-08-13T23:55:18",
   "unit": "원",
   "annual": [
     {
@@ -62,11 +62,11 @@
   ],
   "latest_quarter": {
     "period": "2026-반기(누적)",
-    "revenue": 497054350040,
-    "op_income": 44136149517,
-    "op_margin": 0.0888,
-    "net_income": 30217492177,
-    "net_margin": 0.0608,
+    "revenue": 909103936040,
+    "op_income": 64742982396,
+    "op_margin": 0.0712,
+    "net_income": 52548248907,
+    "net_margin": 0.0578,
     "fs_div": "CFS"
   }
 }

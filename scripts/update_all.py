@@ -1,18 +1,19 @@
-"""4개 지수 + 종목 데이터 일괄 갱신.
+"""시장 지수(KOSPI·KOSDAQ·S&P 500)만 갱신하는 최소 러너.
 
 기본: 증분 갱신 (KR 일별 데이터). 미국 월별은 항상 풀 fetch.
---full: 모든 데이터 풀 재수집.
---with-stocks: data/stocks/*.json 에 있는 모든 종목도 함께 갱신.
+--full: 풀 재수집.
+
+종목 단위 갱신(`--with-stocks`)은 제거됐다 — pykrx 기반 `fetch_stock_kr.py`가
+2026-08-13 KRX IP 차단으로 폐기됐기 때문. Top N 일별 풀 데이터는
+`scripts/fetch_batch_api.py --top-n 20`이 담당한다.
+전체 파이프라인은 `/update-data` 슬래시 커맨드를 쓸 것.
 """
 import argparse
-import json
 import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-PROJECT = ROOT.parent
-STOCKS_DIR = PROJECT / "data" / "stocks"
 
 
 def run(args: list) -> bool:
@@ -25,21 +26,10 @@ def run(args: list) -> bool:
     return True
 
 
-def list_stock_codes() -> list:
-    if not STOCKS_DIR.exists():
-        return []
-    codes = []
-    for p in STOCKS_DIR.glob("*.json"):
-        codes.append(p.stem)
-    return sorted(codes)
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--full", action="store_true",
                     help="증분 무시하고 풀 재수집")
-    ap.add_argument("--with-stocks", action="store_true",
-                    help="data/stocks/*.json 의 모든 종목도 함께 갱신")
     args = ap.parse_args()
 
     extra = ["--full"] if args.full else []
@@ -47,16 +37,6 @@ def main():
     ok = True
     ok &= run([str(ROOT / "fetch_kr.py"), *extra])
     ok &= run([str(ROOT / "fetch_us.py")])
-
-    if args.with_stocks:
-        codes = list_stock_codes()
-        if not codes:
-            print("\n[stocks] data/stocks/ 비어있음. 건너뜀.")
-        else:
-            print(f"\n[stocks] {len(codes)}개 종목 갱신: {', '.join(codes)}")
-            for code in codes:
-                ok &= run([str(ROOT / "fetch_stock_kr.py"), code, *extra])
-                ok &= run([str(ROOT / "render_stock.py"), code])
 
     print("\n" + ("=" * 40))
     print("DONE" if ok else "PARTIAL FAIL", flush=True)

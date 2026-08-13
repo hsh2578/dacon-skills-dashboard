@@ -8,9 +8,12 @@ exit code 1로 종료해서 후속 commit/push가 자동으로 멈추도록 한�
 1. 시장 지수 (kospi/kosdaq/sp500) — 마지막 날짜가 N일 이내, non-null 비율 ≥ 80%
 2. universe.json — close 0/None 비율 ≤ 5%, price_reference_date가 N일 이내
 3. matrix/{per,pbr}_monthly.json — 마지막 거래일에 non-null 종목 ≥ 70%
-4. screens/triple_cross.json — top 10 모두 current_price > 0
-5. screens/ai_notes.json — items 길이 ≥ 8 (Top 10에 가까운지)
-6. financials/{code}.json — Top 10 중 ≥ 80%가 annual ≥ 3개년 (DART 재무)
+4. screens/triple_cross.json — top 전 종목 current_price > 0
+5. screens/ai_notes.json — items가 top 목록의 ≥ 80%를 덮는지 + 코드가 실제로 일치하는지
+6. financials/{code}.json — top 중 ≥ 80%가 annual ≥ 3개년 (DART 재무)
+
+Top N 개수는 apply_triple_cross.py의 TOP_N을 그대로 따라간다 — 여기에 숫자를
+하드코딩하지 않고 triple_cross.json의 top 길이를 기준으로 삼는다.
 """
 import json
 import os
@@ -79,7 +82,8 @@ def check_universe(errors: list, warnings: list):
     ratio = bad_close / len(passed)
     if ratio > 0.05:
         errors.append(
-            f"universe.passed.close: 무효(0/None) 비율 {ratio:.1%} ({bad_close}/{len(passed)}) — refresh_universe_prices.py 실행 필요"
+            f"universe.passed.close: 무효(0/None) 비율 {ratio:.1%} ({bad_close}/{len(passed)}) "
+            f"— fetch_universe_api.py 재실행 필요"
         )
     ref = d.get("meta", {}).get("price_reference_date")
     if ref:
@@ -118,6 +122,7 @@ def check_matrix(errors: list, warnings: list):
 
 def check_screens(errors: list, warnings: list):
     tc = load_json(DATA / "screens" / "triple_cross.json")
+    top = []
     if not tc:
         errors.append("screens/triple_cross.json: 미존재")
     else:
@@ -125,19 +130,28 @@ def check_screens(errors: list, warnings: list):
         bad = [t for t in top if not t.get("current_price") or t["current_price"] <= 0]
         if bad:
             names = ", ".join(t.get("name", t.get("code", "?")) for t in bad)
-            errors.append(f"top 10에 current_price 무효 종목: {names}")
+            errors.append(f"top {len(top)}에 current_price 무효 종목: {names}")
 
     ai = load_json(DATA / "screens" / "ai_notes.json")
     if ai:
         items = ai.get("items") or []
-        if len(items) < 8:
-            warnings.append(f"ai_notes.items: {len(items)}개 (Top 10에 비해 부족)")
+        n_top = len(top)
+        if n_top and len(items) < n_top * 0.8:
+            warnings.append(f"ai_notes.items: {len(items)}개 (Top {n_top} 대비 부족)")
+        # AI 분석이 이전 Top N에 대한 것이면 화면 카드가 조용히 stale해진다.
+        top_codes = {t.get("code") for t in top}
+        stale = [i.get("code") for i in items if i.get("code") not in top_codes]
+        if stale:
+            errors.append(
+                f"ai_notes: 현재 Top {n_top}에 없는 종목 {len(stale)}개 포함 "
+                f"({', '.join(stale[:5])}) — AI 분석이 이전 스크리닝 기준. 6단계 재실행 필요"
+            )
     else:
         warnings.append("ai_notes.json: 미존재 (--skip-ai 모드라면 정상)")
 
 
 def check_financials(errors: list, warnings: list):
-    """DART 재무: Top 10 중 ≥ 80%가 annual ≥ 3개년이어야 함 (적자·금융사 자연 결측 허용)."""
+    """DART 재무: Top N 중 ≥ 80%가 annual ≥ 3개년이어야 함 (적자·금융사 자연 결측 허용)."""
     tc = load_json(DATA / "screens" / "triple_cross.json")
     if not tc:
         return  # triple_cross 자체 오류는 check_screens가 처리
@@ -157,7 +171,7 @@ def check_financials(errors: list, warnings: list):
     ratio = ok / len(top)
     if ratio < 0.80:
         errors.append(
-            f"financials: Top 10 중 {ok}/{len(top)}만 재무 보유 (< 80%) — 누락: {', '.join(missing)}"
+            f"financials: Top {len(top)} 중 {ok}개만 재무 보유 (< 80%) — 누락: {', '.join(missing)}"
         )
     elif missing:
         warnings.append(f"financials: 일부 종목 재무 부족/누락 — {', '.join(missing)}")
