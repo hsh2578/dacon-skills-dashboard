@@ -116,7 +116,7 @@ universe(303종목) 정량 시그널을 통과한 종목에 대해 다음 두 �
     }
   ],
   "undervaluation_cause": {
-    "text": "왜 시장이 이 종목을 싸게 보는가 — 한 줄 (60자 이내) [출처: WebSearch · YYYY-MM]",
+    "text": "왜 시장이 이 종목을 싸게 보는가 — 2~3문장 (180~260자) [출처: WebSearch · YYYY-MM]",
     "nature": "TEMPORARY | STRUCTURAL"
   },
   "evidence_strength": "STRONG | MODERATE | WEAK"

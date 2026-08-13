@@ -106,7 +106,22 @@ def main():
             (ex_short if valid else ex_nodata).append(s)
             continue
         adverse = sum(1 for v in valid if v <= 0)
-        rec = {**s, "valid_quarters": len(valid), "adverse_quarters": adverse}
+
+        # 직전 확정 결산 EPS.
+        # s3_per(Growth)의 기준을 맞추기 위해 필요하다. 네이버 forward_per는
+        # "직전 결산 PER → 추정 PER" 이라는 같은 잣대 안의 값인데, 우리 current_per는
+        # TTM이라 그대로 빼면 기준이 섞인다(대주전자재료: CB 파생평가손으로 TTM 순이익이
+        # 눌려 s3가 +0.348로 나왔으나 실제는 −0.238, 부호 반전).
+        # apply_triple_cross가 close/annual_eps로 "직전 결산 PER"을 복원해 쓴다.
+        annual_eps = None
+        for st in sorted((k for k in series if str(k).endswith("12")), reverse=True):
+            v = _amt((series.get(st) or {}).get("eps"))
+            if v:
+                annual_eps = v
+                break
+
+        rec = {**s, "valid_quarters": len(valid), "adverse_quarters": adverse,
+               "annual_eps": annual_eps}
         if adverse > args.max_adverse:
             ex_adverse.append(rec)
         else:

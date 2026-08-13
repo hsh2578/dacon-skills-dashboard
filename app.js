@@ -232,9 +232,15 @@ async function loadTripleCross() {
 
           <div class="card-per-row">
             <div><div class="lbl">PER</div><div class="val">${fmtPer(c.current_per)}</div></div>
-            <div><div class="lbl">5Y</div><div class="val">${fmtPer(c.avg_5y_per)}</div></div>
-            <div><div class="lbl">Fwd</div><div class="val fwd">${fmtPer(c.forward_per)}</div></div>
-            <div><div class="lbl">Up</div><div class="val fwd">${fmtPct(c.upside_raw)}</div></div>
+            <div><div class="lbl">5Y PER</div><div class="val muted">${fmtPer(c.avg_5y_per)}</div></div>
+            <div><div class="lbl">PBR</div><div class="val">${fmtPer(c.cur_pbr)}</div></div>
+            <div><div class="lbl">5Y PBR</div><div class="val muted">${fmtPer(c.avg_5y_pbr)}</div></div>
+          </div>
+
+          <div class="card-fwd-row">
+            <div><div class="lbl">Fwd PER</div><div class="val fwd">${fmtPer(c.forward_per)}</div></div>
+            <div><div class="lbl">컨센 목표가</div><div class="val">${fmtPrice(c.avg_target)}</div></div>
+            <div><div class="lbl">상승여력</div><div class="val fwd">${fmtPct(c.upside_raw)}</div></div>
           </div>
 
           <div class="card-group-row">

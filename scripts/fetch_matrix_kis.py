@@ -210,23 +210,35 @@ def fetch_closes_daily(months: int, refresh: bool, workers: int = KRX_WORKERS):
             record(res)
     DAILY_PATH.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
 
-    # 월평균 집계
+    # 월평균 집계.
+    # 단, **가장 최근 달은 평균이 아니라 최신 거래일 종가**를 쓴다.
+    # 5년 평균에는 월평균이 옳지만(특정일 노이즈 제거), "현재 PER"에는 틀리다.
+    # 카드가 '현재가 = 최신 종가'와 'PER = 월평균 기반'을 나란히 보여주면
+    # 사용자가 현재가÷EPS로 검산할 때 맞지 않는다(2026-08-13 실측: 괴리 중앙 2.6%,
+    # 오킨스전자 18.3%). 과거는 집계, 현재는 실시간 — 실무 표준과도 같다.
     by_month = {}
     for ds, c in raw.items():
         if not c:
             continue
         by_month.setdefault(ds[:6], []).append((ds, c))
     out, dates = {}, []
-    for ym in sorted(by_month)[-months:]:
+    months_sorted = sorted(by_month)[-months:]
+    latest_ym = months_sorted[-1] if months_sorted else None
+    for ym in months_sorted:
         days = by_month[ym]
         last_ds = max(d for d, _ in days)
-        acc, cnt = {}, {}
-        for _, c in days:
-            for code, px in c.items():
-                acc[code] = acc.get(code, 0.0) + px
-                cnt[code] = cnt.get(code, 0) + 1
-        out[last_ds] = {code: acc[code] / cnt[code] for code in acc}
+        if ym == latest_ym:
+            out[last_ds] = dict(dict(days)[last_ds])   # 최신 달 = 최신 거래일 종가
+        else:
+            acc, cnt = {}, {}
+            for _, c in days:
+                for code, px in c.items():
+                    acc[code] = acc.get(code, 0.0) + px
+                    cnt[code] = cnt.get(code, 0) + 1
+            out[last_ds] = {code: acc[code] / cnt[code] for code in acc}
         dates.append(last_ds)
+    if latest_ym:
+        print(f"  최신 달({latest_ym})은 월평균 대신 최신 거래일 종가 사용", flush=True)
     print(f"  → {len(dates)}개월 (월평균, 거래일 중앙 "
           f"{sorted(len(v) for v in by_month.values())[len(by_month)//2]}일)")
     return out, sorted(dates)

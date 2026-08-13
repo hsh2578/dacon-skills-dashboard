@@ -110,10 +110,21 @@ def main():
         target = s.get("avg_target_price")
         close = s.get("close")
 
+        # s3_per 의 기준선 — 직전 확정 결산 PER.
+        #
+        # forward_per(네이버)는 "직전 결산 실적 → 추정 실적" 이라는 같은 잣대 안의 값이다.
+        # 반면 cur_per 는 우리가 만든 TTM 기준이라, 둘을 그대로 빼면 사과-오렌지가 된다.
+        # 실측(2026-08-13): s3_per 절대 차이 중앙 0.127·최대 0.586, 대주전자재료는
+        # CB 파생평가손으로 TTM 순이익이 눌려 s3 가 +0.348(개선)로 나왔으나
+        # 네이버 잣대로는 -0.238(악화) — 부호가 뒤집혔다.
+        # 따라서 Growth 축은 네이버 내부 정합성을 쓰고, TTM 은 Value 축에서만 쓴다.
+        annual_eps = s.get("annual_eps")
+        base_per = (close / annual_eps) if (close and annual_eps and annual_eps > 0) else None
+
         # 시그널 raw
         s1_per = (avg_per - cur_per) / avg_per if avg_per and cur_per else np.nan
         s1_pbr = (avg_pbr - cur_pbr) / avg_pbr if avg_pbr and cur_pbr else np.nan
-        s3_per = (cur_per - fwd_per) / cur_per if cur_per and fwd_per else np.nan
+        s3_per = (base_per - fwd_per) / base_per if base_per and fwd_per else np.nan
         upside = (target - close) / close if target and close else np.nan
 
         rows.append({
@@ -127,6 +138,8 @@ def main():
             "avg_5y_pbr": avg_pbr,
             "cur_pbr": cur_pbr,
             "fwd_per": fwd_per,
+            "base_per": base_per,          # s3_per 기준선 (직전 결산 PER)
+            "annual_eps": annual_eps,
             "fwd_year": s.get("fwd_year"),
             "avg_target": target,
             "broker_count": s.get("broker_count"),

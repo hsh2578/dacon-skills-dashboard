@@ -49,7 +49,7 @@ model: sonnet
 - 여유 상한(110자)을 넘는 항목만, 핵심·출처 태그를 보존하며 압축
 - **출처 태그(`[출처: ...]`, `확인 필요`, `[정량]`)는 절대 제거하지 말 것**
 
-### undervaluation_cause (왜 저평가인지 — 카드 한 줄 부가표기 / 권장 50자, 여유 상한 75자)
+### undervaluation_cause (왜 저평가인지 — 카드 본문 / 권장 180~260자, 여유 상한 320자)
 - `fundamental.undervaluation_cause`를 그대로 전달. `text`와 `nature`(TEMPORARY/STRUCTURAL) 모두 보존.
 - 출처 태그 보존. 여유 상한 초과 시에만 원인 핵심구만 남기고 압축 (nature는 절대 변경 금지).
 - `fundamental.undervaluation_cause`가 없으면 risks 중 가장 구조적/시장인식 성격 항목 1개를 출처 태그째 인용해 `text`로 쓰고, 그 성격에 따라 `nature` 부여 (새 사실 생성 금지).
@@ -117,7 +117,7 @@ model: sonnet
 |---|---|---|
 | one_liner | 40자 | 48자 |
 | investment_point / risk (개별) | 60~90자 | 110자 |
-| undervaluation_cause.text | 50자 | 75자 |
+| undervaluation_cause.text | 180~260자 | 320자 |
 
 정보·출처 태그가 흐려질 정도면 권장을 넘겨도 둔다. 줄이기 위해 사실을 빼지 말 것.
 
