@@ -592,6 +592,109 @@ main {
 .screen-card.tier-weak,
 .screen-card.tier-miss { background: #fafafa; }
 
+/* ── 카드 헤드 재설계 (2026-08) ────────────────────────────────
+   기존: 전 종목 동일한 STRONG_BUY 배지가 가장 강한 시각 요소 = 정보량 0.
+   변경: 판정(일시적/구조적) + 순위 이동을 헤드에 올리고, 저평가 이유를
+         카드 표면으로 끌어올린다. 숫자 블록은 근거로 물러난다.        */
+
+/* 판정 배지 — 채운 알약 대신 점 + 텍스트로 낮춘다.
+   색이 카드 좌측 보더와 공명하므로 배지 자체는 조용해도 읽힌다. */
+.card-nat {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  padding: 3px 8px 3px 7px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+.card-nat::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.nat-temporary  .card-nat { color: #047857; background: #ecfdf5; border-color: #a7f3d0; }
+.nat-structural .card-nat { color: #b91c1c; background: #fef2f2; border-color: #fecaca; }
+.nat-unknown    .card-nat { color: var(--text-faint); background: var(--surface-soft); border-color: var(--border); }
+
+/* 좌측 보더로 판정을 카드 전체에 각인 — 스캔할 때 색만으로 구분된다 */
+.screen-card.nat-temporary  { border-left: 3px solid #10b981; }
+.screen-card.nat-structural { border-left: 3px solid #ef4444; }
+.screen-card.nat-unknown    { border-left: 3px solid var(--border-strong); }
+
+/* 정량 → AI 순위 이동. 2단계 랭킹 구조의 서사를 한 줄로 보여준다 */
+.card-move {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-soft);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.card-move.mv-up   { color: #b45309; background: #fffbeb; }
+.card-move.mv-down { color: #1261c4; background: #eff6ff; }
+
+/* 저평가 이유 — 이 대시보드의 결론. 항상 보이게 한다 */
+.card-uc {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-soft);
+}
+.card-uc-lbl {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+  margin-bottom: 4px;
+}
+.card-uc p {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 순위 위계 — 상위 3종목만 무게를 준다 */
+.screen-card.rk-top .card-rank { font-size: 20px; color: var(--text-strong); }
+.screen-card.rk-low { opacity: 0.92; }
+.screen-card.rk-low .card-name { font-size: 15px; }
+
+/* 숫자 블록은 근거로 물러난다 */
+.card-factor-grid, .card-per-row { opacity: 0.88; }
+.screen-card:hover .card-factor-grid,
+.screen-card:hover .card-per-row { opacity: 1; }
+
+/* 모바일 가로 오버플로 수정 (기존 결함).
+   .screen-meta의 nowrap과 .signal-legend의 비-wrap 플렉스가 390px 뷰포트에서
+   432px로 삐져나가 페이지 전체가 가로 스크롤됐다. */
+@media (max-width: 768px) {
+  .screen-meta {
+    white-space: normal;
+    line-height: 1.5;
+    max-width: 100%;
+  }
+  .signal-legend {
+    flex-wrap: wrap;
+    max-width: 100%;
+  }
+  /* 카드 헤드가 좁은 폭에서 겹치지 않도록 */
+  .card-rank-row { flex-wrap: wrap; row-gap: 6px; }
+  .card-nat { margin-left: auto; }
+}
+
 .card-name { font-size: 16px; font-weight: 800; color: #1c1f24; letter-spacing: -0.01em; }
 .quality-badge {
   display: inline-block;

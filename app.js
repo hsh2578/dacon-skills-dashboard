@@ -188,15 +188,40 @@ async function loadTripleCross() {
       const ai = aiMap[c.code];
       const aiBlock = ai ? renderAiBlock(c.code, ai) : '';
 
+      // ── 카드 헤드 ──────────────────────────────────────────────
+      // 옛 구조는 티어 배지(전 종목 STRONG_BUY = 정보량 0)가 가장 강한 시각 요소였고,
+      // 정작 이 시스템의 결론인 "왜 싼가 / 회복하는가"는 AI 블록 안에 접혀 있었다.
+      // 결론을 카드 표면으로 끌어올리고 티어 배지는 걷어낸다.
+      const rk = aiRankMap[c.code] || {};
+      const nature = (ai?.undervaluation_cause?.nature || '').toUpperCase();
+      const natCls = nature === 'STRUCTURAL' ? 'nat-structural'
+        : nature === 'TEMPORARY' ? 'nat-temporary' : 'nat-unknown';
+      const natTxt = nature === 'STRUCTURAL' ? '구조적'
+        : nature === 'TEMPORARY' ? '일시적' : '판정 없음';
+
+      // 정량 후보 순위 → AI 재순위 이동. 이 대비가 2단계 랭킹 구조의 핵심 서사다.
+      const move = (rk.quant_rank != null && rk.ai_rank != null)
+        ? rk.quant_rank - rk.ai_rank : null;
+      const moveCls = move == null ? '' : move > 0 ? 'mv-up' : move < 0 ? 'mv-down' : 'mv-flat';
+      const moveTxt = move == null ? ''
+        : move === 0 ? '정량과 동일'
+        : `정량 ${rk.quant_rank}위 ${move > 0 ? '▲' : '▼'} ${Math.abs(move)}`;
+
+      const ucText = ai?.undervaluation_cause?.text || '';
+      const rankTier = i < 3 ? 'rk-top' : i < 10 ? 'rk-mid' : 'rk-low';
+
       return `
-        <a class="screen-card ${tierClass}" href="stock.html?code=${c.code}">
+        <a class="screen-card ${tierClass} ${natCls} ${rankTier}" href="stock.html?code=${c.code}">
           <div class="card-rank-row">
             <span class="card-rank">#${i + 1}</span>
-            <span class="card-tier">${tierTxt}</span>
+            ${move != null ? `<span class="card-move ${moveCls}">${moveTxt}</span>` : ''}
+            <span class="card-nat">${natTxt}</span>
           </div>
           <div class="card-name">${c.name}</div>
           <div class="card-code">${c.code} · ${c.market || 'KR'}</div>
           <div class="card-price">${fmtPrice(c.current_price)}</div>
+
+          ${ucText ? `<div class="card-uc"><span class="card-uc-lbl">왜 저평가인가</span><p>${ucText}</p></div>` : ''}
 
           <div class="card-factor-grid">
             ${factor('PER↓', c.s1_per_z)}
@@ -357,7 +382,9 @@ function renderSearchResults(query) {
                     WATCH: 'Watch', WEAK: 'Weak', MISS: 'Miss' };
 
   resultsEl.innerHTML = view.map(s => {
-    const tierBadge = s.tier
+    // tier는 전 종목 STRONG_BUY로 통일 운영이라 배지가 정보를 담지 못한다
+    // (#N 순위와 Z 점수가 이미 위치를 말해준다). 예외 상태일 때만 노출한다.
+    const tierBadge = (s.tier && s.tier !== 'STRONG_BUY')
       ? `<span class="srch-tier-badge tier-${s.tier.toLowerCase()}">${tierLbl[s.tier] || s.tier}</span>`
       : '';
     const rankBadge = s.rank ? `#${s.rank}` : '';
