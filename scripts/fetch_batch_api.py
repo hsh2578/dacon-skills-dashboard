@@ -72,6 +72,54 @@ def load_caches():
     return daily, shares_by_ym, ratios
 
 
+def _has_values(d) -> bool:
+    """딕셔너리에 실제 값이 하나라도 있는가. 전부 None이면 '못 받은 것'이다."""
+    return bool(d) and any(v is not None for v in d.values())
+
+
+def merge_consensus(code, naver):
+    """네이버가 비어서 돌아오면 **직전 파일의 값을 지킨다**.
+
+    네이버는 스로틀되면 요약표에 "최근3개월 이내에 제시된 의견이 없습니다"를
+    돌려준다. 이걸 그대로 쓰면 멀쩡하던 목표주가·Forward PER이 전부 null로
+    덮인다. 실제로 2026-08-14 실행에서 20종목 중 18종목이 이렇게 날아갔다.
+    캐시 폴백·유니버스 붕괴와 같은 부류의 조용한 열화다.
+
+    반환: (forward, consensus, carried_from) — carried_from은 승계했을 때만 값.
+    """
+    fresh_fwd = naver.get("forward") or {}
+    fresh_cons = naver.get("consensus") or {}
+    fresh_summary = fresh_cons.get("summary") or {}
+
+    prev_path = DATA_DIR / f"{code}.json"
+    prev = {}
+    if prev_path.exists():
+        try:
+            prev = json.loads(prev_path.read_text(encoding="utf-8"))
+        except Exception:
+            prev = {}
+
+    forward = fresh_fwd if _has_values(fresh_fwd) else (prev.get("forward") or {})
+    fwd_carried = not _has_values(fresh_fwd) and _has_values(forward)
+
+    prev_cons = prev.get("consensus") or {}
+    prev_summary = prev_cons.get("summary") or {}
+    if _has_values(fresh_summary):
+        consensus = fresh_cons
+        cons_carried = False
+    elif _has_values(prev_summary):
+        # 요약만 승계하고 애널리스트 목록은 이번 값을 쓴다 — 목록은 정상 파싱됐다.
+        consensus = {"summary": prev_summary,
+                     "brokers": fresh_cons.get("brokers") or prev_cons.get("brokers") or []}
+        cons_carried = True
+    else:
+        consensus = fresh_cons or {"summary": {}, "brokers": []}
+        cons_carried = False
+
+    carried_from = prev.get("updated_at") if (fwd_carried or cons_carried) else None
+    return forward, consensus, carried_from
+
+
 def build_one(code, name, daily, shares_by_ym, ratios):
     dates = sorted(d for d in daily if daily[d].get(code))
     if not dates:
@@ -104,7 +152,9 @@ def build_one(code, name, daily, shares_by_ym, ratios):
         print(f"      [WARN] 컨센서스 실패: {str(e)[:80]}", file=sys.stderr)
         naver = {}
 
-    return {
+    forward, consensus, stale = merge_consensus(code, naver)
+
+    rec = {
         "name": name,
         "ticker": code,
         "market": "KR",
@@ -118,10 +168,14 @@ def build_one(code, name, daily, shares_by_ym, ratios):
         "market_cap_unit": "억원",
         "price_unit": "원",
         "per_basis": "TTM (종가/최근4분기 EPS, 수정주가 기준)",
-        "forward": naver.get("forward", {}),
-        "consensus": naver.get("consensus", {"summary": {}, "brokers": []}),
+        "forward": forward,
+        "consensus": consensus,
         "updated_at": datetime.now().isoformat(timespec="seconds"),
     }
+    if stale:
+        rec["consensus_carried"] = True
+        rec["consensus_carried_from"] = stale
+    return rec
 
 
 def regenerate_manifest():
