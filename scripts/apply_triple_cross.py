@@ -28,6 +28,12 @@ from scipy.stats import zscore
 
 PROJECT = Path(__file__).resolve().parent.parent
 UNIVERSE = PROJECT / "data" / "universe.json"
+
+# 정량 후보 수. 이 숫자만큼 AI 정성 분석·재순위(ranker)가 돌아간다.
+# 2026-08-13 10 → 20으로 확대 (ranker가 고를 수 있는 폭을 넓힘).
+# 바꾸면 fetch_batch_api / fetch_financials / AI 분석 대상이 함께 따라온다
+# (셋 다 triple_cross.json의 top 배열을 읽는다).
+TOP_N = 20
 PER_MATRIX = PROJECT / "data" / "matrix" / "per_monthly.json"
 PBR_MATRIX = PROJECT / "data" / "matrix" / "pbr_monthly.json"
 SCREENS_DIR = PROJECT / "data" / "screens"
@@ -250,7 +256,7 @@ def main():
             "excluded_count": 0,  # universe 단계에서 모두 처리됨
             "updated_at": datetime.now().isoformat(timespec="seconds"),
         },
-        "top": out_records[:10],
+        "top": out_records[:TOP_N],
         "all_ranked": out_records,
         "avoid": [],
     }
@@ -260,7 +266,7 @@ def main():
     print(f"\n  === Top 10 ===")
     print(f"  {'#':<3} {'종목':<14} {'CurPER':>7} {'5YPER':>7} {'FwdPER':>7} "
           f"{'CurPBR':>7} {'5YPBR':>7} {'Up%':>6} {'Total':>7}")
-    for r in out_records[:10]:
+    for r in out_records[:TOP_N]:
         up_pct = (r["upside_raw"] * 100) if r["upside_raw"] is not None else 0
         print(f"  {r['rank']:<3} {r['name']:<14} {r['tier']:<11} "
               f"{(r['current_per'] or 0):>7.2f} {(r['avg_5y_per'] or 0):>7.2f} {(r['forward_per'] or 0):>7.2f} "

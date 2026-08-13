@@ -1,4 +1,4 @@
-# CLAUDE.md
+﻿# CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -15,23 +15,55 @@ DACON 월간 해커톤 "투자 데이터를 시각화하라 — Skills 기반 �
 
 ```
 [로컬 Python] → data/*.json commit → GitHub Pages → [정적 사이트]
-   ├─ scripts/fetch_*.py             시장 지수·universe·매트릭스·컨센서스
-   ├─ scripts/fetch_financials.py    OpenDART 재무(매출·영업이익·순이익 5~6년) — 저평가 진단 데이터 근거
-   ├─ scripts/apply_triple_cross.py  4팩터 Z-Score → Top 10 후보 (정량, 재현 가능)
+   ├─ scripts/fetch_universe_api.py  universe 1단계 (KRX 공식 API, 시총·보통주 필터)
+   ├─ scripts/validate_universe_api.py  2단계 5Y 실적 검증 (KIS 분기 EPS)
+   ├─ scripts/fetch_consensus.py     3단계 컨센서스 (Naver Wisereport)
+   ├─ scripts/fetch_matrix_kis.py    PER/PBR 매트릭스 (KRX 종가 + KIS EPS/BPS, TTM)
+   ├─ scripts/fetch_batch_api.py     Top 20 일별 풀 (캐시 재사용, 새 호출 거의 없음)
+   ├─ scripts/fetch_financials.py    OpenDART 재무(매출·영업이익·순이익 5~6년) — 저평가 진단 근거
+   ├─ scripts/apply_triple_cross.py  4팩터 Z-Score → Top 20 후보 (정량, 재현 가능) · TOP_N 상수
    └─ Agent tool (.claude/agents/)   정성 분석 + ranker 재순위 (재무 교차검증) → ai_notes.json
 ```
 
-**2단계 랭킹 구조 (핵심)**: 4팩터 정량 점수는 Top 10 *후보*를 객관·재현 가능하게 선별한다. 화면에 보이는 순위(`ai_rank`, #1~#10)는 그 위에서 `ranker` 에이전트가 **"저평가 해소 가능성"** 으로 재배열한 것이다. `quant_rank`(정량 순위)는 후보 자격, `ai_rank`(AI 순위)는 회복 가능성을 의미하며 둘 다 `ai_notes.json`에 commit되어 정적 재현된다.
+### 데이터 출처 (2026-08-13 전면 전환)
+
+pykrx(data.krx.co.kr 스크래핑)로 KRX IP가 1일 차단된 뒤 공식 경로로 옮겼다.
+자세한 사고 경위는 아래 "Data Fetch 트러블슈팅 메모" 참조.
+
+| 데이터 | 출처 | 키 |
+|---|---|---|
+| 종가·시가총액·상장주식수 | **KRX 공식 OpenAPI** (`data-dbg.krx.co.kr`) | `KRX_API_KEY` |
+| EPS·BPS (분기 30행 ≈ 7년) | **KIS 재무비율** `FHKST66430300` | `KIS_REAL_APP_KEY` (실전 조회 전용) |
+| Forward PER·목표주가 | Naver Wisereport | 없음 |
+| 상세 재무 (매출·영업이익) | OpenDART | `DART_API_KEY` |
+| KOSPI/KOSDAQ 지수 PER/PBR | **아직 pykrx** — 유일하게 남은 의존 | `KRX_ID`/`KRX_PW` |
+
+- KRX 공식 OpenAPI는 **PER/PBR을 주지 않는다**(시세·시총·상장주식수만). 그래서 KIS EPS/BPS로 역산한다.
+- 검증: 기준일 20260424에 universe 1단계를 돌려 **816종목**이 나와 pykrx 기록과 정확히 일치했고,
+  종목별 시총 비율도 1.000이었다. 즉 시세·시총은 pykrx와 완전 동일하다.
+- **캐시는 `data/.cache/`** (gitignore). 일별 종가 원본(~60MB)·주식수·KIS 응답·API 토큰이 들어간다.
+  토큰이 들어가므로 **절대 커밋 금지** — `.gitignore`에 `data/.cache/`와 `*_token.json` 등록됨.
+- 일별 종가는 **원주가로 저장**한다. 수정주가는 "현재 시점 기준"이라 새 분할이 생기면 과거 값이
+  전부 바뀌지만, 원주가는 불변이라 한 번 받으면 재수집이 필요 없다. 보정은 사용 시점에 적용한다.
+
+**2단계 랭킹 구조 (핵심)**: 4팩터 정량 점수는 **Top 20** *후보*를 객관·재현 가능하게 선별한다. 화면에 보이는 순위(`ai_rank`, #1~#20)는 그 위에서 `ranker` 에이전트가 **"저평가 해소 가능성"** 으로 재배열한 것이다. `quant_rank`(정량 순위)는 후보 자격, `ai_rank`(AI 순위)는 회복 가능성을 의미하며 둘 다 `ai_notes.json`에 commit되어 정적 재현된다.
+
+후보 수는 `apply_triple_cross.py`의 **`TOP_N`** 한 곳에서 정한다(2026-08-13 10 → 20). 바꾸면 `fetch_batch_api.py`·`fetch_financials.py`·AI 분석 대상이 함께 따라온다 — 셋 다 `triple_cross.json`의 `top` 배열을 읽기 때문이다. `index.html`의 표기(Top 20 / #1~#20)도 같이 고칠 것.
+
+> **2026-08-13 실행 관찰**: ranker가 매긴 `ai_rank`가 `undervaluation_cause.nature`와 거의 완전히 일치했다 — TEMPORARY 10종목이 1~10위, STRUCTURAL 10종목이 11~20위(예외 0건). §4.3이 §4.1 촉매·§4.2 실적강도·§4.5 절대밸류를 사실상 압도한 셈이라, **그룹 내부 순서의 근거는 상대적으로 약하다.** 또 verdict 20개 중 12개가 "관망 권고"로 매수 의견이 하나도 없었다. 룰 변경 전 반드시 재확인할 관찰 사항.
 
 3-Section 단일 정적 사이트:
-- `index.html` — Section 1 시장 지수 (KOSPI/KOSDAQ/S&P 500) · Section 2 PER · PBR + Forward Top 10 · Section 3 종목 검색
-- `stock.html?code={code}` — 종목 상세 (시그널 카드 + AI 분석[숏 논거↔반박 듀얼 · Watch 모니터링] + 재무 추이(DART, `#fin-section`) + PER/PBR 차트). AI 분석은 Top 10만, 재무 추이는 universe 전체 표시
+- `index.html` — Section 1 시장 지수 (KOSPI/KOSDAQ/S&P 500) · Section 2 PER · PBR + Forward Top 20 · Section 3 종목 검색
+- `stock.html?code={code}` — 종목 상세 (시그널 카드 + AI 분석[숏 논거↔반박 듀얼 · Watch 모니터링] + 재무 추이(DART, `#fin-section`) + PER/PBR 차트). AI 분석은 Top 20만, 재무 추이는 universe 전체 표시
 - `app.js` / `stock.js` — 페이지별 렌더링, Plotly 차트
 - 한국 시장은 일별 데이터, S&P 500은 월별 (multpl PER/PBR + FRED 종가·yfinance 폴백)
 
 ### 4팩터 알고리즘 (`scripts/apply_triple_cross.py`)
 
-1. **Universe 필터**: 시총 3,000억+ 보통주 (우선주·리츠·스팩 제외) · 5Y PER 검증 (적자분기 ≤ 4Q) · Forward PER + 컨센 목표가 보유 → **303종목**
+1. **Universe 필터**: 시총 2,000억+ 보통주 (우선주·리츠·스팩 제외) · 5Y PER 검증 (적자분기 ≤ 4Q) · Forward PER + 컨센 목표가 보유
+
+> **시총 컷 이력**: 2026-05 제출 당시엔 **3,000억**(→303종목)이었고, 2026-08-13 **2,000억으로 변경**했다. 2026년 6월 급등·8월 급락으로 3,000억 통과 종목이 816→672로 18% 줄면서 모집단이 과하게 축소된 게 이유다. `scripts/fetch_universe.py`의 기본값은 원래부터 `MIN_MARKET_CAP_억 = 2000`이었고 4월 실행 때만 `--min-cap 3000`을 수동으로 넘겼던 것이라, 이제 코드·문서·명령이 모두 2,000억으로 일치한다.
+> **제출 원본인 `docs/기획서_초안.md`/`.pdf`는 3,000억 그대로 보존**한다(심사받은 기록). `skills/` 룰북은 재사용 가능한 산출물이므로 2,000억으로 갱신됨.
 2. **4팩터 raw**:
    - `s1_per` = (avg_5y_per − cur)/avg_5y_per (Value)
    - `s1_pbr` = 같은 패턴 PBR (Value)
@@ -39,8 +71,8 @@ DACON 월간 해커톤 "투자 데이터를 시각화하라 — Skills 기반 �
    - `upside` = (target − cur)/cur (Growth)
 3. Rank → Z-Score 정규화 (universe 내, `multi_factor.py` 패턴)
 4. 그룹 합산 → 재 Z-Score (Value · Growth)
-5. 가중 합산: **`total = Value × 0.60 + Growth × 0.40`** → 상위 10 = **후보** (정량 `quant_rank`)
-6. `ranker` 에이전트가 10 후보를 "저평가 해소 가능성"으로 재순위 → 화면 순위 `ai_rank`
+5. 가중 합산: **`total = Value × 0.60 + Growth × 0.40`** → 상위 20 = **후보** (정량 `quant_rank`)
+6. `ranker` 에이전트가 20 후보를 "저평가 해소 가능성"으로 재순위 → 화면 순위 `ai_rank`
 
 - **티어 통일**: `tier`는 전 종목 `STRONG_BUY` (NaN만 `MISS`). 옛 Z-score 세분(HIDDEN_GEM/BUY/WATCH)은 `ai_rank` 순위 축과 달라 혼란을 줘 **제거됨** — 변경 시 `apply_triple_cross.py`의 `tier =` 한 줄과 `triple_cross.json` 양쪽 갱신.
 - 이전 컨셉이었던 회복 모멘텀 (S2)·Value Trap hard rule·Winsorize는 **모두 제거됨** (정규화로 대체).
@@ -50,12 +82,12 @@ DACON 월간 해커톤 "투자 데이터를 시각화하라 — Skills 기반 �
 
 YAML frontmatter (name / description with "Use PROACTIVELY" / tools / model) + 시스템 프롬프트.
 
-파이프라인 순서: `fundamental-analyst` + `risk-analyst` → `synthesizer`(종목별 통합) → **`ranker`(10종목 종합 재순위)**.
+파이프라인 순서: `fundamental-analyst` + `risk-analyst` → `synthesizer`(종목별 통합) → **`ranker`(20종목 종합 재순위)**.
 
 - `fundamental-analyst.md` — 정성 모멘텀 (CATALYST_NEAR_TERM, THESIS_DRIVER, RECENT_EARNINGS) + **UNDERVALUATION_CAUSE** ("왜 저평가인가" + `nature`: TEMPORARY/STRUCTURAL, 필수 1개) — `tools: WebSearch, Read`
 - `risk-analyst.md` — 정성 리스크 (EXECUTION_RISK, SENTIMENT_RISK, COMPETITIVE_RISK, MACRO_EXPOSURE) — `tools: WebSearch, Read`
 - `synthesizer.md` — 두 결과 통합 → 종목별 `ai_notes` JSON (`undervaluation_cause` 포함)
-- `ranker.md` — 10종목을 "저평가 해소 가능성"으로 재순위 (`ai_rank`/`rerank_reason` 산출) — `tools: Read`, `model: sonnet`. 새 사실 생성 금지, 기존 출처 태그된 필드만 종합. 점수 룰 §4.1 촉매 4단계(+3.5/+2.5/+1/−2) · §4.2 실적 강도(+2.5/+1/+0.5/−1.5) · **§4.2.1 피크 어닝스 보정**(일회성 신작·수주發 이익이 risks에 선반영·차기작 공백으로 명시되면 +2.5→−1.0 — Forward PER 압축이 분모 착시인 경우 차단) · §4.3 `undervaluation_cause.nature`로 Value Trap 판별 + **`data/financials/` 영업이익률 추세 교차검증**(마진 추세 하락+매출 감소면 TEMPORARY라도 −1) · §4.4 단기 노이즈 보정 · §4.5 절대 밸류 페널티 · §4.7 동점은 `quant_rank` tiebreak. `data/financials/{code}.json`이 있으면 nature 판정이 실제 이익 궤적에 앵커됨.
+- `ranker.md` — 20종목(TOP_N)을 "저평가 해소 가능성"으로 재순위 (`ai_rank`/`rerank_reason` 산출) — `tools: Read`, `model: sonnet`. 새 사실 생성 금지, 기존 출처 태그된 필드만 종합. 점수 룰 §4.1 촉매 4단계(+3.5/+2.5/+1/−2) · §4.2 실적 강도(+2.5/+1/+0.5/−1.5) · **§4.2.1 피크 어닝스 보정**(일회성 신작·수주發 이익이 risks에 선반영·차기작 공백으로 명시되면 +2.5→−1.0 — Forward PER 압축이 분모 착시인 경우 차단) · §4.3 `undervaluation_cause.nature`로 Value Trap 판별 + **`data/financials/` 영업이익률 추세 교차검증**(마진 추세 하락+매출 감소면 TEMPORARY라도 −1) · §4.4 단기 노이즈 보정 · §4.5 절대 밸류 페널티 · §4.7 동점은 `quant_rank` tiebreak. `data/financials/{code}.json`이 있으면 nature 판정이 실제 이익 궤적에 앵커됨.
 
 모든 정성 항목 출처 태그 필수: `[출처: WebSearch · YYYY-MM]` / `확인 필요` / `[정량]`. 환각 방지 핵심.
 
@@ -93,18 +125,29 @@ UI 검증은 chrome devtools MCP의 `resize_page`로 데스크톱(1440)·모바�
 `.env`에 `KRX_ID` / `KRX_PW` 필요 (pykrx 인증, 로컬에만).
 
 ```bash
-# 개별 파이프라인 단계
-python scripts/fetch_kr.py                         # KOSPI/KOSDAQ 일별 (증분 갱신)
+# 개별 파이프라인 단계 (2026-08-13 이후 — *_api / *_kis 계열이 정식)
+python scripts/fetch_kr.py                         # KOSPI/KOSDAQ 지수 (아직 pykrx)
 python scripts/fetch_us.py                         # S&P 500 월별 (multpl PER/PBR + FRED 종가·yfinance 폴백)
-python scripts/fetch_universe.py                   # universe 마스터 (시총·필터)
-python scripts/validate_universe_quick.py          # 5Y PER 검증
-python scripts/fetch_consensus.py                  # Naver Wisereport 컨센서스
-python scripts/fetch_matrix.py                     # 매트릭스 PER/PBR (60개월)
-python scripts/refresh_universe_prices.py          # universe.json close 직전 거래일 종가로 갱신 (~30초)
-python scripts/apply_triple_cross.py               # 4팩터 → Top 10
-python scripts/fetch_batch.py --from-screen triple_cross --top-n 10  # Top 10 일별 풀
-python scripts/fetch_financials.py                 # Top 10 재무 추이 (OpenDART, 매출·영업이익·순이익 5~6년)
-python scripts/verify_data.py                      # 페치 결과 sanity 검증 (누락/stale 비율 체크)
+
+python scripts/fetch_universe_api.py               # universe 1단계 — 시총 2,000억+ 보통주 (KRX 공식 API)
+python scripts/fetch_matrix_kis.py --daily --all   # 매트릭스 — 일별 종가 수집 후 월평균, 전 종목
+python scripts/validate_universe_api.py            # 2단계 — 5Y 실적 검증 (KIS 분기 EPS)
+python scripts/fetch_consensus.py                  # 3단계 — Naver 컨센서스 (Forward PER·목표주가)
+python scripts/apply_triple_cross.py               # 4팩터 → Top 20 (TOP_N)
+python scripts/fetch_batch_api.py --top-n 20       # Top 20 일별 풀 (캐시 재사용)
+python scripts/fetch_financials.py                 # Top 20 재무 추이 (OpenDART)
+python scripts/verify_data.py                      # 페치 결과 sanity 검증
+
+# 매트릭스 옵션
+#   --daily       일별 종가를 받아 월평균으로 집계 (특정일 노이즈 제거). 최초 ~15분,
+#                 이후 캐시 증분이라 수십 초. 생략하면 매월 15일 1일 샘플.
+#   --all         universe 밖 종목까지 (검색 페이지 차트 fallback용, KIS ~2,200콜)
+#   --replace     정식 경로(per_monthly.json)에 기록. 생략하면 *_ttm.json
+#   --krx-workers 일별 수집 동시성 (기본 4). 순차 대비 4배.
+
+# 폐기 (pykrx 의존 — KRX 차단 유발. 참고용으로만 남김)
+#   fetch_universe.py / validate_universe_quick.py / fetch_matrix.py
+#   fetch_batch.py / refresh_universe_prices.py
 
 # 사이트 로컬 서버 (정적 호스팅 시뮬레이션)
 python -m http.server 8770
@@ -188,18 +231,18 @@ data/
 ├─ kospi.json kosdaq.json sp500.json     시장 지수 시계열 (Section 1)
 ├─ universe.json                          universe 통과/제외 + 컨센서스
 ├─ matrix/{per,pbr}_monthly.json          PER/PBR 60개월 매트릭스 (검색·종목 차트)
-├─ screens/triple_cross.json              4팩터 raw·Z·점수·Top 10 + all_ranked (tier 전부 STRONG_BUY)
-├─ screens/ai_notes.json                  AI 정성 + ranker 재순위 (Top 10)
-├─ stocks/{code}.json                     Top 10 일별 풀 데이터
-└─ financials/{code}.json                 재무 추이 (OpenDART, 매출·영업이익·순이익·마진 5~6년 + 최근분기) — Top 10 기본, --universe로 303종목
+├─ screens/triple_cross.json              4팩터 raw·Z·점수·Top 20 + all_ranked (tier 전부 STRONG_BUY)
+├─ screens/ai_notes.json                  AI 정성 + ranker 재순위 (Top 20)
+├─ stocks/{code}.json                     Top 20 일별 풀 데이터
+└─ financials/{code}.json                 재무 추이 (OpenDART, 매출·영업이익·순이익·마진 5~6년 + 최근분기) — Top 20 기본, --universe로 전체
 ```
 
 - `ai_notes.json` 각 item: `{code, quant_rank, ai_rank, rerank_reason, ai_notes:{one_liner, investment_points[], risks[], undervaluation_cause:{text,nature}, verdict, evidence_strength, risk_level, ...}}`. items는 `ai_rank` 순 정렬. `meta.ranking`에 basis·ranked_at·note.
 - 사이트는 `ai_rank` 순으로 카드 정렬. "왜 저평가인가" 블록(`.ai-uc`)이 nature별 색(일시적=초록 #059669 / 구조적=빨강 #dc2626, `:has()` 셀렉터)으로 표시 — app.js `renderAiBlock`, stock.js `loadAiNotes`, stock.html `#ai-detail-uc`.
 - `data/matrix/`는 universe 통과 후보 모든 종목용 fallback (검색 페이지에서 어떤 종목이든 PER/PBR 차트 표시)
-- `data/stocks/{code}.json`은 Top 10만 (일별 페치 비용 때문에 풀 데이터는 Top 10 한정)
+- `data/stocks/{code}.json`은 Top 20만 (일별 페치 비용 때문에 풀 데이터는 Top 20 한정)
 - `data/financials/{code}.json`은 OpenDART(`DART_API_KEY`) 공식 재무. `fnlttSinglAcntAll` + account_id 표준 태그(`ifrs-full_Revenue`/`dart_OperatingIncomeLoss`/`ifrs-full_ProfitLoss`)로 매칭, CFS(연결) 우선·OFS(별도) 폴백. 각 item: `{code, corp_code, source, annual:[{year,revenue,op_income,op_margin,net_income,net_margin,fs_div}], latest_quarter}`. `_dart_corpmap.json`은 code→corp_code 캐시 (corpCode.xml 1회 다운). 적자·금융사는 마진 자연 결측 허용.
-  - `/update-data`는 매번 **Top 10만** 페치. **universe 전체**(303종목)는 `python scripts/fetch_financials.py --universe`를 가끔(주1회 정도) 따로 실행 — 그래야 검색→상세에서 Top 10이 아닌 종목도 `stock.html`의 독립 **재무 추이 섹션**(`#fin-section`, `renderFinChart`)이 표시됨. 이 섹션은 `ai_notes` 없이 `data/financials/{code}.json`만 있으면 렌더된다 (Top 10은 AI 섹션 + 재무 섹션 둘 다).
+  - `/update-data`는 매번 **Top 20만** 페치. **universe 전체**(299종목)는 `python scripts/fetch_financials.py --universe`를 가끔(주1회 정도) 따로 실행 — 그래야 검색→상세에서 Top 20이 아닌 종목도 `stock.html`의 독립 **재무 추이 섹션**(`#fin-section`, `renderFinChart`)이 표시됨. 이 섹션은 `ai_notes` 없이 `data/financials/{code}.json`만 있으면 렌더된다 (Top 20은 AI 섹션 + 재무 섹션 둘 다).
 
 ## Data Fetch 트러블슈팅 메모
 
@@ -214,7 +257,22 @@ data/
 
 - **챗봇 형태 절대 금지** — 평가 25점(대시보드 자동 생성) 못 받음. 시각 대시보드만.
 - **API 키 사이트 노출 금지** — 정적 호스팅 원칙, 사전 페치 후 JSON만 commit.
-- **PER/PBR 정의**: TTM (Trailing Twelve Months, KRX/Naver 표준).
+- **PER/PBR 정의**: **TTM (최근 4개 분기 합산)**. 2026-08-13 전환.
+  ```
+  PER = 수정주가 / TTM EPS      TTM = 직전연간 − 전년동기누적 + 당해누적
+  PBR = 수정주가 / BPS          최근 공시 분기말
+  공시 시차: 분기 45일 · 사업보고서 90일 (look-ahead 방지)
+  ```
+  **KRX·네이버 표시값과 다르다 — 의도된 차이다.** 실측 결과 KRX PER/PBR은 TTM이
+  아니라 **직전 확정 결산 기준이고 연 1회(5월)만 갱신**된다(58개월 오차표에서 4월→5월에만
+  계단이 있고 8월·11월엔 없음). 그래서 실적이 급변한 기업은 KRX 값이 최대 17개월 뒤처진다.
+  전환 전 문서에 "TTM (KRX/Naver 표준)"이라고 적혀 있었으나 **실제 데이터는 연간 기준이었고
+  문서가 틀렸던 것**이다.
+  - 검증: IC 백테스트(58개월)에서 연간·TTM·정규화(CAPE) 3종을 비교했으나 테스트 구간이
+    10~16개월뿐이라 **판정 불가**였다(정규화만 명확히 열등해 탈락). TTM 채택은 성능 우위가
+    아니라 "최신 실적 반영"이라는 사용자 결정에 따른 것. 데이터가 쌓이면 재판정 가능.
+  - 부작용 주의: TTM은 **이익 급증 기업의 PER을 낮춰 보이게** 한다(피크 어닝스 착시).
+    `ranker` §4.2.1이 정성 단계에서 이를 걸러내는 역할을 계속 해야 한다.
 - **이름 컨벤션**: `data/screens/triple_cross.json` 같은 파일명은 옛 컨셉의 잔재 (UI 표시 이름은 "PER · PBR + Forward Top 10"). 데이터 호환성 위해 코드명은 유지.
 - **이모지 미사용**: UI 톤은 퀀트 리서치 리포트체. 검색 input 아이콘만 예외.
 - **Windows + Python 한글**: `os.environ.setdefault("PYTHONUTF8", "1")` + `sys.stdout.reconfigure(encoding="utf-8")` 필수.

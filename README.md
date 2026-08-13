@@ -29,7 +29,7 @@
 
 ```
 Universe 필터 (303종목)
-  ↓ 시총 3,000억+ 보통주 · 5Y PER 검증 · Forward PER + 컨센 보유
+  ↓ 시총 2,000억+ 보통주 · 5Y PER 검증 · Forward PER + 컨센 보유
 
 4팩터 raw 계산
   s1_per = (avg_5y_per − cur)/avg_5y_per           ┐ Value

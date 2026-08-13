@@ -47,7 +47,7 @@ python scripts/validate_universe_quick.py
 python scripts/fetch_consensus.py
 ```
 
-시총 3,000억+ 보통주 마스터 → 5Y PER 검증 (적자분기 ≤ 4Q) → Naver Wisereport 컨센서스 (Forward + 목표가). 결과: `data/universe.json` 갱신, 통과 종목 ~303개.
+시총 2,000억+ 보통주 마스터 → 5Y PER 검증 (적자분기 ≤ 4Q) → Naver Wisereport 컨센서스 (Forward + 목표가). 결과: `data/universe.json` 갱신. `fetch_universe.py`의 기본값이 2,000억이므로 인자 없이 실행한다 (`--min-cap`으로 변경 가능).
 
 ## 3단계 — PER/PBR 매트릭스 갱신 (~3분)
 

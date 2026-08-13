@@ -21,7 +21,7 @@
     </div>
     <nav class="header-nav">
       <a href="#section-index">시장 지수</a>
-      <a href="#section-screen">Top 10</a>
+      <a href="#section-screen">Top 20</a>
       <a href="#section-search">종목 검색</a>
     </nav>
   </div>
@@ -100,13 +100,13 @@
 </section>
 
 <!-- ============================================================ -->
-<!-- SECTION 2: Triple Cross Top 10                              -->
+<!-- SECTION 2: Triple Cross Top 20                              -->
 <!-- ============================================================ -->
 <section class="page-section section-screen" id="section-screen">
   <div class="section-tag">Section 2</div>
   <div class="section-divider">
-    <h2>PER · PBR 기반 가치투자 종목 추천 Top 10</h2>
-    <p class="section-sub">시총 3,000억+ 보통주 universe에서 4팩터(Value 60% + Growth 40%) Z-Score 정규화 → 상위 10종목</p>
+    <h2>PER · PBR 기반 가치투자 종목 추천 Top 20</h2>
+    <p class="section-sub">시총 2,000억+ 보통주 universe에서 4팩터(Value 60% + Growth 40%) Z-Score 정규화 → 상위 20종목 · PER/PBR은 TTM(최근 4개 분기) 기준</p>
   </div>
 
   <div class="algo-pipeline">
@@ -116,7 +116,7 @@
         <div class="step-num">1</div>
         <div class="step-body">
           <div class="step-title">Universe 필터</div>
-          <div class="step-desc">시총 3,000억+ 보통주 (우선주·리츠·스팩 제외) · 5Y PER 검증(적자분기 ≤ 4Q) · Forward PER + 컨센 목표가 보유 → <b>303종목</b></div>
+          <div class="step-desc">시총 2,000억+ 보통주 (우선주·리츠·스팩 제외) · 5Y 실적 검증(적자분기 ≤ 4Q) · Forward PER + 컨센 목표가 보유 → <b>299종목</b></div>
         </div>
       </li>
       <li>
@@ -133,7 +133,7 @@
         <div class="step-num">3</div>
         <div class="step-body">
           <div class="step-title">Rank → Z-Score 정규화</div>
-          <div class="step-desc">팩터별 오름차순 rank → Z-Score (universe 303개 내 정규화). 결측치는 skipna.</div>
+          <div class="step-desc">팩터별 오름차순 rank → Z-Score (universe 299개 내 정규화). 결측치는 skipna.</div>
         </div>
       </li>
       <li>
@@ -149,8 +149,8 @@
       <li>
         <div class="step-num">5</div>
         <div class="step-body">
-          <div class="step-title">가중 합산 → Top 10 후보</div>
-          <div class="step-desc"><b>total_score = Value × 0.60 + Growth × 0.40</b><br>상위 10종목을 정량 후보로 추출 (객관·재현 가능). 표시 순위는 6단계에서 결정</div>
+          <div class="step-title">가중 합산 → Top 20 후보</div>
+          <div class="step-desc"><b>total_score = Value × 0.60 + Growth × 0.40</b><br>상위 20종목을 정량 후보로 추출 (객관·재현 가능). 표시 순위는 6단계에서 결정</div>
         </div>
       </li>
       <li>
@@ -160,7 +160,7 @@
           <div class="step-desc">
             <code>.claude/agents/</code> 4종(fundamental-analyst · risk-analyst · synthesizer · ranker) ·
             WebSearch로 모멘텀·리스크·<b>저평가 원인(일시적/구조적)</b> 보강 (출처 태그 필수) →
-            <b>ranker</b>가 10종목을 <b>저평가 해소 가능성</b> 순으로 재배열해 표시 순위(#1~#10) 결정 ·
+            <b>ranker</b>가 20종목을 <b>저평가 해소 가능성</b> 순으로 재배열해 표시 순위(#1~#20) 결정 ·
             <b>4팩터 정량 점수(후보 선정)는 불변</b>
           </div>
         </div>

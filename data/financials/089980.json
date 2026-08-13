@@ -2,7 +2,7 @@
   "code": "089980",
   "corp_code": "00181299",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:46:53",
+  "fetched_at": "2026-08-13T22:13:21",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 48494081588,
-    "op_income": 1165237860,
-    "op_margin": 0.024,
-    "net_income": 718420965,
-    "net_margin": 0.0148,
+    "period": "2026-반기(누적)",
+    "revenue": 55832322734,
+    "op_income": 3579752208,
+    "op_margin": 0.0641,
+    "net_income": 4967601254,
+    "net_margin": 0.089,
     "fs_div": "CFS"
   }
 }

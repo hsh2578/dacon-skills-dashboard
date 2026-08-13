@@ -2,7 +2,7 @@
 name: value_recovery_quant
 version: 1.0.0
 type: main_rulebook
-description: 한국 주식 보통주 가치투자 종목 발굴 메인 룰북. 시가총액 3,000억 이상 universe에서 5년 평균 PER·PBR 저평가(Value)와 Forward PER 개선·컨센서스 상승여력(Growth)을 4팩터 Z-Score 가중합산으로 결합해 Top 10을 자동 추출합니다.
+description: 한국 주식 보통주 가치투자 종목 발굴 메인 룰북. 시가총액 2,000억 이상 universe에서 5년 평균 PER·PBR 저평가(Value)와 Forward PER 개선·컨센서스 상승여력(Growth)을 4팩터 Z-Score 가중합산으로 결합해 Top 10을 자동 추출합니다.
 output: data/screens/triple_cross.json
 implementation: scripts/apply_triple_cross.py
 ---
@@ -33,7 +33,7 @@ PER·PBR은 모두 TTM(Trailing Twelve Months) 기준입니다. KRX와 네이버
 
 | 필터 | 임계값 | 제외 사유 |
 |---|---|---|
-| 시가총액 | 3,000억 원 이상 | 유동성 부족과 이상치 방지, 소형주 노이즈 차단 |
+| 시가총액 | 2,000억 원 이상 | 유동성 부족과 이상치 방지, 소형주 노이즈 차단 |
 | 종목 형태 | 보통주 (우선주·리츠·스팩 제외) | PER 정의가 통일된 표본만 사용 |
 | 5년 PER 검증 | 적자 분기 4분기 이하 | 적자가 너무 많으면 5년 평균 PER이 의미를 잃음 |
 | Forward PER | 보유 필수 | 4팩터 중 하나의 입력 |

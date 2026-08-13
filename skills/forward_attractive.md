@@ -29,7 +29,7 @@ output: data/screens/forward_attractive.json
 
 | 필터 | 임계값 | 이유 |
 |---|---|---|
-| 시가총액 | 3,000억 원 이상 | 메인 룰북 universe와 통일 |
+| 시가총액 | 2,000억 원 이상 | 메인 룰북 universe와 통일 |
 | Forward PER | 보유 + 양수 | 적자 추정 종목 제외 |
 | Forward PER | 30 이하 | 절대 매력 임계 |
 | Current PER | 100 이하 | 극단치 제외 |

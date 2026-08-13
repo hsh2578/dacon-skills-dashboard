@@ -119,7 +119,7 @@ async function load() {
 
   // 데이터 정밀도 안내
   const sourceNote = dataset._source === 'monthly'
-    ? '월별 데이터 (60개월) — 일별 정밀 데이터는 Top 10 종목만 제공'
+    ? '월별 데이터 (60개월) — 일별 정밀 데이터는 Top 20 종목만 제공'
     : null;
   if (sourceNote) document.getElementById('note').innerHTML = sourceNote;
   else if (dataset.note) document.getElementById('note').textContent = dataset.note;
