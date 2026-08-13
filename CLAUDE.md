@@ -136,7 +136,11 @@ python scripts/fetch_consensus.py                  # 3단계 — Naver 컨센서
 python scripts/apply_triple_cross.py               # 4팩터 → Top 20 (TOP_N)
 python scripts/fetch_batch_api.py --top-n 20       # Top 20 일별 풀 (캐시 재사용)
 python scripts/fetch_financials.py                 # Top 20 재무 추이 (OpenDART)
-python scripts/verify_data.py                      # 페치 결과 sanity 검증
+
+# 검증 3종 — 보는 게 각각 다르다. 셋 다 돌릴 것.
+python scripts/verify_data.py                      # 산출물 신선도·커버리지
+python scripts/check_golden_matrix.py              # 매트릭스 과거 값 회귀 (골든 30종목)
+python -m pytest tests/ -q                         # TTM 판정 로직 (네트워크 불필요)
 
 # 매트릭스 옵션
 #   --daily       일별 종가를 받아 월평균으로 집계 (특정일 노이즈 제거). 최초 ~15분,
@@ -248,6 +252,30 @@ data/
 - `data/stocks/{code}.json`은 Top 20만 (일별 페치 비용 때문에 풀 데이터는 Top 20 한정)
 - `data/financials/{code}.json`은 OpenDART(`DART_API_KEY`) 공식 재무. `fnlttSinglAcntAll` + account_id 표준 태그(`ifrs-full_Revenue`/`dart_OperatingIncomeLoss`/`ifrs-full_ProfitLoss`)로 매칭, CFS(연결) 우선·OFS(별도) 폴백. 각 item: `{code, corp_code, source, annual:[{year,revenue,op_income,op_margin,net_income,net_margin,fs_div}], latest_quarter}`. `_dart_corpmap.json`은 code→corp_code 캐시 (corpCode.xml 1회 다운). 적자·금융사는 마진 자연 결측 허용.
   - `/update-data`는 매번 **Top 20만** 페치. **universe 전체**(299종목)는 `python scripts/fetch_financials.py --universe`를 가끔(주1회 정도) 따로 실행 — 그래야 검색→상세에서 Top 20이 아닌 종목도 `stock.html`의 독립 **재무 추이 섹션**(`#fin-section`, `renderFinChart`)이 표시됨. 이 섹션은 `ai_notes` 없이 `data/financials/{code}.json`만 있으면 렌더된다 (Top 20은 AI 섹션 + 재무 섹션 둘 다).
+
+## 검증 계층 (2026-08-14 추가)
+
+세 겹이고 각각 다른 걸 봅니다. 하나로 대체되지 않습니다.
+
+| 검사 | 보는 것 | 못 보는 것 |
+|---|---|---|
+| `verify_data.py` | 산출물 신선도·커버리지·Top N 정합 | **값의 정확성** — PBR이 154배여도 통과 |
+| `check_golden_matrix.py` | 동결 30종목의 **과거 값 불변성** | 신규 종목·최신 달 |
+| `pytest tests/` | TTM 판정 로직 (`scripts/ttm.py`) | 실제 API 응답 형태 변화 |
+
+- **`scripts/ttm.py`** — TTM 판정의 유일한 소유자. 순수 함수라 네트워크 없이 테스트됩니다.
+  불변식 3개(0=결측 · 연간 폴백 금지 · 공시 시차)가 전부 실제 사고 뒤에 추가된 것이라,
+  `fetch_matrix_kis.py`·`validate_universe_api.py`에 복제돼 있던 것을 한 곳으로 모았습니다.
+  **다시 복제하지 말 것** — 한쪽만 고치면 유니버스 기준과 매트릭스가 조용히 어긋납니다.
+- **골든 스냅샷** (`tests/golden/matrix.json`) — 과거 PER/PBR은 원칙적으로 불변입니다.
+  일별 종가를 **원주가로** 저장하고 수정주가 보정을 사용 시점에 적용하기 때문입니다.
+  따라서 과거 값 변동은 (a) 주식수 변동 (b) 실적 정정 (c) **회귀** 셋 중 하나이고,
+  (a)는 전 구간이 균일하게 움직여 자동 분류됩니다. 이관 때 나온 버그 7개를 냈던
+  종목(롯데렌탈·SK텔레콤·에코프로 등)이 `BUG_HISTORY`에 등록돼 있습니다.
+  의도한 변경이면 `--freeze`로 재동결. **정식 파일 덮어쓰기 전 `--suffix _ttm`으로 후보 검사 가능.**
+
+> pykrx를 삭제하면서 "손으로 대조할 정답"이 사라졌기 때문에 만든 계층입니다.
+> 이관 당시 버그 7개를 전부 pykrx 값과 대조해서 찾았다는 걸 기억할 것.
 
 ## Data Fetch 트러블슈팅 메모
 

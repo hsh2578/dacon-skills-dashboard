@@ -38,6 +38,10 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from ttm import (ANNUAL_LAG_DAYS, QUARTER_LAG_DAYS,  # noqa: E402
+                 amount, bps_at, disclosed_stac, ttm_eps)
+
 ROOT = Path(__file__).resolve().parent.parent
 MATRIX_DIR = ROOT / "data" / "matrix"
 CACHE_DIR = ROOT / "data" / ".cache"
@@ -89,20 +93,12 @@ CLOSE_PATH = CACHE_DIR / "_krx_close_monthly.json"
 DAILY_PATH = CACHE_DIR / "_krx_close_daily.json"
 SHRS_PATH = CACHE_DIR / "_krx_shares_monthly.json"
 
-QUARTER_LAG_DAYS = 45     # 분기보고서 법정 제출기한
-ANNUAL_LAG_DAYS = 90      # 사업보고서 법정 제출기한
+# 공시 시차(QUARTER_LAG_DAYS / ANNUAL_LAG_DAYS)와 TTM 판정은 ttm.py 소유.
 
 
 # ------------------------------------------------------------------ 공통
 
-def _amt(s):
-    s = str(s if s is not None else "").replace(",", "").strip()
-    if s in ("", "-"):
-        return None
-    try:
-        return float(s)
-    except ValueError:
-        return None
+_amt = amount   # KRX 응답의 숫자 문자열 파싱 (ttm.py와 동일 규칙)
 
 
 def _jget(url, headers, timeout=30, retry=3, backoff=0.8):
@@ -350,65 +346,6 @@ def fetch_ratios(codes, token, refresh: bool):
     return data
 
 
-# ------------------------------------------------------------- TTM 계산
-
-def available_from(stac: str) -> date:
-    """해당 결산 실적을 실제로 알 수 있게 되는 날짜 (법정 제출기한)."""
-    y, m = int(stac[:4]), int(stac[4:6])
-    if m == 12:
-        return date(y, 12, 31) + timedelta(days=ANNUAL_LAG_DAYS)
-    # 분기말 = 해당 월의 말일
-    nm_y, nm_m = (y + 1, 1) if m == 12 else (y, m + 1)
-    qend = date(nm_y, nm_m, 1) - timedelta(days=1)
-    return qend + timedelta(days=QUARTER_LAG_DAYS)
-
-
-def _ref(series: dict, stac: str):
-    """과거 참조값. KIS는 **데이터가 없는 기간을 0.0으로 채운다**(상장 전 등).
-
-    0을 유효값으로 받으면 TTM = 0 - 0 + 당해누적 = 당해누적 이 되어, TTM이 아닌
-    값이 조용히 TTM 자리에 들어간다(카카오뱅크·케이카에서 확인). 정확히 0이면
-    결측으로 본다 — 손익분기 0원인 진짜 사례는 사실상 없다.
-    """
-    v = _amt((series.get(stac) or {}).get("eps"))
-    return None if (v is None or v == 0) else v
-
-
-def ttm_eps(series: dict, stac: str):
-    """TTM EPS = 직전 연간 - 전년 동기 누적 + 당해 누적 (= 최근 4개 분기). Q4면 연간.
-
-    계산 불가면 None을 돌려준다. 연간 EPS로 폴백하지 않는다 — TTM 시계열에 연간
-    값이 섞이면 5년 평균이 두 기준의 혼합이 되어 팩터가 오염된다.
-    """
-    y, m = int(stac[:4]), int(stac[4:6])
-    cur = _amt((series.get(stac) or {}).get("eps"))
-    if cur is None:
-        return None
-    if m == 12:
-        return cur
-    prev_annual = _ref(series, f"{y-1}12")
-    prev_same = _ref(series, f"{y-1}{m:02d}")
-    if prev_annual is None or prev_same is None:
-        return None
-    return prev_annual - prev_same + cur
-
-
-def pick_stac(series: dict, ds: str):
-    """ds 시점에 공시되어 있는 가장 최근 결산기."""
-    d = date(int(ds[:4]), int(ds[4:6]), int(ds[6:8]))
-    best = None
-    for stac in series:
-        if len(str(stac)) != 6:
-            continue
-        try:
-            if available_from(stac) <= d:
-                if best is None or stac > best:
-                    best = stac
-        except Exception:
-            continue
-    return best
-
-
 def fetch_shares(dates, refresh: bool):
     """월별 상장주식수 {basDd: {code: 주식수}}. 자주 안 바뀌므로 월 1회면 충분."""
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -484,7 +421,7 @@ def build(closes, dates, ratios):
             series = ratios.get(code)
             if not series:
                 continue
-            stac = pick_stac(series, ds)
+            stac = disclosed_stac(series, ds)
             if not stac:
                 continue
             eps = ttm_eps(series, stac)
@@ -495,8 +432,8 @@ def build(closes, dates, ratios):
                 skipped_codes.add(code)
             else:
                 per.setdefault(code, {})[ds] = round(px / eps, 2) if eps > 0 else 0.0
-            bps = _amt((series.get(stac) or {}).get("bps"))
-            if bps and bps > 0:
+            bps = bps_at(series, stac)
+            if bps:
                 pbr.setdefault(code, {})[ds] = round(px / bps, 2)
     if skipped:
         print(f"  TTM 계산 불가 → 결측 처리: {skipped:,}건 / {len(skipped_codes)}종목 "

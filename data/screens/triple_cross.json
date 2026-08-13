@@ -18,7 +18,7 @@
     "triple_cross_pass": 21,
     "avoid_count": 0,
     "excluded_count": 0,
-    "updated_at": "2026-08-13T23:22:23"
+    "updated_at": "2026-08-14T00:12:07"
   },
   "top": [
     {
@@ -173,7 +173,7 @@
       "s1_pbr_z": 1.631,
       "s3_per_z": 0.752,
       "upside_z": 1.689,
-      "value_score": 1.376,
+      "value_score": 1.375,
       "growth_score": 1.671,
       "total_score": 1.494
     },
@@ -955,7 +955,7 @@
       "s1_pbr_z": 1.631,
       "s3_per_z": 0.752,
       "upside_z": 1.689,
-      "value_score": 1.376,
+      "value_score": 1.375,
       "growth_score": 1.671,
       "total_score": 1.494
     },
@@ -2985,7 +2985,7 @@
       "upside_z": -0.474,
       "value_score": 1.242,
       "growth_score": -0.167,
-      "total_score": 0.679
+      "total_score": 0.678
     },
     {
       "rank": 57,
@@ -3763,7 +3763,7 @@
       "s1_pbr_z": -0.532,
       "s3_per_z": 1.31,
       "upside_z": 0.925,
-      "value_score": -0.144,
+      "value_score": -0.143,
       "growth_score": 1.531,
       "total_score": 0.526
     },
@@ -6261,7 +6261,7 @@
       "upside_z": -0.428,
       "value_score": 0.855,
       "growth_score": -0.991,
-      "total_score": 0.117
+      "total_score": 0.116
     },
     {
       "rank": 141,
@@ -6844,7 +6844,7 @@
       "s1_pbr_z": 0.555,
       "s3_per_z": 1.407,
       "upside_z": -0.625,
-      "value_score": -0.252,
+      "value_score": -0.251,
       "growth_score": 0.536,
       "total_score": 0.064
     },
@@ -7390,7 +7390,7 @@
       "s1_pbr_z": 0.324,
       "s3_per_z": -0.874,
       "upside_z": -0.497,
-      "value_score": 0.49,
+      "value_score": 0.489,
       "growth_score": -0.939,
       "total_score": -0.082
     },
@@ -8181,8 +8181,8 @@
       "market": "KOSPI",
       "market_cap_억": 2997.2,
       "current_price": 8720,
-      "current_per": 37.59,
-      "avg_5y_per": 8.77,
+      "current_per": 27.77,
+      "avg_5y_per": 6.67,
       "forward_per": 15.37,
       "fwd_year": "2026/12",
       "min_6m_per": null,
@@ -8198,20 +8198,20 @@
       "avg_5y_pbr": 0.45,
       "avg_target": 13400,
       "broker_count": 4,
-      "score_s1": -3.286,
+      "score_s1": -3.1635,
       "score_s2": 0.5367,
       "score_s3": 0.2597,
-      "s1_per_raw": -3.286,
+      "s1_per_raw": -3.1635,
       "s1_pbr_raw": 0.2944,
       "s3_per_raw": 0.2597,
       "upside_raw": 0.5367,
-      "s1_per_z": -1.631,
+      "s1_per_z": -1.619,
       "s1_pbr_z": 0.902,
       "s3_per_z": -0.109,
       "upside_z": 0.289,
-      "value_score": -0.443,
+      "value_score": -0.436,
       "growth_score": 0.123,
-      "total_score": -0.216
+      "total_score": -0.212
     },
     {
       "rank": 191,
@@ -9652,7 +9652,7 @@
       "s1_pbr_z": -0.879,
       "s3_per_z": -1.031,
       "upside_z": 0.856,
-      "value_score": -0.905,
+      "value_score": -0.904,
       "growth_score": -0.12,
       "total_score": -0.591
     },
@@ -11212,7 +11212,7 @@
       "s1_pbr_z": -0.544,
       "s3_per_z": -0.728,
       "upside_z": -0.682,
-      "value_score": -0.948,
+      "value_score": -0.947,
       "growth_score": -0.966,
       "total_score": -0.955
     },
@@ -11446,7 +11446,7 @@
       "s1_pbr_z": -1.388,
       "s3_per_z": -1.626,
       "upside_z": 0.787,
-      "value_score": -1.313,
+      "value_score": -1.312,
       "growth_score": -0.575,
       "total_score": -1.017
     },
@@ -11485,7 +11485,7 @@
       "s1_pbr_z": -0.636,
       "s3_per_z": -1.201,
       "upside_z": -0.717,
-      "value_score": -0.842,
+      "value_score": -0.841,
       "growth_score": -1.314,
       "total_score": -1.03
     },
@@ -11838,7 +11838,7 @@
       "upside_z": -0.312,
       "value_score": -1.778,
       "growth_score": -0.214,
-      "total_score": -1.153
+      "total_score": -1.152
     },
     {
       "rank": 284,
@@ -12072,7 +12072,7 @@
       "upside_z": -0.173,
       "value_score": -1.595,
       "growth_score": -0.916,
-      "total_score": -1.324
+      "total_score": -1.323
     },
     {
       "rank": 290,
@@ -12339,13 +12339,13 @@
       "s1_pbr_raw": -1.9185,
       "s3_per_raw": null,
       "upside_raw": 0.2882,
-      "s1_per_z": -1.619,
+      "s1_per_z": -1.631,
       "s1_pbr_z": -1.631,
       "s3_per_z": null,
       "upside_z": -1.191,
-      "value_score": -1.975,
+      "value_score": -1.982,
       "growth_score": -0.816,
-      "total_score": -1.511
+      "total_score": -1.515
     },
     {
       "rank": 297,

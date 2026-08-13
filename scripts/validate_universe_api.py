@@ -20,6 +20,9 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from ttm import latest_annual_eps, recent_stacs, ttm_eps  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 CACHE_DIR = DATA_DIR / ".cache"
@@ -36,36 +39,6 @@ if hasattr(sys.stdout, "reconfigure"):
 LOOKBACK_Q = 20      # 최근 5년 = 20분기
 MAX_ADVERSE_Q = 4    # 적자 허용 분기 수
 MIN_VALID_Q = 12     # 최소 유효 분기 (3년치)
-
-
-def _amt(s):
-    s = str(s if s is not None else "").replace(",", "").strip()
-    if s in ("", "-"):
-        return None
-    try:
-        return float(s)
-    except ValueError:
-        return None
-
-
-def _ref(series, stac):
-    """KIS는 데이터 없는 기간을 0.0으로 채운다 → 정확히 0이면 결측 취급."""
-    v = _amt((series.get(stac) or {}).get("eps"))
-    return None if (v is None or v == 0) else v
-
-
-def ttm_eps(series, stac):
-    y, m = int(stac[:4]), int(stac[4:6])
-    cur = _amt((series.get(stac) or {}).get("eps"))
-    if cur is None:
-        return None
-    if m == 12:
-        return cur
-    a = _ref(series, f"{y-1}12")
-    p = _ref(series, f"{y-1}{m:02d}")
-    if a is None or p is None:
-        return None
-    return a - p + cur
 
 
 def load_ratios():
@@ -99,29 +72,21 @@ def main():
         if not series:
             ex_nodata.append(s)
             continue
-        stacs = sorted([k for k in series if len(str(k)) == 6], reverse=True)[:LOOKBACK_Q]
-        vals = [ttm_eps(series, st) for st in stacs]
+        # 여기서는 공시 시차(ttm.disclosed_stac)를 적용하지 않는다 — 의도적이다.
+        # 시차는 "과거 시점에 아직 몰랐을 실적"을 막는 장치인데, 이 검증은 과거
+        # 시계열이 아니라 **지금 시점의 스크리닝**이다. 캐시에 들어 있다는 건 이미
+        # 공시됐다는 뜻이므로 최신 분기를 그대로 쓰는 것이 맞다.
+        vals = [ttm_eps(series, st) for st in recent_stacs(series, LOOKBACK_Q)]
         valid = [v for v in vals if v is not None]
         if len(valid) < args.min_valid:
             (ex_short if valid else ex_nodata).append(s)
             continue
         adverse = sum(1 for v in valid if v <= 0)
 
-        # 직전 확정 결산 EPS.
-        # s3_per(Growth)의 기준을 맞추기 위해 필요하다. 네이버 forward_per는
-        # "직전 결산 PER → 추정 PER" 이라는 같은 잣대 안의 값인데, 우리 current_per는
-        # TTM이라 그대로 빼면 기준이 섞인다(대주전자재료: CB 파생평가손으로 TTM 순이익이
-        # 눌려 s3가 +0.348로 나왔으나 실제는 −0.238, 부호 반전).
-        # apply_triple_cross가 close/annual_eps로 "직전 결산 PER"을 복원해 쓴다.
-        annual_eps = None
-        for st in sorted((k for k in series if str(k).endswith("12")), reverse=True):
-            v = _amt((series.get(st) or {}).get("eps"))
-            if v:
-                annual_eps = v
-                break
-
+        # 직전 확정 결산 EPS — apply_triple_cross가 close/annual_eps로
+        # "직전 결산 PER"을 복원해 s3_per의 기준을 맞추는 데 쓴다 (ttm.py 참조).
         rec = {**s, "valid_quarters": len(valid), "adverse_quarters": adverse,
-               "annual_eps": annual_eps}
+               "annual_eps": latest_annual_eps(series)}
         if adverse > args.max_adverse:
             ex_adverse.append(rec)
         else:

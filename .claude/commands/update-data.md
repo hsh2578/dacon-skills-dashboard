@@ -147,11 +147,29 @@ ranker 프롬프트에 반드시 포함할 것:
 
 ## 7단계 — 검증
 
+두 검사를 모두 돌립니다. 보는 것이 다릅니다.
+
 ```bash
 python scripts/verify_data.py
 ```
+```bash
+python scripts/check_golden_matrix.py
+```
 
-임계값 위반 시 exit 1로 후속 commit/push가 차단됩니다.
+- `verify_data.py` — 산출물의 **신선도·커버리지**. 임계값 위반 시 exit 1.
+- `check_golden_matrix.py` — 동결된 30종목 기준선과 대조해 **과거 값이 바뀌었는지**. 과거 PER/PBR은 원칙적으로 불변이므로(원주가 저장 + 사용 시점 보정), 변동은 회귀 신호입니다. `verify_data.py`는 PBR이 154배여도 통과시키므로 이 검사가 그 구멍을 막습니다.
+
+골든이 위반을 보고하면 **먼저 원인을 확인하세요.** 분할·증자로 전 구간이 균일하게 움직인 경우는 "참고"로 분류되어 통과합니다. 특정 구간만 튀면 회귀입니다.
+의도한 변경임이 확인되면 `python scripts/check_golden_matrix.py --freeze`로 기준선을 다시 동결합니다.
+
+정식 파일을 덮어쓰기 전에 후보를 먼저 검사하려면 3단계를 `--replace` 없이 돌린 뒤
+`python scripts/check_golden_matrix.py --suffix _ttm`으로 확인하고, 통과하면 승격하세요.
+
+단위 테스트도 함께 돌릴 것 (TTM 판정 로직 — 네트워크 불필요, 1초):
+
+```bash
+python -m pytest tests/ -q
+```
 
 ## 8단계 — 완료 보고
 
