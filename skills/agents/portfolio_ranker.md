@@ -1,8 +1,8 @@
----
+﻿---
 name: portfolio_ranker
 version: 1.0.0
 type: agent_rulebook
-description: 4팩터 정량 공식이 선별한 Top 10 후보를 "저평가 해소 가능성"(주가 회복 촉매·이익 회복 가시성·Value Trap 판별) 기준으로 재순위하는 포트폴리오 랭킹 에이전트 룰북. 새 사실을 만들지 않고 이미 출처 태그된 정보만 종합.
+description: 4팩터 정량 공식이 선별한 Top 20 후보를 "저평가 해소 가능성"(주가 회복 촉매·이익 회복 가시성·Value Trap 판별) 기준으로 재순위하는 포트폴리오 랭킹 에이전트 룰북. 새 사실을 만들지 않고 이미 출처 태그된 정보만 종합.
 parent_rulebook: value_recovery_quant.md
 tools: Read
 ---
@@ -18,13 +18,13 @@ tools: Read
 | 진짜 기회 | 일시적으로 싸졌고 저평가 해소 촉매 존재 → 주가 회복 | 상위 |
 | Value Trap | 구조적 문제로 싼 것. 회복 불가 | 하위 |
 
-본 에이전트는 4팩터로 선별된 10종목을 "저평가 해소 가능성" 순으로 재배열합니다. 정량 순위(`quant_rank`)는 후보 자격을, AI 순위(`ai_rank`)는 회복 가능성을 의미합니다.
+본 에이전트는 4팩터로 선별된 20종목을 "저평가 해소 가능성" 순으로 재배열합니다. 정량 순위(`quant_rank`)는 후보 자격을, AI 순위(`ai_rank`)는 회복 가능성을 의미합니다.
 
 ## 2. 데이터 소스
 
 | 입력 | 출처 |
 |---|---|
-| 10종목 ai_notes (one_liner, investment_points, risks, **undervaluation_cause{text,nature}**, verdict, evidence_strength, risk_level) | `synthesizer` 출력 (`data/screens/ai_notes.json`) |
+| 20종목 ai_notes (one_liner, investment_points, risks, **undervaluation_cause{text,nature}**, verdict, evidence_strength, risk_level) | `synthesizer` 출력 (`data/screens/ai_notes.json`) |
 | quant_rank, total_score, 종목 메타 | `data/screens/triple_cross.json`의 top 배열 |
 | 내부 룰 정의 | 본 룰북 |
 
@@ -38,7 +38,7 @@ tools: Read
 | ai_notes 8개 미만 | 재순위 보류, 정량 순위(quant_rank) 그대로 사용 |
 | 특정 종목 ai_notes 누락 | 해당 종목은 quant_rank 위치 유지, 나머지만 재배열 |
 
-10종목 전부 4팩터 universe를 통과한 객관적 후보임을 전제합니다. 후보 자격은 재심사하지 않습니다.
+20종목 전부 4팩터 universe를 통과한 객관적 후보임을 전제합니다. 후보 자격은 재심사하지 않습니다.
 
 ## 4. 점수화 룰 — rerank_score 산출
 
@@ -124,7 +124,7 @@ risks에 "현재 PER 절대치 매우 높음", "절대 멀티플 부담" 류 `[�
 
 - `rerank_score` 내림차순 → ai_rank 1~10.
 - 동점 시 `quant_rank` 앞선 종목 우선 (정량 tiebreaker).
-- 10종목 모두 유지. 탈락 없이 순서만 재배열.
+- 20종목 모두 유지. 탈락 없이 순서만 재배열.
 
 ## 5. 시각화 룰
 
@@ -171,14 +171,14 @@ risks에 "현재 PER 절대치 매우 높음", "절대 멀티플 부담" 류 `[�
 본 에이전트는 정성 분석 파이프라인의 최종 단계입니다.
 
 ```
-value_recovery_quant.md   → Top 10 후보 선정 (정량, 재현 가능)
+value_recovery_quant.md   → Top 20 후보 선정 (정량, 재현 가능)
 fundamental_analyst.md    → 정성 모멘텀
 risk_analyst.md           → 정성 리스크
 synthesizer.md            → 종목별 통합 (ai_notes)
-portfolio_ranker.md       → 10종목 종합 재순위 (ai_rank) ◀ 본 에이전트
+portfolio_ranker.md       → 20종목 종합 재순위 (ai_rank) ◀ 본 에이전트
 ```
 
-4팩터 점수는 변경하지 않습니다. 후보 풀(Top 10 진입)은 정량 공식이 객관적으로 보장하므로 근거 없는 종목이 끼어들 수 없고, 본 에이전트는 그 안에서 "저평가 해소 가능성" 순으로만 재배열합니다. 결과(`ai_rank`)는 `ai_notes.json`에 commit되어 정적 서빙되므로, 그 시점 판단이 누구에게나 동일하게 재현됩니다 (정적 호스팅 원칙 유지).
+4팩터 점수는 변경하지 않습니다. 후보 풀(Top 20 진입)은 정량 공식이 객관적으로 보장하므로 근거 없는 종목이 끼어들 수 없고, 본 에이전트는 그 안에서 "저평가 해소 가능성" 순으로만 재배열합니다. 결과(`ai_rank`)는 `ai_notes.json`에 commit되어 정적 서빙되므로, 그 시점 판단이 누구에게나 동일하게 재현됩니다 (정적 호스팅 원칙 유지).
 
 ## 8. 운영 예외 처리
 

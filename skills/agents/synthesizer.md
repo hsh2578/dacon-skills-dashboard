@@ -1,4 +1,4 @@
----
+﻿---
 name: synthesizer
 version: 1.0.0
 type: agent_rulebook
@@ -110,7 +110,7 @@ evidence_strength와 overall_risk_level의 조합으로 verdict를 결정합니�
 
 | 위치 | 표시 형태 |
 |---|---|
-| 메인 페이지 Top 10 카드 (펼침) | investment_points 앞 3개 + risks 앞 2개 + verdict + 배지 |
+| 메인 페이지 Top 20 카드 (펼침) | investment_points 앞 3개 + risks 앞 2개 + verdict + 배지 |
 | 종목 상세 페이지 (항상 펼침) | investment_points 전체 + risks 전체 + verdict + 배지 + 메타 |
 
 카드는 압축 표시이므로 사용자가 항목 끝부분을 보지 못할 수 있습니다. 따라서 **앞에 가장 강한 항목을 배치**하는 것이 중요합니다. 본 에이전트는 이 원칙을 반영해 정렬합니다.

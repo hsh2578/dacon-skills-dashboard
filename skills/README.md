@@ -1,4 +1,4 @@
-# Skills.md 패키지 — 한국 주식 가치투자 종목 발굴
+﻿# Skills.md 패키지 — 한국 주식 가치투자 종목 발굴
 
 DACON 월간 해커톤 "투자 데이터를 시각화하라 — Skills 기반 대시보드 설계" 출품작의 Skills.md 제출 패키지입니다. 본 패키지는 한국 주식 시장에서 가치투자 종목을 자동 발굴하기 위한 분석 규칙을 .md 문서들로 정의합니다. 각 문서가 곧 알고리즘 명세서이며, 사이트의 자동 갱신 파이프라인이 이 문서들을 따라 동작합니다.
 
@@ -10,7 +10,7 @@ DACON 월간 해커톤 "투자 데이터를 시각화하라 — Skills 기반 �
 
 | 구분 | 파일 | 역할 |
 |---|---|---|
-| 메인 | `value_recovery_quant.md` | 4팩터 Z-Score 가중합산으로 가치투자 Top 10 추출 |
+| 메인 | `value_recovery_quant.md` | 4팩터 Z-Score 가중합산으로 가치투자 Top 20 추출 |
 | 보조 | `forward_attractive.md` | Forward PER 단독 매력도 모델 (단일 팩터 변형) |
 | 보조 | `dividend_value.md` | 배당 + 가치 결합 모델 (보수적 변형) |
 | AI 에이전트 | `agents/fundamental_analyst.md` | 정성 모멘텀 추출 (WebSearch + 출처 태그) |
@@ -79,7 +79,7 @@ DACON 월간 해커톤 "투자 데이터를 시각화하라 — Skills 기반 �
 
 | 소스 | 적용 영역 | 태그 |
 |---|---|---|
-| 사전 페치 정량 | pykrx, 네이버 컨센, multpl, yfinance에서 페치된 JSON | [정량] |
+| 사전 페치 정량 | KRX OpenAPI, KIS, 네이버 컨센, OpenDART, multpl/FRED에서 페치된 JSON | [정량] |
 | Tool Call 결과 | WebSearch (정성 룰북에서만 사용) | [출처: WebSearch · YYYY-MM] |
 | 룰 정의 자체 | Skills.md에 적힌 임계값, 가중치, 공식 | 표기 불필요 |
 
@@ -90,9 +90,9 @@ DACON 월간 해커톤 "투자 데이터를 시각화하라 — Skills 기반 �
 본 패키지의 룰북들이 어떻게 연결되는지 정리하면 다음과 같습니다.
 
 ```
-data/universe.json (universe 303종목)
+data/universe.json (universe 299종목)
     ↓
-value_recovery_quant.md (메인) ──→ data/screens/triple_cross.json (Top 10 + 정량 점수)
+value_recovery_quant.md (메인) ──→ data/screens/triple_cross.json (Top 20 + 정량 점수)
     ↓
 fundamental_analyst.md ──→ 정성 모멘텀
 risk_analyst.md       ──→ 정성·정량 리스크
@@ -117,8 +117,8 @@ dividend_value.md     ──→ data/screens/dividend_value.json (계획)
 
 | 룰북 | 적용 위치 |
 |---|---|
-| value_recovery_quant.md | 메인 페이지 Section 2 (Top 10 카드), 종목 상세 페이지 시그널 카드 |
-| fundamental_analyst.md + risk_analyst.md + synthesizer.md | Top 10 카드 펼침 영역, 종목 상세 페이지 AI 서브에이전트 분석 영역 |
+| value_recovery_quant.md | 메인 페이지 Section 2 (Top 20 카드), 종목 상세 페이지 시그널 카드 |
+| fundamental_analyst.md + risk_analyst.md + synthesizer.md | Top 20 카드 펼침 영역, 종목 상세 페이지 AI 서브에이전트 분석 영역 |
 | forward_attractive.md | (계획) 메인 페이지 Section 4 또는 별도 페이지 |
 | dividend_value.md | (계획) 동일 |
 
@@ -243,4 +243,4 @@ output: data/screens/high_volatility_momentum.json
 
 ## 라이선스 및 저작권
 
-본 패키지의 .md 문서들은 출품작의 일부이며, 코드 또는 데이터의 재사용·수정·재배포는 출처 표기와 함께 허용됩니다. 외부 데이터 출처(pykrx, 네이버 Wisereport, multpl, yfinance)의 사용 정책은 각 출처의 라이선스를 따릅니다.
+본 패키지의 .md 문서들은 출품작의 일부이며, 코드 또는 데이터의 재사용·수정·재배포는 출처 표기와 함께 허용됩니다. 외부 데이터 출처(KRX 공식 OpenAPI, 한국투자증권 OpenAPI, OpenDART, 네이버 Wisereport, multpl, yfinance)의 사용 정책은 각 출처의 라이선스를 따릅니다.

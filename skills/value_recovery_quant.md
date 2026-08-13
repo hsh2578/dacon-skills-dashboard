@@ -1,8 +1,8 @@
----
+﻿---
 name: value_recovery_quant
 version: 1.0.0
 type: main_rulebook
-description: 한국 주식 보통주 가치투자 종목 발굴 메인 룰북. 시가총액 2,000억 이상 universe에서 5년 평균 PER·PBR 저평가(Value)와 Forward PER 개선·컨센서스 상승여력(Growth)을 4팩터 Z-Score 가중합산으로 결합해 Top 10을 자동 추출합니다.
+description: 한국 주식 보통주 가치투자 종목 발굴 메인 룰북. 시가총액 2,000억 이상 universe에서 5년 평균 PER·PBR 저평가(Value)와 Forward PER 개선·컨센서스 상승여력(Growth)을 4팩터 Z-Score 가중합산으로 결합해 Top 20을 자동 추출합니다.
 output: data/screens/triple_cross.json
 implementation: scripts/apply_triple_cross.py
 ---
@@ -19,13 +19,36 @@ implementation: scripts/apply_triple_cross.py
 
 | 데이터 | 출처 | 필드 | 갱신 주기 | 인증 |
 |---|---|---|---|---|
-| KOSPI · KOSDAQ 시가총액·PER·PBR·배당·종가 | pykrx | get_market_fundamental_by_ticker | 일별 | KRX_ID/PW (로컬 페치만) |
+| 종가 · 시가총액 · 상장주식수 | KRX 공식 OpenAPI (`data-dbg.krx.co.kr`) | stk_bydd_trd / ksq_bydd_trd | 일별 | KRX_API_KEY |
+| EPS · BPS (분기, 약 7년) | 한국투자증권 OpenAPI | 재무비율 FHKST66430300 | 분기 | KIS 실전 조회 전용 키 |
 | Forward PER | 네이버 Wisereport | HTML 스크래핑 | 분기 | 불필요 |
 | 컨센서스 평균 목표가 | 네이버 Wisereport | 동일 | 분기 | 불필요 |
 | broker_count (커버리지) | 네이버 Wisereport | 동일 | 분기 | 불필요 |
-| S&P 500 PER (참고용) | multpl, yfinance | 월별 | 월 | 불필요 |
+| 매출·영업이익·순이익 (5~6년) | OpenDART | fnlttSinglAcntAll | 분기 | DART_API_KEY |
+| S&P 500 PER (참고용) | multpl, FRED | 월별 | 월 | FRED_API_KEY |
 
-PER·PBR은 모두 TTM(Trailing Twelve Months) 기준입니다. KRX와 네이버가 모두 이 표준을 따르므로 데이터 일관성이 보장됩니다. 페치는 모두 로컬에서 실행되며, 결과 JSON만 GitHub에 커밋되어 사이트가 정적으로 서빙합니다. API 키는 사이트에 노출되지 않습니다.
+### 2.1 PER · PBR 정의 — TTM 자체 산출
+
+KRX 공식 OpenAPI는 시세·시총만 제공하고 **PER/PBR을 주지 않습니다.** 따라서 KIS의 분기 EPS·BPS로 직접 산출합니다.
+
+```
+PER = 수정주가 / TTM EPS      TTM EPS = 직전연간 − 전년동기누적 + 당해누적 (= 최근 4개 분기)
+PBR = 수정주가 / BPS          최근 공시 분기말 기준
+```
+
+**세 가지 보정이 필수입니다.**
+
+| 보정 | 이유 |
+|---|---|
+| **공시 시차** — 분기 45일 · 사업보고서 90일 | 분기 실적은 분기말 이후에 공시됩니다. 공시 전 날짜에 그 실적을 쓰면 미래 정보를 과거에 반영하는 것(look-ahead)이 되어 스크리너 성과가 부풀려집니다. 법정 제출기한을 그대로 적용합니다. |
+| **수정주가** — `원주가 × 상장주식수(t) / 상장주식수(현재)` | KRX 종가는 원주가라 액면분할 지점에서 계단이 생기는 반면, EPS·BPS는 현재 주식수 기준으로 소급 조정된 값입니다. 보정하지 않으면 분할 이전 구간의 PER이 통째로 부풀려져 **가짜 저평가 신호**가 발생합니다. |
+| **일별 → 월평균** | 매월 특정 1일만 표본으로 쓰면 그날의 급등락이 5년 평균에 그대로 실립니다. 일별 종가를 받아 월평균으로 집계합니다. |
+
+**KRX·네이버 표시값과 다릅니다 — 의도된 차이입니다.** 실측 결과 KRX PER/PBR은 TTM이 아니라 **직전 확정 결산 기준이며 연 1회(5월)만 갱신**됩니다(58개월 오차표에서 4월→5월에만 계단이 있고 8월·11월에는 변화가 없음). 그 결과 실적이 급변한 기업은 KRX 값이 최대 17개월 뒤처집니다. 본 룰북은 분기 실적을 반영하는 TTM을 채택해 그 지연을 제거합니다.
+
+> **부작용 주의**: TTM은 이익이 급증한 기업의 PER을 낮게 보이게 합니다(피크 어닝스 착시). 정성 단계의 `portfolio_ranker` §4.2.1이 이를 걸러내는 역할을 계속 수행해야 합니다.
+
+페치는 모두 로컬에서 실행되며, 결과 JSON만 GitHub에 커밋되어 사이트가 정적으로 서빙합니다. API 키는 사이트에 노출되지 않습니다.
 
 ## 3. 1차 필터 — Universe 정의
 
@@ -39,9 +62,9 @@ PER·PBR은 모두 TTM(Trailing Twelve Months) 기준입니다. KRX와 네이버
 | Forward PER | 보유 필수 | 4팩터 중 하나의 입력 |
 | 컨센 평균 목표가 | 보유 필수 | 4팩터 중 하나의 입력 |
 
-필터를 통과한 universe는 303종목입니다. 본 룰북의 모든 분석은 이 안에서 이루어집니다. 미통과 종목은 `data/universe.json`의 excluded 배열에 사유와 함께 기록됩니다.
+필터를 통과한 universe는 299종목입니다. 본 룰북의 모든 분석은 이 안에서 이루어집니다. 미통과 종목은 `data/universe.json`의 excluded 배열에 사유와 함께 기록됩니다.
 
-분석에서 제외되는 universe 외 종목도 사이트의 PER·PBR 시계열 차트에는 표시될 수 있습니다. 검증 통과한 모든 종목의 60개월 PER·PBR이 매트릭스(`data/matrix/`)로 별도 페치되어, 검색 페이지에서 fallback으로 사용됩니다. 즉 4팩터 점수는 303종목 한정이지만, PER·PBR 시계열 조회는 사실상 무제한입니다.
+분석에서 제외되는 universe 외 종목도 사이트의 PER·PBR 시계열 차트에는 표시될 수 있습니다. 검증 통과한 모든 종목의 60개월 PER·PBR이 매트릭스(`data/matrix/`)로 별도 페치되어, 검색 페이지에서 fallback으로 사용됩니다. 즉 4팩터 점수는 299종목 한정이지만, PER·PBR 시계열 조회는 사실상 무제한입니다.
 
 ## 4. 점수화 룰
 
@@ -109,7 +132,7 @@ df["total_score"] = df["value_score"] * 0.60 + df["growth_score"] * 0.40
 | Watch | total_score ≥ 0σ | 50% |
 | Weak | total_score < 0σ | 하위 50% |
 
-표준 정규분포의 임계값을 그대로 사용했습니다. 본 시점(2026-04-27 기준) Top 10 종목 중 9종목이 Strong Buy 이상에 해당합니다.
+표준 정규분포의 임계값을 그대로 사용했습니다. 본 시점(2026-08-13 기준) Top 20 종목은 전부 Strong Buy 임계(+1.65σ)를 넘지는 않습니다 — 티어는 전 종목 STRONG_BUY로 통일 운영하며, 실제 서열은 정성 단계의 ai_rank가 결정합니다.
 
 ### 4.6 Value Trap 안전 가드
 
@@ -131,7 +154,7 @@ df["total_score"] = df["value_score"] * 0.60 + df["growth_score"] * 0.40
 |---|---|---|---|
 | 단일 시계열 (개별 종목 60개월 PER/PBR) | 한 종목의 시간축 변화 | 라인 차트 + 평균선 + 평균 ±1σ 밴드 | 연속성 강조 + 현재 값이 평균 대비 어디 위치하는지 한눈에 |
 | 다중 시계열 (시장 지수 10년) | 여러 시장 비교 | 라인 차트 + 다중 시리즈 + 정규화(=100) 토글 | 시리즈 간 절대값 차이가 커도 정규화로 추세 비교 가능 |
-| 횡단면 점수 (Top 10) | 동시점 종목 간 순위 | 순위 카드 그리드 + 시그널 막대 + 티어 배지 | 카드 1장 = 종목 1개로 한 화면 동시 비교 가능 |
+| 횡단면 점수 (Top 20) | 동시점 종목 간 순위 | 순위 카드 그리드 + 시그널 막대 + 티어 배지 | 카드 1장 = 종목 1개로 한 화면 동시 비교 가능 |
 | 4팩터 시그널 (Z-Score) | 양수·음수 분포 | 4개 막대 + 양수 강조 색 | Z-Score 양수만 의미 있는 시그널이므로 이진 색 구분 |
 | 그룹 점수 (Value/Growth) | 두 축 비교 | 가로 막대 + 부호 표시 Z 값 | 두 축이 동등하게 중요해 동일 형식 막대로 비교 |
 | 매트릭스 (universe 전체 PER/PBR) | 검색 시 fallback | 단일 시계열 차트 동일 적용 | universe 외 종목도 같은 시각화 일관성 유지 |
@@ -149,13 +172,13 @@ df["total_score"] = df["value_score"] * 0.60 + df["growth_score"] * 0.40
 | Watch 이하 카드 배경 | 무채색 | 강조 없음 |
 | 평균 ±1σ 밴드 | 옅은 회색 채움 | 시계열 맥락 |
 
-### 5.3 메인 페이지 Top 10 카드
+### 5.3 메인 페이지 Top 20 카드
 
 각 카드 한 장에 다음 정보가 위에서 아래로 적층됩니다.
 
 | 영역 | 데이터 |
 |---|---|
-| 헤더 | 순위 (#1 ~ #10), 티어 배지 |
+| 헤더 | 순위 (#1 ~ #20), 티어 배지 |
 | 종목명 | 종목명, 코드, 시장(KOSPI/KOSDAQ), 현재가 |
 | 4팩터 시그널 | 4개 팩터 막대, Z-Score 양수면 강조 색 |
 | 정량 수치 | 현재 PER, 5Y 평균, Forward PER, 상승여력 |
@@ -174,11 +197,11 @@ df["total_score"] = df["value_score"] * 0.60 + df["growth_score"] * 0.40
 
 ### 5.4 종목 상세 페이지 시그널 카드
 
-stock.html의 시그널 영역에 동일 데이터가 더 큰 캔버스로 표시됩니다. universe 303종목 중 #N위 라벨을 함께 노출해 전체에서의 위치를 강조합니다. 4팩터 정규화 점수는 4개 카드로 분리되어 양수일 때 녹색 박스로 강조됩니다.
+stock.html의 시그널 영역에 동일 데이터가 더 큰 캔버스로 표시됩니다. universe 299종목 중 #N위 라벨을 함께 노출해 전체에서의 위치를 강조합니다. 4팩터 정규화 점수는 4개 카드로 분리되어 양수일 때 녹색 박스로 강조됩니다.
 
 ### 5.5 알고리즘 투명성
 
-메인 페이지 Top 10 카드 위에 "어떻게 구했나 — 알고리즘 6단계" 박스가 항상 노출됩니다. Universe 필터부터 가중 합산까지 6단계가 시각적으로 표시되어, 평가자나 사용자가 점수의 도출 과정을 한눈에 파악할 수 있습니다.
+메인 페이지 Top 20 카드 위에 "어떻게 구했나 — 알고리즘 6단계" 박스가 항상 노출됩니다. Universe 필터부터 가중 합산까지 6단계가 시각적으로 표시되어, 평가자나 사용자가 점수의 도출 과정을 한눈에 파악할 수 있습니다.
 
 ### 5.6 데이터 부족 시 처리
 
@@ -228,7 +251,7 @@ def auto_comment(row):
 
 | 소스 | 적용 영역 | 태그 |
 |---|---|---|
-| 사전 페치 정량 | pykrx, 네이버 컨센, multpl, yfinance에서 페치된 JSON | [정량] |
+| 사전 페치 정량 | KRX OpenAPI, KIS, 네이버 컨센, OpenDART, multpl/FRED에서 페치된 JSON | [정량] |
 | Tool Call 결과 | WebSearch (정성 룰북에서만 사용) | [출처: WebSearch · YYYY-MM] |
 | 룰 정의 자체 | 본 룰북에 적힌 임계값, 가중치, 공식 | (출처 표기 불필요) |
 
@@ -254,7 +277,7 @@ LLM이 학습 단계에서 외운 수치는 절대 인용하지 않습니다. �
 
 | 인터페이스 | 출력자 | 입력자 | 스키마 정의 위치 |
 |---|---|---|---|
-| 정량 점수 + Top 10 | value_recovery_quant (본 룰북) | fundamental_analyst, risk_analyst | data/screens/triple_cross.json |
+| 정량 점수 + Top 20 | value_recovery_quant (본 룰북) | fundamental_analyst, risk_analyst | data/screens/triple_cross.json |
 | 정성 모멘텀 | fundamental_analyst | synthesizer | agents/fundamental_analyst.md §6.1 |
 | 정성·정량 리스크 | risk_analyst | synthesizer | agents/risk_analyst.md §6.1 |
 | 카드 통합 JSON | synthesizer | 사이트 (app.js, stock.js) | agents/synthesizer.md §6.1 |
@@ -279,10 +302,10 @@ LLM이 학습 단계에서 외운 수치는 절대 인용하지 않습니다. �
 
 | 시나리오 | 처리 룰 |
 |---|---|
-| pykrx 인증 실패 (KRX_ID/PW 만료) | 페치 중단, 이전 universe.json 유지, UI에 "갱신 미반영, YYYY-MM-DD 데이터" 안내 |
+| KRX/KIS API 실패 (키 만료·한도 초과) | 페치 중단, 이전 universe.json 유지, UI에 "갱신 미반영, YYYY-MM-DD 데이터" 안내 |
 | 컨센서스 부분 실패 (특정 종목만 페치 안 됨) | 해당 종목만 universe excluded로 분류, 다른 종목 정상 처리, 로그에 사유 기록 |
 | 매트릭스 일부 월 데이터 부재 | 5Y 평균 산정에서 해당 월 제외, MIN_VALID_MONTHS=36 미달 시 universe 제외 |
-| 정량 점수 산출 도중 NaN 발생 | 해당 종목만 all_ranked에서 제외, 나머지 정상 처리, top 10 재산출 |
+| 정량 점수 산출 도중 NaN 발생 | 해당 종목만 all_ranked에서 제외, 나머지 정상 처리, top 20 재산출 |
 | screens/triple_cross.json 갱신 실패 | 기존 파일 유지, UI 변화 없음, 운영자 알림 |
 | AI 서브에이전트 출력 오류 (JSON 파싱 실패) | 해당 종목 ai_notes만 누락, 카드 펼침 영역에 "AI 분석 미생성" 안내 |
 | GitHub Pages 배포 실패 | commit 자체 실패 시 push 안 됨. push 성공 후 빌드 실패 시 GitHub 자동 알림 |
@@ -306,8 +329,8 @@ LLM이 학습 단계에서 외운 수치는 절대 인용하지 않습니다. �
 | 분석 종목 수 | 303 |
 | 랭킹 종목 수 | 303 |
 | Strong Buy 이상 통과 (Z ≥ +1.65σ) | 14 (universe 상위 4.6%) |
-| Top 10 평균 total_score | +1.27σ |
-| Top 10 티어 분포 | Strong Buy 9 + Buy 1 |
+| Top 20 평균 total_score | +1.27σ |
+| Top 20 티어 분포 | Strong Buy 9 + Buy 1 |
 
 상세 결과는 `data/screens/triple_cross.json`에 저장됩니다.
 

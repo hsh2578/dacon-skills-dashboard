@@ -1,8 +1,8 @@
----
+﻿---
 name: risk_analyst
 version: 1.0.0
 type: agent_rulebook
-description: Top 10 종목의 정성 리스크(실행 실패, 시장 인식, 경쟁 심화, 거시 노출)를 WebSearch로 검증해 출력하는 리스크 분석 에이전트 룰북. 정량 리스크(Value Trap 등)도 보조로 표시합니다.
+description: Top 20 종목의 정성 리스크(실행 실패, 시장 인식, 경쟁 심화, 거시 노출)를 WebSearch로 검증해 출력하는 리스크 분석 에이전트 룰북. 정량 리스크(Value Trap 등)도 보조로 표시합니다.
 parent_rulebook: value_recovery_quant.md
 tools: WebSearch, Read
 ---
@@ -29,7 +29,7 @@ tools: WebSearch, Read
 
 | 조건 | 처리 |
 |---|---|
-| 입력 종목이 Top 10에 포함됨 | 분석 실행 |
+| 입력 종목이 Top 20에 포함됨 | 분석 실행 |
 | 그 외 | 분석 안 함 |
 | tier == AVOID 또는 is_value_trap == true | 강한 경고 어조로 단일 항목 반환 후 종료 |
 | broker_count < 3 | "컨센 표본 작음" 정량 리스크 자동 추가 |
@@ -99,7 +99,7 @@ WebSearch 결과에 명시된 사실만 인용합니다. 일반론적 우려는 
 
 | 위치 | 표시 형태 |
 |---|---|
-| 메인 페이지 Top 10 카드 (펼침) | 리스크 2개로 압축 표시 |
+| 메인 페이지 Top 20 카드 (펼침) | 리스크 2개로 압축 표시 |
 | 종목 상세 페이지 (항상 펼침) | 리스크 3~4개 전체 표시 |
 
 각 항목은 한 줄 60자 이내, 출처 태그를 끝에 붙입니다. severity HIGH 항목은 정성·정량 무관하게 우선 표시됩니다.

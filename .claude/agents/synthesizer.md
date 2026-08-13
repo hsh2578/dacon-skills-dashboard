@@ -1,4 +1,4 @@
----
+﻿---
 name: synthesizer
 description: Use PROACTIVELY to merge fundamental-analyst (quantitative thesis + qualitative drivers) and risk-analyst (quantitative red flags + qualitative risks) into the final card-ready ai_notes JSON. Compresses to UI length, preserves source tags, and assigns the verdict using the evidence × risk matrix. Adds no new facts.
 tools: Read

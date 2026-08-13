@@ -1,4 +1,4 @@
----
+﻿---
 name: forward_attractive
 version: 1.0.0
 type: auxiliary_rulebook
@@ -20,7 +20,7 @@ output: data/screens/forward_attractive.json
 | 데이터 | 출처 | 비고 |
 |---|---|---|
 | Forward PER | 네이버 Wisereport | 가장 최근 컨센서스 추정치 |
-| Current PER | pykrx | TTM |
+| Current PER | KRX OpenAPI 종가 + KIS EPS/BPS | TTM 자체 산출 (메인 룰북 §2.1) |
 | broker_count (커버리지) | 네이버 | 신뢰도 가중치에 사용 |
 
 본 룰북은 5년 시계열을 사용하지 않습니다. 컨센서스 데이터만으로 단일 시점 점수를 만듭니다. 입력 데이터는 메인 룰북의 `universe.json`을 그대로 재사용하므로 별도 페치가 필요하지 않습니다.
@@ -108,7 +108,7 @@ broker_count가 2면 raw Z-Score의 70%만, 10 이상이면 100%가 점수에 �
 | 우하단 (시총 큼 + Forward 매력 약함) | 안정 보유 |
 | 좌하단 (시총 작음 + Forward 매력 약함) | 회피 |
 
-### 5.2 Top 10 카드
+### 5.2 Top 20 카드
 
 산점도 우측에 메인 룰북과 같은 디자인의 카드 그리드가 함께 배치됩니다. 다만 4팩터 막대 대신 단일 팩터 막대 + 신뢰도 표시가 들어갑니다.
 

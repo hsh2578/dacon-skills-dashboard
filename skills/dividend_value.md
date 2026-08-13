@@ -1,4 +1,4 @@
----
+﻿---
 name: dividend_value
 version: 1.0.0
 type: auxiliary_rulebook
@@ -19,10 +19,10 @@ output: data/screens/dividend_value.json
 
 | 데이터 | 출처 | 비고 |
 |---|---|---|
-| 배당수익률 | pykrx (`get_market_fundamental_by_ticker`) | DIV 필드 |
-| Current PER · PBR | pykrx | TTM |
+| 배당수익률 | 네이버 Wisereport | dividend_yield |
+| Current PER · PBR | KRX OpenAPI 종가 + KIS EPS/BPS | TTM 자체 산출 (메인 룰북 §2.1) |
 | 5Y 평균 PER · PBR | `data/matrix/{per,pbr}_monthly.json` | 본 프로젝트 사전 페치 |
-| 5Y 배당 시계열 | pykrx 일별 DIV → 분기 평균 | 배당 안정성 검증 |
+| 5Y 배당 시계열 | 네이버 Wisereport 연간 → 분기 평균 | 배당 안정성 검증 |
 
 본 룰북의 큰 장점은 컨센서스 의존도가 0이라는 점입니다. 네이버 컨센이 일시 차단되거나 컨센이 없는 종목도 분석 가능합니다. 메인 룰북이 Forward PER과 컨센 목표가에 의존하는 것과 가장 큰 차이입니다.
 
@@ -119,7 +119,7 @@ df["dv_score"] = df["income_score"] * 0.50 + df["value_score"] * 0.50
 | 우하단 (저평가 큼 + 저배당) | 가치 단독 매력 |
 | 좌하단 (저평가 약함 + 저배당) | 회피 |
 
-### 5.2 Top 10 카드
+### 5.2 Top 20 카드
 
 차트 우측에 메인 룰북과 같은 디자인의 카드 그리드가 배치됩니다. 다만 카드 하단에 배당 시계열 미니 차트가 추가됩니다.
 
