@@ -110,10 +110,15 @@ Agent 도구로 직접 호출합니다.
 ```
 Triple Cross Top 20 중 **{종목명}({코드})** 의 ai_notes JSON을 작성합니다.
 
-룰 파일 3개를 Read로 정독하고 그대로 따르세요:
-- .claude/agents/fundamental-analyst.md
-- .claude/agents/risk-analyst.md
-- .claude/agents/synthesizer.md
+룰 파일 4개를 Read로 정독하고 **아래 순서대로** 수행하세요:
+1. .claude/agents/fundamental-analyst.md  — 정성 모멘텀 + 왜 저평가인가 진단
+2. .claude/agents/risk-analyst.md         — 리스크
+3. .claude/agents/resolution-scout.md     — **1에서 진단한 원인이 풀리고 있는지 검색**
+4. .claude/agents/synthesizer.md          — 통합
+
+**3은 반드시 1 이후에 하세요.** resolution-scout의 검색 쿼리는 1에서 나온
+undervaluation_cause에서 파생됩니다. 원인을 모른 채 검색하면 그냥 일반 호재
+검색이 되어 이 단계의 의미가 사라집니다.
 
 데이터:
 - 정량: data/screens/_top20_context.json 의 code="{코드}"
@@ -123,14 +128,18 @@ Triple Cross Top 20 중 **{종목명}({코드})** 의 ai_notes JSON을 작성합
 (1) 시장이 싸게 보는 직접 원인 (2) 재무 궤적이 뒷받침/반박하는지 (3) 해소 조건.
 영업이익률·매출 추세 숫자 필수 인용.
 
-PER/PBR은 TTM(최근 4개 분기) 기준입니다. WebSearch 3-5회로 최근 분기~6개월
-모멘텀·리스크를 조사하세요.
+PER/PBR은 TTM(최근 4개 분기) 기준입니다. WebSearch는 1·2단계에 3-5회,
+3단계에 3-6회 (합계 6-11회).
+
+**해소 근거를 못 찾으면 `verdict: "NO_EVIDENCE"` + 빈 evidence 배열로 두세요.**
+억지로 채우면 Value Trap이 상위로 올라가 랭킹 전체가 망가집니다.
 
 규칙: investment_points 4-5개 · risks 3-4개 · 정성 항목 전부
 `[출처: WebSearch · YYYY-MM]` 또는 `확인 필요` 태그 · 정량 `[정량]` ·
 퀀트 리포트체 · 이모지 금지.
 
-출력: ```json ... ``` 코드 블록 하나만 (code + ai_notes). 코드 블록 외 텍스트 금지.
+출력: ```json ... ``` 코드 블록 하나만 (code + ai_notes, ai_notes.resolution 포함).
+코드 블록 외 텍스트 금지.
 ```
 
 종목별 특이사항(5년 평균 PER이 비정상적으로 높음, Forward PER > 현재 PER, 상장 이력 짧음 등)은 프롬프트에 명시해 에이전트가 검증하도록 하세요.
@@ -142,7 +151,8 @@ PER/PBR은 TTM(최근 4개 분기) 기준입니다. WebSearch 3-5회로 최근 �
 ranker 프롬프트에 반드시 포함할 것:
 - `.claude/agents/ranker.md` 정독
 - 입력: `ai_notes.json` · `_top20_context.json` · `data/financials/{code}.json`
-- **nature(§4.3)를 1차 축으로 쓰되 그룹 내부 순서와 경계는 촉매 임박도(§4.1)·피크 어닝스(§4.2.1)·절대 밸류(§4.5)가 결정하도록** 지시. 과거 실행에서 ai_rank가 nature와 100% 일치해 §4.3이 다른 룰을 압도한 적이 있습니다.
+- **§4.1의 주 입력은 `resolution.verdict`** (RESOLVING/EARLY_SIGNS/NO_EVIDENCE/WORSENING) + `expected_window` 시점 보정. 일반 촉매는 `resolution`이 없을 때만 폴백.
+- **`nature`(§4.3)와 `resolution.verdict`가 어긋나면 관측(resolution)을 우선**하도록 지시. STRUCTURAL+RESOLVING은 감점 완화, TEMPORARY+WORSENING은 가점을 감점으로 뒤집습니다. 과거 실행에서 ai_rank가 nature와 100% 일치해 §4.3이 다른 룰을 압도한 적이 있습니다.
 - 새 사실 생성 금지, 4팩터 점수 변경 금지
 
 ## 7단계 — 검증

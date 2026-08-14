@@ -24,7 +24,7 @@ tools: Read
 
 | 입력 | 출처 |
 |---|---|
-| 20종목 ai_notes (one_liner, investment_points, risks, **undervaluation_cause{text,nature}**, verdict, evidence_strength, risk_level) | `synthesizer` 출력 (`data/screens/ai_notes.json`) |
+| 20종목 ai_notes (one_liner, investment_points, risks, **undervaluation_cause{text,nature}**, **resolution{evidence,counter_evidence,expected_window,verdict}**, verdict, evidence_strength, risk_level) | `synthesizer` 출력 (`data/screens/ai_notes.json`) |
 | quant_rank, total_score, 종목 메타 | `data/screens/triple_cross.json`의 top 배열 |
 | 내부 룰 정의 | 본 룰북 |
 
@@ -44,16 +44,23 @@ tools: Read
 
 각 종목에 다음을 순서대로 적용해 `rerank_score`를 계산하고 내림차순 정렬합니다.
 
-### 4.1 저평가 해소 촉매 (1순위, 최대 가중)
+### 4.1 저평가 해소 근거 (1순위, 최대 가중)
 
-구체성·임박도로 **4단계 세분** (중위권 변별력 확보).
+**주 입력은 `resolution`** — `resolution_scout`가 진단된 저평가 원인을 **직접 겨냥해** 검색한 결과입니다. 일반 촉매(`investment_points`)와 구분해야 합니다. 일반 촉매는 "이 종목에 좋은 일"이지만, `resolution.evidence`는 "**바로 그 싼 이유가 걷힌다**"는 증거입니다. 재순위의 기준은 후자입니다.
 
-| investment_points 상태 | 점수 |
+| `resolution.verdict` | 점수 |
 |---|---|
-| 6개월 내 촉매가 날짜·수치까지 구체 명시되고 2건 이상 | +3.5 |
-| 6개월 내 구체적 촉매 1건, 또는 복수지만 시점 대략적 | +2.5 |
-| 촉매 존재하나 시점 불명확 또는 구조적 드라이버만 | +1 |
-| 촉매 없음·모호·"확인 필요" 위주 | −2 (Value Trap 의심) |
+| `RESOLVING` — 검증 가능한 근거 2건 이상 + 수치로 이미 확인 | +3.5 |
+| `EARLY_SIGNS` — 근거는 있으나 수치 미확인 또는 확인 시점이 멂 | +2.5 |
+| `NO_EVIDENCE` — 원인을 겨냥하는 근거 없음 | −2 (Value Trap 의심) |
+| `WORSENING` — 반증이 더 강함, 원인 심화 중 | −3 |
+
+시점 보정 (`expected_window`) — **`RESOLVING`·`EARLY_SIGNS`에만 적용**: `1-2Q` +0.5 · `3-4Q` 0 · `1년+`/`불명` −0.5
+（`NO_EVIDENCE`·`WORSENING`은 해소가 아니라 **악화**가 임박한 것이므로 가점 대상이 아닙니다. 이 구분이 없으면 "곧 나빠질 게 확인되는 종목"이 "천천히 나빠지는 종목"보다 높아집니다.）
+반증 보정: `counter_evidence` 수가 `evidence` 수 이상이면 −1
+자본정책 보정: `evidence`의 `kind`가 `CAPITAL_POLICY`뿐이면 한 단계 하향 (이익 회복이 아니라 주주환원)
+
+`resolution`이 없을 때만 (구버전 데이터·페치 실패) `investment_points`의 단기 촉매로 폴백합니다: 날짜·수치 명시 2건 이상 +3.5 / 구체 1건 +2.5 / 시점 불명확 +1 / 없음 −2. 폴백 시 산출물에 `(촉매 기반)`을 표기합니다.
 
 ### 4.2 이익 회복 가시성 (2순위)
 
@@ -96,6 +103,16 @@ tools: Read
 | 연간 적자/부진인데 최근 분기만 급등(latest_quarter OPM ≫ 연간) | 일회성 피크 → §4.2.1 연동, 가산 금지 |
 
 재무 파일이 없으면 본 교차검증은 생략하고 `nature`만 사용합니다.
+
+**`resolution`과 충돌할 때 — 관측을 우선합니다.** `nature`는 "왜 싼가"에 대한 **진단**이고, `resolution.verdict`는 "지금 풀리고 있는가"에 대한 **관측**입니다. 진단은 후속 관측으로 갱신되어야 합니다.
+
+| 조합 | 처리 |
+|---|---|
+| `STRUCTURAL` + `RESOLVING` | −2를 **−0.5로 완화** (구조적 문제라도 실제로 걷히는 검증 가능 근거가 2건 이상이면 그게 사실) |
+| `TEMPORARY` + `WORSENING` | +1을 **−2로 반전** ("일시적"이라는 진단이 후속 사실로 반박됨) |
+| `TEMPORARY` + `NO_EVIDENCE` | +1 → **0** (일시적이어도 풀린다는 증거가 없으면 대기 시간이 무한정일 수 있음) |
+
+이 규칙은 실제 운영에서 `ai_rank`가 `nature`와 100% 일치해 §4.3이 다른 룰을 압도한 사례에 대한 직접 교정입니다.
 
 ### 4.4 단기 노이즈 보정 (촉매 강도 × 센티먼트)
 

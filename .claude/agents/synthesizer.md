@@ -93,9 +93,10 @@ model: sonnet
       "정량 리스크 (선택, 마지막) [정량]"
     ],
     "undervaluation_cause": {
-      "text": "왜 시장이 이 종목을 싸게 보는가 — 한 줄 (권장 50자, 출처 태그 포함) [출처: WebSearch · YYYY-MM]",
+      "text": "왜 시장이 이 종목을 싸게 보는가 — 2~3문장 (권장 180~260자, 출처 태그 포함) [출처: WebSearch · YYYY-MM]",
       "nature": "TEMPORARY | STRUCTURAL"
     },
+    "resolution": { "resolution-scout 결과를 그대로 옮긴다 — 아래 설명 참조" },
     "verdict": "정량·정성 양호 | ...",
     "evidence_strength": "STRONG | MODERATE | WEAK",
     "risk_level": "LOW | MEDIUM | HIGH",
@@ -110,6 +111,14 @@ model: sonnet
 - risks: 정성 2-3 + 정량 0-1 = **총 3-4개**
 - 카드 UI에서는 `.slice(0,3)` / `.slice(0,2)`로 앞부분만 표시되므로 **앞에 가장 강한 항목 배치**
 - `undervaluation_cause`는 카드에 항상 1개 표시 (개수 slice 대상 아님) — 반드시 채울 것
+
+**`resolution` 처리 — 요약하지 말고 그대로 옮긴다**:
+
+`resolution-scout`의 출력 객체(`cause_restated` / `conditions` / `evidence[]` / `counter_evidence[]` / `expected_window` / `verdict` / `summary`)를 **구조 그대로** `ai_notes.resolution`에 넣습니다. 이 필드는 `ranker` §4.1의 주 입력이고, 항목 수·`verifiable_by`·`kind`가 전부 점수 계산에 쓰이므로 압축하면 랭킹이 망가집니다.
+
+- `evidence`가 빈 배열이어도 **그대로 둡니다.** 근거 없음은 정당한 결과이고 `ranker`에서 강등 신호로 작동합니다. 채우지 마십시오.
+- `verdict`를 다시 판정하지 마십시오. `resolution-scout`의 값을 그대로 씁니다.
+- `resolution-scout` 결과가 없으면 `resolution` 키를 **생략**합니다. null이나 빈 객체를 넣으면 `ranker`가 폴백 경로를 못 고릅니다.
 
 **글자수 가이드 (여유롭게, 출처 태그 포함 기준 / 모두 권장이며 강제 상한 아님)**:
 

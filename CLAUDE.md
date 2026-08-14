@@ -82,12 +82,15 @@ pykrx(data.krx.co.kr 스크래핑)로 KRX IP가 1일 차단된 뒤 공식 경로
 
 YAML frontmatter (name / description with "Use PROACTIVELY" / tools / model) + 시스템 프롬프트.
 
-파이프라인 순서: `fundamental-analyst` + `risk-analyst` → `synthesizer`(종목별 통합) → **`ranker`(20종목 종합 재순위)**.
+파이프라인 순서: `fundamental-analyst` + `risk-analyst` → **`resolution-scout`** → `synthesizer`(종목별 통합) → **`ranker`(20종목 종합 재순위)**.
 
 - `fundamental-analyst.md` — 정성 모멘텀 (CATALYST_NEAR_TERM, THESIS_DRIVER, RECENT_EARNINGS) + **UNDERVALUATION_CAUSE** ("왜 저평가인가" + `nature`: TEMPORARY/STRUCTURAL, 필수 1개) — `tools: WebSearch, Read`
 - `risk-analyst.md` — 정성 리스크 (EXECUTION_RISK, SENTIMENT_RISK, COMPETITIVE_RISK, MACRO_EXPOSURE) — `tools: WebSearch, Read`
-- `synthesizer.md` — 두 결과 통합 → 종목별 `ai_notes` JSON (`undervaluation_cause` 포함)
-- `ranker.md` — 20종목(TOP_N)을 "저평가 해소 가능성"으로 재순위 (`ai_rank`/`rerank_reason` 산출) — `tools: Read`, `model: sonnet`. 새 사실 생성 금지, 기존 출처 태그된 필드만 종합. 점수 룰 §4.1 촉매 4단계(+3.5/+2.5/+1/−2) · §4.2 실적 강도(+2.5/+1/+0.5/−1.5) · **§4.2.1 피크 어닝스 보정**(일회성 신작·수주發 이익이 risks에 선반영·차기작 공백으로 명시되면 +2.5→−1.0 — Forward PER 압축이 분모 착시인 경우 차단) · §4.3 `undervaluation_cause.nature`로 Value Trap 판별 + **`data/financials/` 영업이익률 추세 교차검증**(마진 추세 하락+매출 감소면 TEMPORARY라도 −1) · §4.4 단기 노이즈 보정 · §4.5 절대 밸류 페널티 · §4.7 동점은 `quant_rank` tiebreak. `data/financials/{code}.json`이 있으면 nature 판정이 실제 이익 궤적에 앵커됨.
+- **`resolution-scout.md`** — **진단된 저평가 원인이 풀리고 있는지 검색** (`tools: WebSearch, Read`). 반드시 `fundamental-analyst` **이후**에 실행 — 검색 쿼리를 `undervaluation_cause`에서 파생시키기 때문. 산출 `resolution`: `evidence[]`(각 항목에 `kind`·`verifiable_by` 필수) · `counter_evidence[]` · `expected_window` · `verdict`(RESOLVING/EARLY_SIGNS/NO_EVIDENCE/WORSENING).
+  - **왜 필요했나**: `ranker`는 `tools: Read`뿐이라 검색을 못 하는데 "저평가 해소 가능성"을 판정한다. `fundamental-analyst`의 촉매 검색은 원인을 진단하는 것과 같은 패스라 "이 종목에 무슨 호재가 있나"라는 일반 질문이 되고, "**바로 그 싼 이유가 걷히는가**"를 겨냥하지 못한다. 진단과 처방 탐색의 순서가 어긋나 있었다.
+  - **핵심 규율**: 근거는 진단된 원인을 **직접** 겨냥해야 하고(무관한 호재 무효), `verifiable_by`(언제 사실 확인 가능한지)가 없으면 의견이므로 버린다. **`NO_EVIDENCE`는 정당한 결과** — 억지로 채우면 Value Trap이 상위로 올라간다.
+- `synthesizer.md` — 세 결과 통합 → 종목별 `ai_notes` JSON (`undervaluation_cause` + `resolution` 포함). `resolution`은 **요약하지 말고 구조 그대로** 옮긴다 (항목 수·`kind`·`verifiable_by`가 ranker 점수 계산에 쓰임)
+- `ranker.md` — 20종목(TOP_N)을 "저평가 해소 가능성"으로 재순위 (`ai_rank`/`rerank_reason` 산출) — `tools: Read`, `model: sonnet`. 새 사실 생성 금지, 기존 출처 태그된 필드만 종합. 점수 룰 **§4.1 저평가 해소 근거** — 주 입력은 `resolution.verdict`(RESOLVING +3.5 / EARLY_SIGNS +2.5 / NO_EVIDENCE −2 / WORSENING −3) + `expected_window` 시점 보정(1-2Q +0.5 / 1년+·불명 −0.5, **RESOLVING·EARLY_SIGNS에만** — 악화가 임박한 건 가점 대상이 아님) + counter_evidence 팽팽하면 −1. `resolution`이 없을 때만 옛 촉매 4단계로 폴백 · §4.2 실적 강도(+2.5/+1/+0.5/−1.5) · **§4.2.1 피크 어닝스 보정**(일회성 신작·수주發 이익이 risks에 선반영·차기작 공백으로 명시되면 +2.5→−1.0 — Forward PER 압축이 분모 착시인 경우 차단) · §4.3 `undervaluation_cause.nature`로 Value Trap 판별 + **`data/financials/` 영업이익률 추세 교차검증**(마진 추세 하락+매출 감소면 TEMPORARY라도 −1) + **`resolution`과 충돌 시 관측 우선**(STRUCTURAL+RESOLVING이면 −2를 −0.5로 완화 / TEMPORARY+WORSENING이면 +1을 −2로 반전 / TEMPORARY+NO_EVIDENCE면 +1→0) · §4.4 단기 노이즈 보정 · §4.5 절대 밸류 페널티 · §4.7 동점은 `quant_rank` tiebreak. `data/financials/{code}.json`이 있으면 nature 판정이 실제 이익 궤적에 앵커됨.
 
 모든 정성 항목 출처 태그 필수: `[출처: WebSearch · YYYY-MM]` / `확인 필요` / `[정량]`. 환각 방지 핵심.
 
@@ -95,11 +98,11 @@ DACON 제출용 동일 룰의 Skills.md 표준 6섹션 버전이 `skills/agents/
 
 ### Skills.md 패키지 (`skills/`)
 
-DACON 제출용. 8개 .md + 같은 내용의 PDF 8개 구성:
+DACON 제출용. 9개 .md + 같은 내용의 PDF 9개 구성:
 
 - `value_recovery_quant.md` — 메인 룰북 (4팩터 Z-Score, 검증 5종, 인터페이스 명세, 운영 예외)
 - `forward_attractive.md` / `dividend_value.md` — 보조 룰북 (단일 팩터 / 배당+가치)
-- `agents/{fundamental,risk}_analyst.md`, `agents/synthesizer.md`, `agents/portfolio_ranker.md` — 정성 분석 4종 (`portfolio_ranker` = `.claude/agents/ranker.md`의 제출용)
+- `agents/{fundamental,risk}_analyst.md`, `agents/resolution_scout.md`, `agents/synthesizer.md`, `agents/portfolio_ranker.md` — 정성 분석 5종 (`portfolio_ranker` = `.claude/agents/ranker.md`의 제출용, `resolution_scout` = `resolution-scout.md`)
 - `README.md` — 패키지 설명 + Skills.md 메타 명세 (새 룰북 추가 가이드, frontmatter 표준)
 
 새 룰북 추가 시 `skills/README.md`의 "Skills.md 메타 명세" 섹션 frontmatter 필드(name/version/type/output 등)를 따라야 함.

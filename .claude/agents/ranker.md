@@ -29,6 +29,15 @@ model: sonnet
     "investment_points": [ "... [출처: WebSearch · YYYY-MM]", "... [정량]" ],
     "risks": [ "... [출처: ...]", "... [정량]" ],
     "undervaluation_cause": { "text": "왜 싼가 [출처: ...]", "nature": "TEMPORARY | STRUCTURAL" },
+    "resolution": {                        // resolution-scout 산출 — §4.1의 주 입력
+      "cause_restated": "무엇이 풀려야 하는가",
+      "evidence": [ { "text": "...", "kind": "...", "verifiable_by": "2026-11 3Q 실적",
+                      "source": "[출처: ...]" } ],
+      "counter_evidence": [ { "text": "...", "source": "[출처: ...]" } ],
+      "expected_window": "1-2Q | 3-4Q | 1년+ | 불명",
+      "verdict": "RESOLVING | EARLY_SIGNS | NO_EVIDENCE | WORSENING",
+      "summary": "해소 전망 [출처: ...]"
+    },
     "verdict": "...",
     "evidence_strength": "STRONG | MODERATE | WEAK",
     "risk_level": "LOW | MEDIUM | HIGH"
@@ -48,16 +57,32 @@ model: sonnet
 
 각 종목에 대해 다음을 순서대로 평가해 `rerank_score`(높을수록 상위)를 정합니다.
 
-### 4.1 저평가 해소 촉매 (가중치 최대 — 1순위)
+### 4.1 저평가 해소 근거 (가중치 최대 — 1순위)
 
-investment_points 중 CATALYST_NEAR_TERM 성격 항목을 본다. **구체성·임박도로 4단계 세분** (중위권 변별력 확보 목적).
+**`resolution`을 주 입력으로 쓴다.** `resolution-scout`가 진단된 저평가 원인을 직접 겨냥해 검색한 결과이므로, 일반 촉매(`investment_points`의 CATALYST_NEAR_TERM)보다 우선한다. 일반 호재는 "이 종목에 좋은 일"이지만 `resolution.evidence`는 "**바로 그 싼 이유가 걷힌다**"는 증거다. 우리가 매기는 순위는 후자다.
 
-| 상태 | 판정 |
+| `resolution.verdict` | 판정 |
 |---|---|
-| 6개월 내 촉매가 **날짜·수치까지 구체 명시**되고 그런 항목이 2건 이상 (예: "6/26-28 월드투어 매진", "1Q +464% QoQ") | 매우 강함 (+3.5) |
-| 6개월 내 구체적 촉매 1건, 또는 복수지만 시점이 대략적 | 강함 (+2.5) |
-| 촉매가 있으나 시점 불명확하거나 구조적 드라이버(THESIS_DRIVER)만 존재 | 보통 (+1) |
-| 촉매 없음 / 모멘텀이 모호 / "확인 필요" 태그 위주 | Value Trap 의심 (−2) |
+| `RESOLVING` — 검증 가능한 근거 2건 이상 + 수치로 이미 확인 | 매우 강함 (+3.5) |
+| `EARLY_SIGNS` — 근거는 있으나 수치 미확인 또는 확인 시점이 멂 | 강함 (+2.5) |
+| `NO_EVIDENCE` — 원인을 겨냥하는 근거를 못 찾음 | Value Trap 의심 (−2) |
+| `WORSENING` — counter_evidence가 더 강함, 원인 심화 중 | 강한 Value Trap (−3) |
+
+**시점 보정** (`expected_window` 기준) — **`RESOLVING`·`EARLY_SIGNS`에만 적용한다.**
+
+| | |
+|---|---|
+| `1-2Q` — 두 분기 안에 확인 가능 | +0.5 |
+| `3-4Q` | 0 |
+| `1년+` 또는 `불명` | −0.5 |
+
+`NO_EVIDENCE`·`WORSENING`에는 적용하지 않는다. 해소가 임박한 것이 아니라 **악화가 임박한** 것이므로 가점이 될 수 없다. 이 구분이 없으면 "곧 나빠질 게 확인되는 종목"이 "천천히 나빠지는 종목"보다 높은 점수를 받는다.
+
+**counter_evidence 감점**: `evidence`가 있어도 `counter_evidence`가 그 수만큼 있으면 −1. 근거와 반증이 팽팽하면 해소가 확정적이지 않다.
+
+**`resolution`이 없는 경우에만** (구버전 데이터·페치 실패) 기존 방식으로 폴백한다 — `investment_points`의 CATALYST_NEAR_TERM을 구체성·임박도로 4단계 판정: 날짜·수치 명시 2건 이상 +3.5 / 구체 1건 +2.5 / 시점 불명확 +1 / 없음 −2. 폴백을 썼으면 `rerank_reason`에 `(촉매 기반)`을 남긴다.
+
+> **주의**: `resolution.evidence`가 많다고 좋은 게 아니다. `verifiable_by`가 없는 항목은 `resolution-scout`가 걸렀어야 하지만 남아 있다면 세지 않는다. 또 `evidence`의 `kind`가 `CAPITAL_POLICY`(자사주·배당)뿐이면 이익이 회복되는 게 아니라 주주환원으로 눌린 것이므로 한 단계 낮춘다.
 
 ### 4.2 이익 회복 가시성 (2순위)
 
@@ -102,6 +127,16 @@ RECENT_EARNINGS 항목 + Forward PER 개선이 실제 실적으로 뒷받침되�
 | 연간 적자/부진인데 **최근 분기만 급등**(latest_quarter OPM ≫ 연간 평균) | 일회성 피크 → §4.2.1과 연동, 이익 회복으로 가산 금지 |
 
 재무 파일이 없으면 본 교차검증은 생략하고 `nature`만 사용한다.
+
+**`resolution`과의 충돌 처리** — `nature`는 "왜 싼가"의 성격이고 `resolution.verdict`는 "지금 풀리고 있는가"의 관측이다. 둘이 어긋나면 **관측을 우선**한다.
+
+| 조합 | 처리 |
+|---|---|
+| `STRUCTURAL` + `RESOLVING` | §4.3의 −2를 **−0.5로 완화**. 구조적 문제라도 실제로 걷히고 있다는 검증 가능한 근거가 2건 이상이면 그게 사실이다 (예: 사업 재편 완료, 경쟁 구도 변화) |
+| `TEMPORARY` + `WORSENING` | §4.3의 +1을 **−2로 뒤집는다**. "일시적"이라는 진단이 후속 사실로 반박된 것이다 |
+| `TEMPORARY` + `NO_EVIDENCE` | +1 → **0**. 일시적이라 해도 풀린다는 증거가 없으면 대기 시간이 무한정일 수 있다 |
+
+이 규칙은 2026-08-13 실행에서 `ai_rank`가 `nature`와 100% 일치해 §4.3이 다른 룰을 압도했던 문제에 대한 직접 교정이다. `nature`는 **진단**이고, 진단은 후속 관측으로 갱신되어야 한다.
 
 ### 4.4 단기 노이즈 보정 (촉매 강도 × 센티먼트)
 

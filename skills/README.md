@@ -13,10 +13,24 @@ DACON 월간 해커톤 "투자 데이터를 시각화하라 — Skills 기반 �
 | 메인 | `value_recovery_quant.md` | 4팩터 Z-Score 가중합산으로 가치투자 Top 20 추출 |
 | 보조 | `forward_attractive.md` | Forward PER 단독 매력도 모델 (단일 팩터 변형) |
 | 보조 | `dividend_value.md` | 배당 + 가치 결합 모델 (보수적 변형) |
-| AI 에이전트 | `agents/fundamental_analyst.md` | 정성 모멘텀 추출 (WebSearch + 출처 태그) |
+| AI 에이전트 | `agents/fundamental_analyst.md` | 정성 모멘텀 + **저평가 원인 진단** (WebSearch + 출처 태그) |
 | AI 에이전트 | `agents/risk_analyst.md` | 정성·정량 리스크 추출 |
-| AI 에이전트 | `agents/synthesizer.md` | 두 정성 분석을 카드용 단일 JSON으로 통합 |
+| AI 에이전트 | `agents/resolution_scout.md` | **진단된 원인이 해소되고 있는지 검색·검증** (WebSearch) |
+| AI 에이전트 | `agents/synthesizer.md` | 세 정성 분석을 카드용 단일 JSON으로 통합 |
+| AI 에이전트 | `agents/portfolio_ranker.md` | Top 20을 "저평가 해소 가능성"으로 재순위 |
 | 패키지 설명 | `README.md` | 본 문서 |
+
+### 에이전트 파이프라인
+
+정성 분석은 **진단 → 처방 탐색 → 통합 → 재순위** 순서로 흐릅니다. 순서가 핵심입니다.
+
+```
+fundamental_analyst  →  "왜 싼가"          (undervaluation_cause)   ┐
+risk_analyst         →  "무엇이 위험한가"   (risks)                  ├→ synthesizer → portfolio_ranker
+resolution_scout     →  "그게 풀리고 있나"  (resolution)             ┘
+```
+
+`resolution_scout`는 반드시 `fundamental_analyst` **이후**에 실행됩니다. 검색 쿼리를 진단된 원인에서 파생시키기 때문입니다. 원인을 모른 채 검색하면 일반 호재 검색이 되어 단계의 의미가 사라집니다.
 
 ---
 
