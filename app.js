@@ -17,6 +17,10 @@ let currentMode = 'compare';
 // ============================================================
 // AI 분석 카드 영역 (서브에이전트 결과 — 점수 영향 X)
 // ============================================================
+function natLabel(n) {
+  return String(n || '').toUpperCase() === 'STRUCTURAL' ? '구조적' : '일시적';
+}
+
 function renderAiBlock(code, ai) {
   const evCls = `ev-${(ai.evidence_strength || 'mod').toLowerCase()}`;
   const rkCls = `rk-${(ai.risk_level || 'low').toLowerCase()}`;
@@ -33,13 +37,19 @@ function renderAiBlock(code, ai) {
     ? `<div class="ai-more-note">+${moreP + moreR}개 항목은 상세페이지에서 확인</div>` : '';
 
   const uc = ai.undervaluation_cause;
+  // 초기 진단이 증거로 뒤집혔으면 그 자체가 핵심 서사다 — 숨기지 않고 드러낸다.
+  const flipped = uc && uc.nature_initial && uc.nature_initial !== uc.nature;
+  const flipTxt = flipped
+    ? `<span class="ai-uc-flip">초기 ${natLabel(uc.nature_initial)} → 검증 후 ${natLabel(uc.nature)}</span>` : '';
   const ucBlock = (uc && uc.text) ? `
         <div class="ai-uc">
           <div class="ai-uc-head">
             <span class="ai-uc-lbl">왜 저평가인가</span>
             <span class="ai-uc-nat uc-${(uc.nature || '').toLowerCase()}">${uc.nature === 'STRUCTURAL' ? '구조적 · 회복 지연' : '일시적 · 해소 가능'}</span>
+            ${flipTxt}
           </div>
           <div class="ai-uc-text">${uc.text}</div>
+          ${uc.nature_basis ? `<div class="ai-uc-basis">${uc.nature_basis}</div>` : ''}
         </div>` : '';
 
   return `

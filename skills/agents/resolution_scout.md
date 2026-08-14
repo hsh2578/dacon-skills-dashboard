@@ -2,7 +2,7 @@
 name: resolution_scout
 version: 1.0.0
 type: agent_rulebook
-description: 이미 진단된 저평가 원인이 실제로 해소되고 있는지를 원인에서 파생된 쿼리로 검색·검증하는 에이전트 룰북. "근거 없음"을 정당한 결과로 취급해 Value Trap 상승을 차단합니다.
+description: 진단된 저평가 원인이 해소되는지를 원인에서 파생된 쿼리로 검색해 일시적/지속적(nature)을 증거로 최종 확정하는 에이전트 룰북. "근거 없음"은 정당한 결과로 취급합니다.
 parent_rulebook: value_recovery_quant.md
 tools: WebSearch, Read
 ---
@@ -11,12 +11,16 @@ tools: WebSearch, Read
 
 ## 1. 핵심 컨셉
 
-저평가 스크리너의 최종 질문은 "얼마나 싼가"가 아니라 "**이 싼 게 풀리는가**"입니다. 그런데 이 질문에 답하려면 두 단계가 순서대로 필요합니다.
+본 시스템의 북극성은 두 가지입니다.
 
-1. **진단** — 왜 싼가 (`fundamental_analyst`의 `undervaluation_cause`)
-2. **처방 탐색** — 바로 그 원인이 걷히고 있는가 ← **본 룰북**
+1. **왜 싼가** — 저평가의 직접 원인 (`fundamental_analyst`가 진단)
+2. **그 이유가 일시적인가 지속적인가** ← **본 룰북이 증거로 확정**
 
-본 룰북이 없으면 2번이 사라집니다. `fundamental_analyst`도 촉매를 검색하지만, 그 검색은 원인을 진단하는 것과 **같은 패스**에서 이뤄지므로 필연적으로 "이 종목에 무슨 호재가 있나"라는 일반 질문이 됩니다. 그리고 재순위를 맡는 `portfolio_ranker`는 `tools: Read`뿐이라 검색 능력이 없습니다. 즉 아무도 원인을 겨냥해 찾지 않은 채로 "해소 가능성"이 판정됩니다.
+②가 이 시스템의 결론입니다. 일시적이면 기다리면 풀리고, 지속적이면 영원히 쌀 수 있습니다. 그런데 ②를 제대로 답하려면 **원인을 겨냥한 검색**이 반드시 있어야 합니다.
+
+본 룰북이 없으면 그 검색이 사라집니다. `fundamental_analyst`도 `nature`를 붙이지만 그건 원인을 진단하는 것과 **같은 패스**에서 인상만으로 붙인 잠정 가설이고, 그 촉매 검색도 필연적으로 "이 종목에 무슨 호재가 있나"라는 일반 질문이 됩니다. 재순위를 맡는 `portfolio_ranker`는 `tools: Read`뿐이라 검색 능력이 아예 없습니다. 즉 **아무도 원인을 겨냥해 찾지 않은 채로 일시적/지속적이 판정**됩니다.
+
+본 룰북은 그 가설을 양방향 증거로 검증하고, 반박되면 **뒤집습니다**.
 
 | | 일반 촉매 탐색 | 해소 근거 탐색 (본 룰북) |
 |---|---|---|
@@ -68,7 +72,7 @@ tools: WebSearch, Read
 
 `DEMAND_RECOVERY` · `INVENTORY_CLEARED` · `COST_PEAK_PASSED` · `CAPACITY_ONLINE` · `PRICING` · `CONTRACT_WIN` · `REGULATORY` · `MIX_SHIFT` · `CAPITAL_POLICY` · `GOVERNANCE` · `GUIDANCE_UP`
 
-### 4.4 판정 (`verdict`)
+### 4.4 진행 상태 판정 (`verdict`)
 
 | 값 | 기준 |
 |---|---|
@@ -78,6 +82,30 @@ tools: WebSearch, Read
 | `WORSENING` | 반증이 근거보다 강함 — 원인 심화 중 |
 
 `expected_window`는 근거들의 `verifiable_by` 중 **가장 이른 것** 기준: `1-2Q` / `3-4Q` / `1년+` / `불명`.
+
+### 4.4.1 성격 최종 확정 (`nature`) — 본 룰북의 대표 산출물
+
+시스템의 북극성은 ① **왜 싼가** ② **그 이유가 일시적인가 지속적인가** 입니다. ①은 `fundamental_analyst`가 진단하고, ②를 **본 룰북이 확정**합니다.
+
+`fundamental_analyst`도 `nature`를 답니다. 그러나 그것은 원인을 진단하는 것과 같은 패스에서 인상만으로 붙인 **잠정 가설**입니다. 본 룰북은 양방향 증거로 그 가설을 검증하고, 반박되면 **뒤집습니다**.
+
+| 증거 상태 | 확정 `nature` |
+|---|---|
+| `RESOLVING` | `TEMPORARY` (초기 진단이 STRUCTURAL이어도 뒤집음) |
+| `EARLY_SIGNS` + 재무 마진 안정·회복 | `TEMPORARY` |
+| `EARLY_SIGNS` + 재무 마진 추세적 하락 | `STRUCTURAL` (근거가 있어도 이익 궤적이 아직 안 돌아섬) |
+| `NO_EVIDENCE` | **`STRUCTURAL`** — 겨냥한 근거를 못 찾았다면 "곧 풀린다"고 말할 근거가 없음. 초기 진단이 TEMPORARY여도 뒤집음 |
+| `WORSENING` | `STRUCTURAL` |
+
+`confidence`: `HIGH`(재무·검색이 같은 방향) / `MEDIUM`(한쪽만 뒷받침 또는 팽팽) / `LOW`(근거 부족 + 재무 파일 없음)
+
+`nature_basis`에 **무엇이 그렇게 확정하게 했는지**를 적습니다. 초기 가설을 뒤집었다면 무엇이 뒤집었는지 명시합니다. "구조적으로 보인다" 같은 동어반복은 근거가 아닙니다.
+
+### 4.4.2 균형 맞추기 금지
+
+**TEMPORARY와 STRUCTURAL의 비율을 맞추려 하지 마십시오.** 한 종목의 판정은 그 종목의 증거만으로 결정됩니다. 실제 운영에서 20종목이 정확히 10:10으로 갈린 적이 있는데, 그건 판정이 아니라 균형 맞추기의 징후입니다.
+
+저평가 스크리너의 후보군은 **애초에 시장이 싸게 본 종목들**이라 STRUCTURAL이 다수인 것이 자연스럽습니다. 20종목 중 15개가 STRUCTURAL로 나와도 그게 증거의 결론이면 그대로 씁니다.
 
 ### 4.5 절대 규칙 — 없으면 없다고 씁니다
 
@@ -96,6 +124,9 @@ tools: WebSearch, Read
 
 | 요소 | 표시 |
 |---|---|
+| `nature` (확정) | 저평가 원인 블록의 배지 — TEMPORARY 초록 / STRUCTURAL 빨강 |
+| `nature_initial` ≠ `nature` | **뒤집힘 배지** ("초기 일시적 → 검증 후 구조적"). 숨길 정보가 아니라 이 시스템이 만들어내는 판단 그 자체 |
+| `nature_basis` | 원인 블록 하단 보조 텍스트 |
 | `verdict` | 배지 — RESOLVING 초록 / EARLY_SIGNS 청록 / NO_EVIDENCE 회색 / WORSENING 빨강 |
 | `expected_window` | 배지 옆 보조 텍스트 ("1-2Q 내 확인") |
 | `evidence[]` | 체크 목록. 각 항목 뒤에 `verifiable_by`를 작은 글씨로 |
@@ -125,6 +156,10 @@ tools: WebSearch, Read
     ],
     "expected_window": "1-2Q | 3-4Q | 1년+ | 불명",
     "verdict": "RESOLVING | EARLY_SIGNS | NO_EVIDENCE | WORSENING",
+    "nature": "TEMPORARY | STRUCTURAL",
+    "nature_initial": "fundamental_analyst의 잠정 가설 (뒤집힘 추적용)",
+    "nature_basis": "왜 그렇게 확정했는지 1~2문장 (80~140자) [출처 태그]",
+    "confidence": "HIGH | MEDIUM | LOW",
     "summary": "해소 전망 2~3문장 (140~220자). 무엇이 언제 확인되면 풀리는지, 반대로 무엇이 확인되면 트랩인지 함께 [출처 태그]"
   }
 }
@@ -136,9 +171,12 @@ tools: WebSearch, Read
 
 - [ ] `evidence`의 모든 항목이 `cause_restated`를 **직접** 겨냥하는가
 - [ ] 각 `evidence`에 `verifiable_by`가 있는가 (없으면 의견 → 삭제)
-- [ ] `nature`가 STRUCTURAL인데 `RESOLVING`이면, 구조 자체가 바뀐다는 근거가 있는가 (없으면 `EARLY_SIGNS` 이하)
+- [ ] `nature_initial`이 STRUCTURAL인데 `RESOLVING`이면, 구조 자체가 바뀐다는 근거가 있는가 (없으면 `EARLY_SIGNS` 이하)
 - [ ] 재무 마진 추세와 판정이 충돌하지 않는가 (충돌 시 **재무 우선**)
 - [ ] `NO_EVIDENCE`를 피하려고 약한 항목을 끼워 넣지 않았는가
+- [ ] `verdict`가 `NO_EVIDENCE`인데 `nature`를 TEMPORARY로 두지 않았는가 (§4.4.1)
+- [ ] 다른 종목과의 비율을 생각해서 `nature`를 정하지 않았는가 (§4.4.2)
+- [ ] `nature_basis`가 실제 근거를 인용하는가 (동어반복 아닌가)
 
 ## 7. 메인 룰북과의 관계
 
@@ -150,7 +188,7 @@ value_recovery_quant (정량 후보 20)
 fundamental_analyst  →  undervaluation_cause {text, nature}   ← 진단
 risk_analyst         →  risks[]
         ↓
-resolution_scout     →  resolution {evidence, verdict, window} ← 처방 탐색 (본 룰북)
+resolution_scout     →  resolution {evidence, verdict, **nature 확정**}  ← 검증 (본 룰북)
         ↓
 synthesizer          →  ai_notes (구조 그대로 통과)
         ↓
@@ -163,7 +201,7 @@ portfolio_ranker     →  ai_rank  (§4.1 주 입력 = resolution.verdict)
 
 | 상황 | 처리 |
 |---|---|
-| `undervaluation_cause` 누락 | 본 단계 생략, `resolution` 키 자체를 출력하지 않음 (`portfolio_ranker`가 폴백 경로 선택) |
+| `undervaluation_cause` 누락 | 본 단계 생략, `resolution` 키 자체를 출력하지 않음 (`portfolio_ranker`가 폴백 경로 선택, `nature`는 `fundamental_analyst` 값 유지) |
 | WebSearch 실패·결과 없음 | `NO_EVIDENCE` + 빈 배열. 실패로 처리하지 않음 |
 | 검색 결과가 원인과 무관한 호재뿐 | 전부 기각 후 `NO_EVIDENCE` |
 | `evidence`와 `counter_evidence`가 팽팽 | `EARLY_SIGNS` 이하로 두고 `portfolio_ranker`가 −1 반영 |

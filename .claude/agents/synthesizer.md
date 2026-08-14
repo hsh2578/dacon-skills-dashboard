@@ -94,7 +94,9 @@ model: sonnet
     ],
     "undervaluation_cause": {
       "text": "왜 시장이 이 종목을 싸게 보는가 — 2~3문장 (권장 180~260자, 출처 태그 포함) [출처: WebSearch · YYYY-MM]",
-      "nature": "TEMPORARY | STRUCTURAL"
+      "nature": "TEMPORARY | STRUCTURAL",        // resolution.nature (확정본)
+      "nature_initial": "뒤집힌 경우에만 — fundamental-analyst의 잠정 가설",
+      "nature_basis": "왜 그렇게 확정했는지 [출처 태그]"
     },
     "resolution": { "resolution-scout 결과를 그대로 옮긴다 — 아래 설명 참조" },
     "verdict": "정량·정성 양호 | ...",
@@ -111,6 +113,20 @@ model: sonnet
 - risks: 정성 2-3 + 정량 0-1 = **총 3-4개**
 - 카드 UI에서는 `.slice(0,3)` / `.slice(0,2)`로 앞부분만 표시되므로 **앞에 가장 강한 항목 배치**
 - `undervaluation_cause`는 카드에 항상 1개 표시 (개수 slice 대상 아님) — 반드시 채울 것
+
+**`nature`는 `resolution`의 확정본을 쓴다 (중요)**:
+
+`fundamental-analyst`의 `nature`는 근거를 모으기 전의 **잠정 가설**이고, `resolution-scout`의 `resolution.nature`가 양방향 증거로 **확정한 값**입니다. 둘이 다르면 확정본이 이깁니다.
+
+| 필드 | 값 |
+|---|---|
+| `undervaluation_cause.nature` | `resolution.nature` (확정본) |
+| `undervaluation_cause.nature_initial` | 뒤집힌 경우에만 `resolution.nature_initial` 을 넣는다. 같으면 **생략** |
+| `undervaluation_cause.nature_basis` | `resolution.nature_basis` |
+
+`resolution`이 없으면 `fundamental-analyst`의 `nature`를 그대로 쓰고 `nature_initial`·`nature_basis`는 넣지 않습니다.
+
+뒤집힘은 숨길 정보가 아니라 **드러낼 정보**입니다. "초기엔 일시적으로 봤으나 근거 검증 후 구조적"이 이 시스템이 만들어내는 판단 그 자체입니다.
 
 **`resolution` 처리 — 요약하지 말고 그대로 옮긴다**:
 

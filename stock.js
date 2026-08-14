@@ -156,9 +156,26 @@ async function loadAiNotes() {
       natEl.textContent = uc.nature === 'STRUCTURAL' ? '구조적 · 회복 지연' : '일시적 · 해소 가능';
       natEl.className = `ai-uc-nat uc-${(uc.nature || '').toLowerCase()}`;
       document.getElementById('ai-detail-uc-text').textContent = uc.text;
+
+      // 초기 진단이 증거로 뒤집혔으면 그게 이 종목의 핵심 서사다.
+      const flipEl = document.getElementById('ai-detail-uc-flip');
+      if (flipEl) {
+        const flipped = uc.nature_initial && uc.nature_initial !== uc.nature;
+        flipEl.style.display = flipped ? '' : 'none';
+        if (flipped) {
+          flipEl.textContent = `초기 ${natLabel(uc.nature_initial)} → 검증 후 ${natLabel(uc.nature)}`;
+        }
+      }
+      const basisEl = document.getElementById('ai-detail-uc-basis');
+      if (basisEl) {
+        basisEl.style.display = uc.nature_basis ? '' : 'none';
+        basisEl.textContent = uc.nature_basis || '';
+      }
     } else if (ucEl) {
       ucEl.style.display = 'none';
     }
+
+    renderResolution(ai.resolution);
 
     const evCls = `ev-${(ai.evidence_strength || 'mod').toLowerCase()}`;
     const rkCls = `rk-${(ai.risk_level || 'low').toLowerCase()}`;
@@ -192,6 +209,53 @@ async function loadAiNotes() {
     console.warn('[ai_notes] 로드 실패:', e.message);
     sectionEl.style.display = 'none';
   }
+}
+
+function natLabel(n) {
+  return String(n || '').toUpperCase() === 'STRUCTURAL' ? '구조적' : '일시적';
+}
+
+const RES_VERDICT = {
+  RESOLVING: ['해소 진행 중', 'res-resolving'],
+  EARLY_SIGNS: ['초기 신호', 'res-early'],
+  NO_EVIDENCE: ['근거 없음', 'res-none'],
+  WORSENING: ['원인 심화 중', 'res-worse'],
+};
+
+// resolution-scout 산출 — "이 저평가가 풀릴까"에 대한 양방향 증거.
+// evidence가 비어 있는 것은 결측이 아니라 결론이므로 그대로 보여준다.
+function renderResolution(res) {
+  const el = document.getElementById('ai-detail-res');
+  if (!el) return;
+  if (!res || !res.verdict) { el.style.display = 'none'; return; }
+  el.style.display = '';
+
+  const [txt, cls] = RES_VERDICT[String(res.verdict).toUpperCase()] || ['판정 없음', 'res-none'];
+  const vEl = document.getElementById('ai-detail-res-verdict');
+  vEl.textContent = txt;
+  vEl.className = `ai-res-verdict ${cls}`;
+
+  const wEl = document.getElementById('ai-detail-res-window');
+  const showWindow = res.expected_window && res.expected_window !== '불명'
+    && ['RESOLVING', 'EARLY_SIGNS'].includes(String(res.verdict).toUpperCase());
+  wEl.style.display = showWindow ? '' : 'none';
+  wEl.textContent = showWindow ? `${res.expected_window} 내 확인` : '';
+
+  document.getElementById('ai-detail-res-summary').textContent = res.summary || '';
+
+  const evUl = document.getElementById('ai-detail-res-ev');
+  const ev = res.evidence || [];
+  evUl.innerHTML = ev.length
+    ? ev.map(e => `<li>${escapeHtml(e.text || '')}`
+        + (e.verifiable_by ? `<span class="ai-res-when">${escapeHtml(e.verifiable_by)} 확인</span>` : '')
+        + '</li>').join('')
+    : '<li class="ai-res-empty">원인을 직접 겨냥하는 해소 근거를 찾지 못했습니다.</li>';
+
+  const cUl = document.getElementById('ai-detail-res-counter');
+  const ce = res.counter_evidence || [];
+  cUl.innerHTML = ce.length
+    ? ce.map(c => `<li>${escapeHtml(c.text || '')}</li>`).join('')
+    : '<li class="ai-res-empty">확인된 심화 요인 없음</li>';
 }
 
 function escapeHtml(s) {
