@@ -227,7 +227,7 @@ stock.html의 시그널 영역에 동일 데이터가 더 큰 캔버스로 표�
 
 ## 6. 인사이트 생성 룰
 
-본 룰북은 정량 출력까지만 정의합니다. 정성 분석(투자 포인트, 리스크 등)은 별도 서브에이전트 룰북(`agents/fundamental_analyst.md`, `agents/risk_analyst.md`, `agents/synthesizer.md`)에 위임됩니다. 본 섹션에서는 정량 시그널의 자동 코멘트 생성 룰만 다룹니다.
+본 룰북은 정량 출력까지만 정의합니다. 정성 분석(투자 포인트, 리스크, 저평가 원인·성격 판정)은 별도 서브에이전트 룰북(`agents/fundamental_analyst.md`, `agents/risk_analyst.md`, `agents/resolution_scout.md`, `agents/synthesizer.md`, `agents/portfolio_ranker.md`)에 위임됩니다. 본 섹션에서는 정량 시그널의 자동 코멘트 생성 룰만 다룹니다.
 
 ### 6.1 카드 자동 코멘트 템플릿
 
@@ -278,9 +278,11 @@ LLM이 학습 단계에서 외운 수치는 절대 인용하지 않습니다. �
 | 인터페이스 | 출력자 | 입력자 | 스키마 정의 위치 |
 |---|---|---|---|
 | 정량 점수 + Top 20 | value_recovery_quant (본 룰북) | fundamental_analyst, risk_analyst | data/screens/triple_cross.json |
-| 정성 모멘텀 | fundamental_analyst | synthesizer | agents/fundamental_analyst.md §6.1 |
-| 정성·정량 리스크 | risk_analyst | synthesizer | agents/risk_analyst.md §6.1 |
-| 카드 통합 JSON | synthesizer | 사이트 (app.js, stock.js) | agents/synthesizer.md §6.1 |
+| 정성 모멘텀 + 저평가 원인 진단 | fundamental_analyst | resolution_scout, synthesizer | agents/fundamental_analyst.md §6.1 |
+| 정성·정량 리스크 | risk_analyst | resolution_scout, synthesizer | agents/risk_analyst.md §6.1 |
+| 해소 근거 + **일시적/지속적 확정** | resolution_scout | synthesizer, portfolio_ranker | agents/resolution_scout.md §6 |
+| 카드 통합 JSON | synthesizer | portfolio_ranker, 사이트 (app.js, stock.js) | agents/synthesizer.md §6.1 |
+| 저평가 해소 가능성 순위 | portfolio_ranker | 사이트 (ai_rank) | agents/portfolio_ranker.md §4 |
 | universe + 컨센서스 | (페치 스크립트) | 본 룰북 | data/universe.json |
 | PER/PBR 매트릭스 | (페치 스크립트) | 본 룰북 + 사이트 fallback | data/matrix/{per,pbr}_monthly.json |
 

@@ -78,15 +78,29 @@ tools: Read
 
 ### 4.4 undervaluation_cause (왜 저평가인가 — 카드 한 줄 부가표기)
 
-`fundamental.undervaluation_cause`를 그대로 전달합니다. `text`와 `nature`(TEMPORARY/STRUCTURAL) 모두 보존합니다.
+`text`는 `fundamental_analyst`의 것을 보존하고, **`nature`는 `resolution_scout`의 확정본을 씁니다.**
+
+`fundamental_analyst`의 `nature`는 근거를 모으기 전의 **잠정 가설**이고, `resolution.nature`가 양방향 증거로 **확정한 값**입니다. 둘이 다르면 확정본이 이깁니다.
+
+| 필드 | 값 |
+|---|---|
+| `undervaluation_cause.nature` | `resolution.nature` (확정본) |
+| `undervaluation_cause.nature_initial` | 뒤집힌 경우에만 `resolution.nature_initial`. 같으면 생략 |
+| `undervaluation_cause.nature_basis` | `resolution.nature_basis` |
+
+뒤집힘은 숨길 정보가 아니라 **드러낼 정보**입니다. "초기엔 일시적으로 봤으나 근거 검증 후 구조적"이 이 시스템이 만들어내는 판단 그 자체입니다.
+
+`resolution`이 없으면 `fundamental_analyst`의 `nature`를 그대로 쓰고 `nature_initial`·`nature_basis`는 넣지 않습니다.
 
 | 상황 | 처리 |
 |---|---|
-| `fundamental.undervaluation_cause` 존재 | `text`·`nature` 그대로 전달, 출처 태그 보존 |
-| 여유 상한(75자) 초과 | 원인 핵심구만 남기고 압축 — `nature`는 절대 변경 금지 |
+| `fundamental.undervaluation_cause` 존재 | `text` 보존, `nature`는 `resolution.nature`로 교체, 출처 태그 보존 |
+| 여유 상한(320자) 초과 | 원인 핵심구만 남기고 압축 — `nature`는 임의 변경 금지 (`resolution` 확정본만 반영) |
 | `fundamental.undervaluation_cause` 없음 | risks 중 가장 구조적/시장인식 성격 항목 1개를 출처 태그째 인용해 `text`로, 그 성격에 따라 `nature` 부여 (새 사실 생성 금지) |
 
-이 필드의 `nature`는 후속 `portfolio_ranker`의 Value Trap 판별 주 입력이 되므로 임의 변경·생략을 금지합니다.
+이 필드의 `nature`는 후속 `portfolio_ranker`의 Value Trap 판별 주 입력이 되므로 임의 변경·생략을 금지합니다. 유일하게 허용되는 변경은 `resolution.nature`(증거 확정본)로의 교체입니다.
+
+**`resolution`은 요약하지 말고 구조 그대로 옮깁니다.** 항목 수·`kind`·`verifiable_by`가 전부 `portfolio_ranker` 점수 계산에 쓰이므로 압축하면 재순위가 망가집니다. `evidence`가 빈 배열이어도 그대로 둡니다 — 근거 없음은 정당한 결과이고 강등 신호로 작동합니다. `verdict`를 다시 판정하지 않습니다.
 
 ### 4.5 verdict 매트릭스
 
@@ -153,8 +167,11 @@ evidence_strength와 risk_level은 카드 우측 상단에 색상 배지로 표�
     ],
     "undervaluation_cause": {
       "text": "왜 시장이 이 종목을 싸게 보는가 — 한 줄 (권장 50자, 출처 태그 포함) [출처: WebSearch · YYYY-MM]",
-      "nature": "TEMPORARY | STRUCTURAL"
+      "nature": "TEMPORARY | STRUCTURAL",
+      "nature_initial": "뒤집힌 경우에만 — fundamental_analyst의 잠정 가설",
+      "nature_basis": "왜 그렇게 확정했는지 [출처 태그]"
     },
+    "resolution": { "resolution_scout 결과를 구조 그대로 (요약 금지)" },
     "verdict": "정량·정성 양호 | ...",
     "evidence_strength": "STRONG | MODERATE | WEAK",
     "risk_level": "LOW | MEDIUM | HIGH",
