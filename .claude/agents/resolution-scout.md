@@ -110,7 +110,9 @@ model: sonnet
 | `NO_EVIDENCE` | 원인을 직접 겨냥하는 근거를 못 찾음 |
 | `WORSENING` | counter_evidence가 evidence보다 강함 — 원인이 심화 중 |
 
-`expected_window`는 근거들의 `verifiable_by` 중 **가장 이른 것**을 기준으로 정합니다: `1-2Q` / `3-4Q` / `1년+` / `불명`.
+`expected_window`는 **`evidence`의 `verifiable_by` 중 가장 이른 것**을 기준으로 정합니다: `1-2Q` / `3-4Q` / `1년+` / `불명`.
+
+`evidence`가 비어 있으면 `불명`입니다 — 해소 근거가 없는데 "언제 해소되는지"를 말할 수 없습니다. 반증의 확인 시점을 여기 쓰지 마십시오. 그건 해소 시점이 아니라 악화 확인 시점입니다.
 
 ### 6.2 `nature` — 저평가 요인이 일시적인가 지속적인가 (최종 확정)
 

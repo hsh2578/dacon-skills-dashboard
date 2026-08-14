@@ -81,7 +81,9 @@ tools: WebSearch, Read
 | `NO_EVIDENCE` | 원인을 직접 겨냥하는 근거 없음 |
 | `WORSENING` | 반증이 근거보다 강함 — 원인 심화 중 |
 
-`expected_window`는 근거들의 `verifiable_by` 중 **가장 이른 것** 기준: `1-2Q` / `3-4Q` / `1년+` / `불명`.
+`expected_window`는 **`evidence`의 `verifiable_by` 중 가장 이른 것** 기준: `1-2Q` / `3-4Q` / `1년+` / `불명`.
+
+`evidence`가 비어 있으면 `불명`입니다 — 해소 근거가 없는데 언제 해소되는지 말할 수 없습니다. 반증의 확인 시점을 여기 쓰지 마십시오. 그건 해소 시점이 아니라 악화 확인 시점입니다.
 
 ### 4.4.1 성격 최종 확정 (`nature`) — 본 룰북의 대표 산출물
 
