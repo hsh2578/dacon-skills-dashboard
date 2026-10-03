@@ -28,7 +28,7 @@
 ## 4팩터 알고리즘 (`scripts/apply_triple_cross.py`)
 
 ```
-Universe 필터 (303종목)
+Universe 필터 (299종목)
   ↓ 시총 2,000억+ 보통주 · 5Y PER 검증 · Forward PER + 컨센 보유
 
 4팩터 raw 계산
@@ -131,7 +131,7 @@ DACON 제출용. 7개 .md + 같은 내용의 PDF 7개로 구성:
 - 헤더: sticky + backdrop blur 14px, `PER · PBR` 모노스페이스 브랜드 마크
 - 폰트: Pretendard (SIL OFL) + JetBrains Mono (SIL OFL)
 - 색: 모노크롬 베이스 + 한국 시장 색 컨벤션(상승 빨강 / 하락 파랑)
-- 검색: 30개/페이지 페이지네이션 (303종목 → 11페이지) + ellipsis
+- 검색: 30개/페이지 페이지네이션 (299종목 → 10페이지) + ellipsis
 - 모바일: 768px 이하 반응형 (헤더 nav 풀 너비 3등분, 가로 스크롤 0)
 - 저작권: 외부 이미지·아이콘 0, 폰트는 모두 OFL
 
