@@ -10,6 +10,19 @@ const METRICS = [
 
 let dataset = null;
 
+// v6 (2026-11-24) — 원인 분류 · 기대 괴리 (app.js 와 같은 라벨)
+const CAUSE_LABEL = {
+  CYCLICAL_PEAK: '경기 정점', STRUCTURAL_DECLINE: '구조적 쇠퇴', TEMPORARY_SHOCK: '일시 충격',
+  ONE_OFF_ACCOUNTING: '일회성 회계', GOVERNANCE_DISCOUNT: '지배구조 할인', NEGLECT: '소외',
+  REGULATORY_MACRO: '규제·거시', BALANCE_SHEET_TRAP: '재무 함정',
+};
+const GAP_LABEL = {
+  TOO_PESSIMISTIC: ['가격이 과도하게 비관적', 'uc-temporary'],
+  FAIR: ['가격이 전망 반영', ''],
+  NOT_PESSIMISTIC_ENOUGH: ['함정 경계', 'uc-structural'],
+};
+
+
 function fmtZ(v) {
   return v == null ? '—' : (v >= 0 ? '+' : '') + v.toFixed(2);
 }
@@ -38,33 +51,37 @@ async function loadTripleCrossSignal() {
 
     const total = all.length;
     document.getElementById('signal-rank-line').innerHTML =
-      `universe <b>${total}종목</b> 중 <b>#${me.rank}위</b> · ` +
-      `Value <b>${fmtZ(me.value_score)}</b> · Growth <b>${fmtZ(me.growth_score)}</b>`;
+      `universe <b>${total}종목</b> 중 정량 <b>#${me.rank}위</b> · ` +
+      `가치 <b>${fmtZ(me.value_score)}</b> · 전망 <b>${fmtZ(me.growth_score)}</b>` +
+      (me.quality_pass === false ? ' · <b style="color:var(--warn)">퀄리티 하위 20% (Top 자격 없음)</b>' : '') +
+      (me.cyclical_flag ? ' · <b style="color:var(--warn)">이익 정점 의심</b>' : '');
 
     const tierLabel = {
       HIDDEN_GEM: 'Hidden Gem', STRONG_BUY: 'Strong Buy', BUY: 'Buy',
       WATCH: 'Watch', WEAK: 'Weak', MISS: 'Miss',
     };
     const tierEl = document.getElementById('signal-tier');
-    tierEl.textContent = tierLabel[me.tier] || me.tier;
-    tierEl.className = `signal-tier-badge tier-${(me.tier || 'BUY').toLowerCase()}`;
+    // v6: 전 종목 같은 티어라 정보가 없다 — 숨김 (순위·기대 괴리가 결론을 대신한다)
+    tierEl.style.display = 'none';
 
     const factorList = [
-      { lbl: 'PER 저평가', sub: '5Y avg 대비', z: me.s1_per_z, raw: me.s1_per_raw },
-      { lbl: 'PBR 저평가', sub: '5Y avg 대비', z: me.s1_pbr_z, raw: me.s1_pbr_raw },
-      { lbl: 'Forward 개선', sub: 'Cur → Fwd PER', z: me.s3_per_z, raw: me.s3_per_raw },
-      { lbl: '목표가 상승여력', sub: '컨센서스', z: me.upside_z, raw: me.upside_raw },
+      { lbl: 'PER 할인', sub: '5Y 중앙 대비', z: me.s1_per_z, raw: me.s1_per_raw },
+      { lbl: 'PBR 할인', sub: '5Y 중앙 대비', z: me.s1_pbr_z, raw: me.s1_pbr_raw },
+      { lbl: '전망 할인', sub: 'Fwd PER vs 5Y 중앙', z: me.s3_per_z, raw: me.s3_per_raw },
+      { lbl: '가격 가정 이익', sub: '컨센서스 대비 배수', z: null, raw: null,
+        txt: me.implied_fade == null ? '—' : '×' + me.implied_fade.toFixed(2),
+        on: me.implied_fade != null && me.implied_fade < 1 },
     ];
 
     document.getElementById('signal-factors').innerHTML = factorList.map(f => {
-      const on = f.z != null && f.z > 0;
-      const rawTxt = f.raw == null ? '—' : (f.raw >= 0 ? '+' : '') + (f.raw * 100).toFixed(1) + '%';
+      const on = f.on ?? (f.z != null && f.z > 0);
+      const rawTxt = f.txt ?? (f.raw == null ? '—' : (f.raw >= 0 ? '+' : '') + (f.raw * 100).toFixed(1) + '%');
       return `
         <div class="factor-item ${on ? 'on' : ''}">
           <div class="factor-lbl">${f.lbl}</div>
           <div class="factor-sub">${f.sub}</div>
           <div class="factor-raw">${rawTxt}</div>
-          <div class="factor-z">z = ${fmtZ(f.z)}</div>
+          <div class="factor-z">${f.z == null ? '' : 'z = ' + fmtZ(f.z)}</div>
         </div>`;
     }).join('');
 
@@ -76,12 +93,12 @@ async function loadTripleCrossSignal() {
     };
     document.getElementById('signal-groups').innerHTML = `
       <div class="g-row big">
-        <span class="g-lbl">Value</span>
+        <span class="g-lbl">가치</span>
         ${groupBar(me.value_score)}
         <span class="g-val">${fmtZ(me.value_score)}</span>
       </div>
       <div class="g-row big">
-        <span class="g-lbl">Growth</span>
+        <span class="g-lbl">전망</span>
         ${groupBar(me.growth_score)}
         <span class="g-val">${fmtZ(me.growth_score)}</span>
       </div>`;
@@ -98,10 +115,24 @@ async function loadTripleCrossSignal() {
 async function load() {
   // 1차: 일별 풀 데이터 시도
   try {
-    const r = await fetch(`data/stocks/${code}.json?t=${Date.now()}`);
+    const [r, scR] = await Promise.all([
+      fetch(`data/daily/${code}.json?t=${Date.now()}`),
+      fetch(`data/screens/triple_cross.json?t=${Date.now()}`),
+    ]);
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    dataset = await r.json();
-    dataset._source = 'daily';
+    const d = await r.json();
+    const sc = scR.ok ? ((await scR.json()).all_ranked || []).find(s => s.code === code) : null;
+    const ymd = (x) => `${x.slice(0, 4)}-${x.slice(4, 6)}-${x.slice(6, 8)}`;
+    dataset = {
+      name: d.name || sc?.name || code, ticker: code, market: 'KR', frequency: 'daily',
+      dates: d.dates.map(ymd), per: d.per, pbr: d.pbr,
+      market_cap: d.mcap_억, market_cap_unit: '억원', close: d.close || d.dates.map(() => null), price_unit: '원',
+      forward: { per_forward: sc?.forward_per, year_estimate: sc?.fwd_year },
+      consensus: { summary: { avg_target_price: sc?.avg_target, broker_count: sc?.broker_count }, brokers: [] },
+      updated_at: new Date().toISOString(),
+      note: 'PER·PBR = (보통주+우선주 시가총액) ÷ DART 지배주주 TTM 순이익·자본, 공시 기한 이후 반영',
+      _source: 'daily',
+    };
   } catch (e) {
     // 2차: 매트릭스 fallback (월별)
     dataset = await loadFromMatrix(code);
@@ -119,7 +150,7 @@ async function load() {
 
   // 데이터 정밀도 안내
   const sourceNote = dataset._source === 'monthly'
-    ? '월별 데이터 (60개월) — 일별 정밀 데이터는 Top 20 종목만 제공'
+    ? '월별 데이터 (60개월) — 일별 정밀 데이터는 Top 30 종목만 제공'
     : null;
   if (sourceNote) document.getElementById('note').innerHTML = sourceNote;
   else if (dataset.note) document.getElementById('note').textContent = dataset.note;
@@ -153,14 +184,20 @@ async function loadAiNotes() {
     if (ucEl && uc && uc.text) {
       ucEl.style.display = '';
       const natEl = document.getElementById('ai-detail-uc-nat');
-      natEl.textContent = uc.nature === 'STRUCTURAL' ? '구조적 · 회복 지연' : '일시적 · 해소 가능';
-      natEl.className = `ai-uc-nat uc-${(uc.nature || '').toLowerCase()}`;
+      const gap = GAP_LABEL[ai.resolution?.expectation_gap];
+      if (uc.cause_type) {
+        natEl.textContent = `${CAUSE_LABEL[uc.cause_type] || uc.cause_type}${gap ? ' · ' + gap[0] : ''}`;
+        natEl.className = `ai-uc-nat ${gap ? gap[1] : ''}`;
+      } else {
+        natEl.textContent = uc.nature === 'STRUCTURAL' ? '구조적 · 회복 지연' : '일시적 · 해소 가능';
+        natEl.className = `ai-uc-nat uc-${(uc.nature || '').toLowerCase()}`;
+      }
       document.getElementById('ai-detail-uc-text').textContent = uc.text;
 
       // 초기 진단이 증거로 뒤집혔으면 그게 이 종목의 핵심 서사다.
       const flipEl = document.getElementById('ai-detail-uc-flip');
       if (flipEl) {
-        const flipped = uc.nature_initial && uc.nature_initial !== uc.nature;
+        const flipped = !uc.cause_type && uc.nature_initial && uc.nature_initial !== uc.nature;
         flipEl.style.display = flipped ? '' : 'none';
         if (flipped) {
           flipEl.textContent = `초기 ${natLabel(uc.nature_initial)} → 검증 후 ${natLabel(uc.nature)}`;
@@ -168,8 +205,10 @@ async function loadAiNotes() {
       }
       const basisEl = document.getElementById('ai-detail-uc-basis');
       if (basisEl) {
-        basisEl.style.display = uc.nature_basis ? '' : 'none';
-        basisEl.textContent = uc.nature_basis || '';
+        const basis = [uc.implied_expectations, ai.resolution?.expectation_gap_basis].filter(Boolean).join('  /  ')
+          || uc.nature_basis || '';
+        basisEl.style.display = basis ? '' : 'none';
+        basisEl.textContent = basis;
       }
     } else if (ucEl) {
       ucEl.style.display = 'none';
@@ -180,7 +219,8 @@ async function loadAiNotes() {
     const evCls = `ev-${(ai.evidence_strength || 'mod').toLowerCase()}`;
     const rkCls = `rk-${(ai.risk_level || 'low').toLowerCase()}`;
     document.getElementById('ai-detail-badges').innerHTML = `
-      <span class="ai-badge ${evCls}">근거 ${ai.evidence_strength || ''}</span>
+      ${ai.resolution?.info_grade ? `<span class="ai-badge ev-moderate" title="증권사 리포트 수 기준 정보량 (A 6건 이상 · B 2~5 · C 0~1)">정보 ${ai.resolution.info_grade}</span>`
+        : `<span class="ai-badge ${evCls}">근거 ${ai.evidence_strength || ''}</span>`}
       <span class="ai-badge ${rkCls}">리스크 ${ai.risk_level || ''}</span>
     `;
 
@@ -343,7 +383,9 @@ async function loadFromMatrix(code) {
       .concat(universe?.excluded?.reit || [], universe?.excluded?.spac || [],
               universe?.excluded?.no_forward_per || [], universe?.excluded?.no_target_price || [],
               universe?.excluded?.adverse || [], universe?.excluded?.short_history || [],
-              universe?.excluded?.no_data || [])
+              universe?.excluded?.no_data || [], universe?.excluded?.validation_adverse || [],
+              universe?.excluded?.validation_short || [], universe?.excluded?.validation_nodata || [],
+              universe?.excluded?.no_fy1_eps || [])
       .find(s => s.code === code);
     const screenStock = (screen?.all_ranked || []).find(s => s.code === code);
 
@@ -563,7 +605,7 @@ function renderSummary() {
   };
   const fwd = dataset.forward || {};
   const fwdMap = { per: fwd.per_forward, pbr: fwd.pbr_forward };
-  const fwdYearShort = (fwd.year_estimate || '').split('/')[0] || '';
+  const fwdYearShort = String(fwd.year_estimate || '').includes('E') ? fwd.year_estimate : ((fwd.year_estimate || '').split('/')[0] + 'E');
 
   for (const m of ['per', 'pbr', 'market_cap', 'close']) {
     if (!hasAnyData(m)) continue;
@@ -576,7 +618,7 @@ function renderSummary() {
     const zCls = z >= 0 ? 'z-pos' : 'z-neg';
     const sign = z >= 0 ? '+' : '';
     const fwdRow = (m === 'per' || m === 'pbr') && fwdMap[m] != null
-      ? `<span>Fwd ${fwdYearShort}E</span><span style="color:#dc2626;font-weight:600">${fmt(fwdMap[m])}</span>`
+      ? `<span>Fwd ${fwdYearShort}</span><span style="color:#dc2626;font-weight:600">${fmt(fwdMap[m])}</span>`
       : '';
     blocks.push(`
       <div class="stat-block">
@@ -603,13 +645,12 @@ function renderSummary() {
     const upsideStr = upside == null ? '—' : `${upside >= 0 ? '+' : ''}${upside.toFixed(1)}%`;
     blocks.push(`
       <div class="stat-block">
-        <div class="stat-label">증권사 컨센서스 (${cs.broker_count || brokers.length}곳)</div>
+        <div class="stat-label">증권사 목표가 (${cs.broker_count || brokers.length}곳 · 점수 미반영)</div>
         <div class="stat-val">${fmt(tgt)}원</div>
         <div class="stat-grid">
           <span>현재가 대비</span><span class="${upsideCls}">${upsideStr}</span>
-          <span>Fwd PER</span><span>${fmt(cs.avg_per_forward)}</span>
-          <span>Fwd EPS</span><span>${fmt(cs.avg_eps_forward)}</span>
-          <span>점수</span><span>${cs.consensus_score ?? '—'}</span>
+          ${cs.avg_per_forward != null ? `<span>Fwd PER</span><span>${fmt(cs.avg_per_forward)}</span>` : ''}
+          ${cs.avg_eps_forward != null ? `<span>Fwd EPS</span><span>${fmt(cs.avg_eps_forward)}</span>` : ''}
         </div>
       </div>`);
   }

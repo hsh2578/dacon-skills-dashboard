@@ -2,7 +2,7 @@
   "code": "316140",
   "corp_code": "01350869",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:35:37",
+  "fetched_at": "2026-11-23T22:12:52",
   "unit": "원",
   "annual": [
     {
@@ -34,11 +34,11 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
+    "period": "2026-3Q(누적)",
     "revenue": null,
-    "op_income": 808155000000,
+    "op_income": 3542764000000,
     "op_margin": null,
-    "net_income": 639433000000,
+    "net_income": 2745876000000,
     "net_margin": null,
     "fs_div": "CFS"
   }

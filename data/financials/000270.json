@@ -2,7 +2,7 @@
   "code": "000270",
   "corp_code": "00106641",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:34:47",
+  "fetched_at": "2026-11-23T22:12:48",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 29501881000000,
-    "op_income": 2205091000000,
-    "op_margin": 0.0747,
-    "net_income": 1830207000000,
-    "net_margin": 0.062,
+    "period": "2026-3Q(누적)",
+    "revenue": 94136383000000,
+    "op_income": 6651936000000,
+    "op_margin": 0.0707,
+    "net_income": 5443487000000,
+    "net_margin": 0.0578,
     "fs_div": "CFS"
   }
 }

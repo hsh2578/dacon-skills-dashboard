@@ -187,3 +187,24 @@ def test_결산기_목록은_6자리_숫자만():
 
 def test_최근_결산기는_내림차순():
     assert ttm.recent_stacs(SAMSUNG, 3) == ["202603", "202512", "202509"]
+
+
+def test_latest_due_stac():
+    from datetime import date
+    from ttm import latest_due_stac
+    assert latest_due_stac(date(2026, 11, 23)) == "202609"   # 3Q 기한 11-14 경과
+    assert latest_due_stac(date(2026, 11, 10)) == "202606"
+    assert latest_due_stac(date(2026, 4, 1)) == "202512"     # 사업보고서 기한 3-31 경과
+    assert latest_due_stac(date(2026, 3, 30)) == "202509"
+
+
+def test_valuation_uses_amounts_and_lag():
+    """시총/금액 PER — 공시 전엔 직전 분기, 순이익 ≤ 0 이면 None."""
+    from build_valuation import valuation_series, company_mcap
+    s = {"202412": {"ni": 400, "eq": 1000}, "202503": {"ni": 100, "eq": 1100},
+         "202512": {"ni": 500, "eq": 1200}, "202603": {"ni": 200, "eq": 1300}}
+    v = valuation_series(s, ["20260512", "20260518"], [10000, 10000])
+    assert v[0] == (10000 / 500, 10000 / 1200, "202512")      # 1Q 공시 기한(5/15) 전
+    assert v[1] == (10000 / 600, 10000 / 1300, "202603")      # TTM = 500 - 100 + 200
+    assert valuation_series({"202512": {"ni": -5, "eq": 0}}, ["20260401"], [1])[0][:2] == (None, None)
+    assert company_mcap({"005930": 100, "005935": 10, "005940": 7}, "005930") == 110

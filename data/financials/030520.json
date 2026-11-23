@@ -2,7 +2,7 @@
   "code": "030520",
   "corp_code": "00204262",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:46:43",
+  "fetched_at": "2026-11-23T22:17:03",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 63616446094,
-    "op_income": 8564239878,
-    "op_margin": 0.1346,
-    "net_income": 6838974511,
-    "net_margin": 0.1075,
+    "period": "2026-3Q(누적)",
+    "revenue": 275618686005,
+    "op_income": 32104340710,
+    "op_margin": 0.1165,
+    "net_income": 33474077533,
+    "net_margin": 0.1215,
     "fs_div": "CFS"
   }
 }

@@ -2,7 +2,7 @@
   "code": "018670",
   "corp_code": "00144164",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:40:45",
+  "fetched_at": "2026-11-23T22:14:13",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 2635257118131,
-    "op_income": 227687095512,
-    "op_margin": 0.0864,
-    "net_income": 267353907314,
-    "net_margin": 0.1015,
+    "period": "2026-3Q(누적)",
+    "revenue": 7659330714888,
+    "op_income": 331405403193,
+    "op_margin": 0.0433,
+    "net_income": 463158938548,
+    "net_margin": 0.0605,
     "fs_div": "CFS"
   }
 }

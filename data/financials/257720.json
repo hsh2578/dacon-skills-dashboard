@@ -2,7 +2,7 @@
   "code": "257720",
   "corp_code": "00982023",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:39:46",
+  "fetched_at": "2026-11-23T22:14:34",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 346556192213,
-    "op_income": 64540111638,
-    "op_margin": 0.1862,
-    "net_income": 54346030385,
-    "net_margin": 0.1568,
+    "period": "2026-3Q(누적)",
+    "revenue": 1173515955257,
+    "op_income": 217126977519,
+    "op_margin": 0.185,
+    "net_income": 135478015587,
+    "net_margin": 0.1154,
     "fs_div": "CFS"
   }
 }

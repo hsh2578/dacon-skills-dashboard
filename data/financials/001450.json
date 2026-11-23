@@ -2,7 +2,7 @@
   "code": "001450",
   "corp_code": "00164973",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:40:22",
+  "fetched_at": "2026-11-23T22:13:48",
   "unit": "원",
   "annual": [
     {
@@ -34,11 +34,11 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
+    "period": "2026-3Q(누적)",
     "revenue": null,
-    "op_income": 324494379640,
+    "op_income": 1128952429212,
     "op_margin": null,
-    "net_income": 236446287868,
+    "net_income": 865017065984,
     "net_margin": null,
     "fs_div": "CFS"
   }

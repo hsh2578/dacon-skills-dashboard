@@ -9,7 +9,7 @@
 <meta http-equiv="Expires" content="0">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="style.css?v=25">
+<link rel="stylesheet" href="style.css?v=26">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 </head>
 <body>
@@ -24,7 +24,7 @@
     </div>
     <nav class="header-nav">
       <a href="index.html#section-index">시장 지수</a>
-      <a href="index.html#section-screen">Top 20</a>
+      <a href="index.html#section-screen">Top 30</a>
       <a href="index.html#section-search">종목 검색</a>
     </nav>
   </div>
@@ -45,7 +45,7 @@
     </div>
     <div class="signal-body">
       <div class="signal-factors">
-        <h3>4팩터 정규화 점수</h3>
+        <h3>팩터 점수 (동일 비중 ⅓)</h3>
         <div class="factor-list" id="signal-factors"></div>
       </div>
       <div class="signal-groups">
@@ -53,7 +53,7 @@
         <div class="group-list" id="signal-groups"></div>
       </div>
       <div class="signal-total">
-        <div class="total-lbl">종합 점수 (Value 60% + Growth 40%)</div>
+        <div class="total-lbl">정량 종합 (PER·PBR·전망 각 ⅓)</div>
         <div class="total-val" id="signal-total">—</div>
       </div>
     </div>
@@ -66,7 +66,7 @@
       <div>
         <h2>AI 서브에이전트 분석</h2>
         <p class="ai-detail-sub">
-          .claude/agents/ 3종 (fundamental-analyst · risk-analyst · synthesizer) 룰 기반 정성 분석 ·
+          DART 공시·증권사 리포트·뉴스 자료 묶음 → .claude/agents/ 5종 (fundamental · risk · resolution-scout · synthesizer · ranker) 정성 분석 ·
           정량 점수에는 영향 없음 · 정성 항목은 모두 출처 태그 필수
         </p>
       </div>
@@ -174,6 +174,6 @@
   </section>
 </main>
 
-<script src="stock.js?v=10"></script>
+<script src="stock.js?v=17"></script>
 </body>
 </html>

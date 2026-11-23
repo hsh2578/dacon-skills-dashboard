@@ -120,7 +120,9 @@ def freeze():
 
 
 def _drift(old, new):
-    """상대 오차. 반올림 잡음은 ABS_TOL로 흡수."""
+    """상대 오차. 반올림 잡음은 ABS_TOL로 흡수. 한쪽만 None(적자 전환 등)이면 변동으로 센다."""
+    if old is None or new is None:
+        return 0.0 if old is new else float("inf")
     if abs(new - old) <= ABS_TOL:
         return 0.0
     if old == 0:
@@ -149,7 +151,7 @@ def compare(kind: str, golden: dict, cur: dict, cutoff: str, problems: list, not
             d = _drift(gv, cv)
             if d > REL_TOL:
                 diffs.append((m, gv, cv, d))
-                if gv:
+                if gv and cv is not None:
                     ratios.append(cv / gv)
         if missing:
             problems.append(f"{kind} {code}: 과거 {missing}개월이 사라짐")

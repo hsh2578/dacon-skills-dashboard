@@ -2,7 +2,7 @@
   "code": "185750",
   "corp_code": "00992871",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:42:52",
+  "fetched_at": "2026-11-23T22:15:11",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 447765687540,
-    "op_income": 14087924568,
-    "op_margin": 0.0315,
-    "net_income": 12615439809,
-    "net_margin": 0.0282,
+    "period": "2026-3Q(누적)",
+    "revenue": 1360511730193,
+    "op_income": 54748343805,
+    "op_margin": 0.0402,
+    "net_income": 52360291886,
+    "net_margin": 0.0385,
     "fs_div": "CFS"
   }
 }

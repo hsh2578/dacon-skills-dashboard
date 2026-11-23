@@ -2,7 +2,7 @@
   "code": "074600",
   "corp_code": "00468374",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:43:48",
+  "fetched_at": "2026-11-23T22:15:28",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 256232792850,
-    "op_income": 21862148868,
-    "op_margin": 0.0853,
-    "net_income": 14421286487,
-    "net_margin": 0.0563,
+    "period": "2026-3Q(누적)",
+    "revenue": 811778228448,
+    "op_income": 97161533707,
+    "op_margin": 0.1197,
+    "net_income": 56385027606,
+    "net_margin": 0.0695,
     "fs_div": "CFS"
   }
 }

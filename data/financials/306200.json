@@ -2,7 +2,7 @@
   "code": "306200",
   "corp_code": "01325979",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:47:07",
+  "fetched_at": "2026-11-23T22:17:07",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 448577896123,
-    "op_income": 24108279088,
-    "op_margin": 0.0537,
-    "net_income": 20991503970,
-    "net_margin": 0.0468,
+    "period": "2026-3Q(누적)",
+    "revenue": 1420895249739,
+    "op_income": 79257562613,
+    "op_margin": 0.0558,
+    "net_income": 50726612665,
+    "net_margin": 0.0357,
     "fs_div": "CFS"
   }
 }

@@ -52,6 +52,9 @@ REPRT_QUARTERS = [("11014", "3Q"), ("11012", "반기"), ("11013", "1Q")]
 # account_id가 비표준이면 account_nm으로 폴백. CFS(연결) 우선, OFS(별도) 폴백.
 REVENUE_IDS = {"ifrs-full_Revenue", "ifrs-full_RevenueFromContractsWithCustomers"}
 OP_INCOME_IDS = {"dart_OperatingIncomeLoss", "ifrs-full_ProfitLossFromOperatingActivities"}
+# 2026-11-24: 지배주주 순이익 우선 — PER(build_valuation)이 지배 기준이라 에이전트가 읽는 순이익률과 잣대를 맞춘다.
+# 지배 태그가 없으면(별도재무 등) 전체 순이익으로 폴백.
+NET_INCOME_CTRL_IDS = {"ifrs-full_ProfitLossAttributableToOwnersOfParent"}
 NET_INCOME_IDS = {"ifrs-full_ProfitLoss"}
 REVENUE_NAMES = {"매출액", "수익(매출액)", "영업수익", "보험료수익"}
 OP_INCOME_NAMES = {"영업이익", "영업이익(손실)"}
@@ -142,7 +145,8 @@ def extract_annual_from_report(rows, bsns_year, fs):
     for field, year in period_map.items():
         rev = _pick(rows, REVENUE_IDS, REVENUE_NAMES, field)
         op = _pick(rows, OP_INCOME_IDS, OP_INCOME_NAMES, field)
-        net = _pick(rows, NET_INCOME_IDS, NET_INCOME_NAMES, field)
+        net = _pick(rows, NET_INCOME_CTRL_IDS, (), field)
+        net = net if net is not None else _pick(rows, NET_INCOME_IDS, NET_INCOME_NAMES, field)
         if rev is None and op is None and net is None:
             continue
         out[year] = {
@@ -200,7 +204,8 @@ def fetch_latest_quarter(key: str, corp_code: str, this_year: int):
                 continue
             rev = _cum(rows, REVENUE_IDS, REVENUE_NAMES)
             op = _cum(rows, OP_INCOME_IDS, OP_INCOME_NAMES)
-            net = _cum(rows, NET_INCOME_IDS, NET_INCOME_NAMES)
+            net = _cum(rows, NET_INCOME_CTRL_IDS, ())
+            net = net if net is not None else _cum(rows, NET_INCOME_IDS, NET_INCOME_NAMES)
             if rev is None and op is None and net is None:
                 continue
             return {

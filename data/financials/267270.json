@@ -2,7 +2,7 @@
   "code": "267270",
   "corp_code": "01205842",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:37:16",
+  "fetched_at": "2026-11-23T22:13:36",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 2304866321000,
-    "op_income": 190698553000,
-    "op_margin": 0.0827,
-    "net_income": 173870816000,
-    "net_margin": 0.0754,
+    "period": "2026-3Q(누적)",
+    "revenue": 6830502936000,
+    "op_income": 597265362000,
+    "op_margin": 0.0874,
+    "net_income": 356365833000,
+    "net_margin": 0.0522,
     "fs_div": "CFS"
   }
 }

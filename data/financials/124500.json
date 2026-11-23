@@ -2,7 +2,7 @@
   "code": "124500",
   "corp_code": "00620868",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:43:25",
+  "fetched_at": "2026-11-23T22:16:30",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 3288221636118,
-    "op_income": 99167251600,
-    "op_margin": 0.0302,
-    "net_income": 72738858564,
-    "net_margin": 0.0221,
+    "period": "2026-3Q(누적)",
+    "revenue": 7111417919351,
+    "op_income": 101253382698,
+    "op_margin": 0.0142,
+    "net_income": 120843012714,
+    "net_margin": 0.017,
     "fs_div": "CFS"
   }
 }

@@ -2,7 +2,7 @@
   "code": "029780",
   "corp_code": "00126292",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:38:01",
+  "fetched_at": "2026-11-23T22:13:31",
   "unit": "원",
   "annual": [
     {
@@ -34,11 +34,11 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
+    "period": "2026-3Q(누적)",
     "revenue": null,
-    "op_income": 210015000000,
+    "op_income": 605736000000,
     "op_margin": null,
-    "net_income": 156284000000,
+    "net_income": 450303000000,
     "net_margin": null,
     "fs_div": "CFS"
   }

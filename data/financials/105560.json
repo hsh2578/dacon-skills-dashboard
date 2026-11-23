@@ -2,7 +2,7 @@
   "code": "105560",
   "corp_code": "00688996",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:34:53",
+  "fetched_at": "2026-11-23T22:12:43",
   "unit": "원",
   "annual": [
     {
@@ -34,11 +34,11 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
+    "period": "2026-3Q(누적)",
     "revenue": null,
-    "op_income": 2727566000000,
+    "op_income": 7807403000000,
     "op_margin": null,
-    "net_income": 1916469000000,
+    "net_income": 5691566000000,
     "net_margin": null,
     "fs_div": "CFS"
   }

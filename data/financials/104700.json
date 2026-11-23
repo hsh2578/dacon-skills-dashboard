@@ -2,7 +2,7 @@
   "code": "104700",
   "corp_code": "00687711",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:48:12",
+  "fetched_at": "2026-11-23T22:16:11",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 111694794949,
-    "op_income": -14281437833,
-    "op_margin": -0.1279,
-    "net_income": -11223795330,
-    "net_margin": -0.1005,
+    "period": "2026-3Q(누적)",
+    "revenue": 408908814743,
+    "op_income": -27616754746,
+    "op_margin": -0.0675,
+    "net_income": -16344143142,
+    "net_margin": -0.04,
     "fs_div": "OFS"
   }
 }

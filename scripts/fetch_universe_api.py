@@ -144,6 +144,7 @@ def main():
             "price_reference_date": bas_dd,
             "price_updated_at": datetime.now().isoformat(timespec="seconds"),
         },
+        "stage1": universe,   # 단계 키 (2026-11-24): stage1 = 1단계 · validated = 실적 검증 · final(=passed=stocks) = 최종. 각 단계는 자기 키에만 쓴다 — 재실행이 이미 줄어든 목록을 다시 검증하지 않게.
         "stocks": universe,
         "passed": universe,
         "excluded": {

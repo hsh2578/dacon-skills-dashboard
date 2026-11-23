@@ -2,7 +2,7 @@
   "code": "001440",
   "corp_code": "00113207",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:37:27",
+  "fetched_at": "2026-11-23T22:13:42",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 1083362142421,
-    "op_income": 60411051450,
-    "op_margin": 0.0558,
-    "net_income": -6844458203,
-    "net_margin": -0.0063,
+    "period": "2026-3Q(누적)",
+    "revenue": 3458438386092,
+    "op_income": 152125906509,
+    "op_margin": 0.044,
+    "net_income": -61319389796,
+    "net_margin": -0.0177,
     "fs_div": "CFS"
   }
 }

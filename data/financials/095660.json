@@ -2,7 +2,7 @@
   "code": "095660",
   "corp_code": "00628860",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:46:40",
+  "fetched_at": "2026-11-23T22:16:46",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 101415031092,
-    "op_income": 6951449443,
-    "op_margin": 0.0685,
-    "net_income": 15472658324,
-    "net_margin": 0.1526,
+    "period": "2026-3Q(누적)",
+    "revenue": 314000562801,
+    "op_income": 24494917253,
+    "op_margin": 0.078,
+    "net_income": 23551834173,
+    "net_margin": 0.075,
     "fs_div": "CFS"
   }
 }

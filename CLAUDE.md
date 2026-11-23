@@ -2,6 +2,47 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## ★ 현재 구조 (v6, 2026-11-24) — 이 절이 아래 옛 설명보다 우선한다
+
+**용도가 바뀌었다**: DACON 대회는 끝났고(1등), 이제 **사용자 본인의 실투자 판단 도구**다. 대회 평가·제출물(기획서 PDF·skills zip) 기준은 더 이상 판단 기준이 아니다. **월 1회** 갱신, 정량·AI 를 같은 날 함께.
+
+### 데이터 출처 (KIS 재무비율 API 404 → 폐기)
+| 데이터 | 출처 | 스크립트 · 저장 |
+|---|---|---|
+| 일별 시가총액·종가 (우선주 포함 전 종목) | KRX 공식 OpenAPI | `fetch_mcap_daily.py` → `data/.cache/_krx_{mcap,close}_daily.json` |
+| 분기 지배주주 순이익·자본·매출·영업이익·영업CF·자산·금융비용 | **DART 원본** — dartlab HuggingFace 미러(CC BY 4.0) 우선, 빈 보고서만 OpenDART | `fetch_dart_quarterly.py` → `data/financials_q/{code}.json` (로컬 전용) |
+| 연간 EPS 실적·추정 (FY-2~FY+2) 월별 스냅샷 | 네이버 Wisereport (FnGuide 데이터) | `fetch_eps_annual.py` → `data/consensus/eps_annual_YYYYMMDD.json` (로컬 전용) |
+| 목표가 (표시용, 점수 미사용) | 네이버 컨센서스 — 요약표가 비면 증권사별 표 최근 92일 평균 | `fetch_consensus.py` · `naver_consensus.py` |
+| AI 근거 자료 묶음 (DART 주요사항·거래소공시 1년 · 리포트 6개월 · 뉴스·텔레그램 3개월 · 추정치 변화) | DART list API · 네이버증권 API · 모의투자대회 `catalyst_engine.grounding` · 리서치에이전트 `fnguide_data` | `build_research_pack.py` → `data/research/{code}.json` (**공개 금지** — 텔레그램 원문) |
+| 지수 PER/PBR/배당 | KRX 정보데이터시스템 로그인(pykrx) — **유일한 잔존 의존** (KRX OpenAPI는 지수 PER 미제공) | `fetch_kr.py` |
+
+### 계산
+- **PER = (보통주+우선주 시총) ÷ TTM 지배주주 순이익, PBR = 같은 시총 ÷ 최근 분기 지배자본** (`build_valuation.py`). 주당 값을 안 쓰므로 액면분할·무상증자에 영향 없음(나이스정보통신 사례). 외화 공시(두산밥캣 USD·GRT CNY)는 제외. 공시 시차 = `ttm.py`.
+- 일별 전 종목 → `data/.cache/daily/`, 월별 매트릭스 → `data/matrix/{per,pbr}_monthly.json`(사이트·점수가 읽음), 검색 대상(시총 2,000억+ 765종목) 일별 사본 → `data/daily/`.
+
+### 유니버스 → 점수 → 필터 (`apply_triple_cross.py`)
+- 유니버스: 시총 2,000억+ 보통주 → 최근 20분기 TTM 지배순이익 적자 ≤4 → **FY+1 컨센서스 EPS 보유**. 단계 키: `stage1` / `validated` / `final(=passed=stocks)` — 각 단계는 자기 키에만 쓴다.
+- 점수 = **⅓ PER 할인 + ⅓ PBR 할인 + ⅓ 전망** (순위→Z). 할인 = 1 − 현재 ÷ **5년(최대 60개월) 중앙값**, 최소 24개월 이력. 전망 = 1 − Forward PER ÷ 5년 PER 중앙값, Forward PER = 시총 ÷ (FY0 지배순이익 × 성장배수), 성장배수 = avg(FY+1, FY+2 EPS)/FY0 EPS (FY+2 없으면 FY+1). 1~3월 FY0 연간 미공시면 TTM 대체.
+- 가중치 근거: PER:PBR 을 1:0~0:1 로 바꿔도 IC 0.034~0.040 — 최적화 근거 없음 → 동일 비중. **목표가 괴리는 점수에서 제외**(Bradshaw 2013 등).
+- **퀄리티 = 필터(점수 아님)** (`quality.py`): 이익률 추세(자기 20분기 중앙 대비)·이익의 질((영업CF−순이익)/자산)·이자보상배율 순위 평균 하위 20% → Top 자격 없음. 가치와 음의 상관이라 점수로 섞지 않는다(QMJ·Piotroski 계열).
+- 기대 역산 [정량] 필드 (에이전트 입력): `implied_fade`(시총/5년중앙PER ÷ Forward 이익), `implied_vs_ttm`, `midcycle_vs_ttm`, `cyclical_flag`.
+- **TOP_N = 30**. 사이트 카드 기본 순서 = AI 재순위, 전환 버튼으로 정량 순위.
+
+### AI 단계 (`.claude/agents/` · `/update-data` 2단계 · `scripts/ai_stage.py`)
+- 판단 축이 **nature(일시적/구조적) → `expectation_gap`(가격 가정 vs 증거: TOO_PESSIMISTIC / FAIR / NOT_PESSIMISTIC_ENOUGH)** 로 바뀌었다(Mauboussin·Marks). 원인은 `cause_type` 8분류(경기 정점·구조적 쇠퇴·일시 충격·일회성 회계·지배구조 할인·소외·규제거시·재무 함정). nature 는 표시용.
+- 에이전트는 **자료 묶음(`data/research/`)을 먼저 Read**, WebSearch(미국 중심이라 한국 중소형주에 약함)는 보충. 정보량 등급 A/B/C.
+- **재분석 대상만 돌린다** (`ai_stage.py targets`): 신규 진입·새 공시/리포트·추정치 ±5%. 나머지는 직전 노트 재사용. resolution-scout §6.5 = 사실이 바뀔 때만 판정 변경.
+- 판단 기록·채점: `judgments.py record/grade` → `data/judgments/`. AI 단계 효과는 이 사후 채점으로만 검증 가능(웹 근거라 백테스트 불가).
+
+### 실행
+`python scripts/update_all.py` (정량 전부, `--from N`) → AI 단계(`/update-data` 문서) → `ai_stage.py merge` → ranker → `ai_stage.py apply-rank`. **폐기**: `fetch_matrix_kis.py`(실행하면 새 매트릭스를 옛 KIS 값으로 덮어씀), `fetch_batch_api.py`·`data/stocks/`(삭제됨), `fetch_matrix_api.py`.
+
+### 백테스트 (`backtest_value.py`, 점수와 같은 매트릭스·같은 신호)
+2023-04~2026-10 43개월, 월말 리밸런싱, point-in-time 유니버스, 상장폐지 76종목 재무·정리매매 수익률 반영. 결과: 가장 싼 20% ≈ 시장 평균(초과 없음), 가장 비싼 20% 부진, 퀄리티 탈락분 부진(필터 +0.14%/월, t≈1.4). **정량은 후보 추리기이지 우위가 아니다.** 수치는 방향 확인용 — 단정 인용 금지.
+
+### 이번 세션에서 실제로 난 사고 (재발 방지)
+KIS 404 를 예외로 삼켜 2,200종목이 옛 캐시로 남음 · KRX 당일 빈 응답을 휴장일로 캐시 · 대형주 공시 50건 상한이 한 달 치 · 외화 공시로 PBR 930배 · 지배 태그 미사용 회사(유한양행) · `triple_cross.json` 의 NaN 으로 사이트 Top 목록 전체 미표시 · 네이버 요약표만 비는 스로틀로 목표가 90% 소실. 공통 교훈: **실패를 빈 값으로 굳히지 말 것.**
+
 ## Project Overview
 
 DACON 월간 해커톤 "투자 데이터를 시각화하라 — Skills 기반 대시보드 설계" **최종 1등 수상작**.

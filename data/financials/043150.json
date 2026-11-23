@@ -2,7 +2,7 @@
   "code": "043150",
   "corp_code": "00264255",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:48:23",
+  "fetched_at": "2026-11-23T22:17:38",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 105198476481,
-    "op_income": 10994904724,
-    "op_margin": 0.1045,
-    "net_income": 14232538882,
-    "net_margin": 0.1353,
+    "period": "2026-3Q(누적)",
+    "revenue": 337457629016,
+    "op_income": 51033836052,
+    "op_margin": 0.1512,
+    "net_income": 32552470616,
+    "net_margin": 0.0965,
     "fs_div": "CFS"
   }
 }

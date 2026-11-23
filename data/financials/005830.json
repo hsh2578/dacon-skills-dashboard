@@ -2,7 +2,7 @@
   "code": "005830",
   "corp_code": "00159102",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:36:58",
+  "fetched_at": "2026-11-23T22:13:08",
   "unit": "원",
   "annual": [
     {
@@ -34,11 +34,11 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
+    "period": "2026-3Q(누적)",
     "revenue": null,
-    "op_income": 413033000000,
+    "op_income": 2205238000000,
     "op_margin": null,
-    "net_income": 239580000000,
+    "net_income": 1560457000000,
     "net_margin": null,
     "fs_div": "CFS"
   }

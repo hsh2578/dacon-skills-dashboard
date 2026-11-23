@@ -2,7 +2,7 @@
   "code": "020000",
   "corp_code": "00188089",
   "source": "OpenDART",
-  "fetched_at": "2026-08-13T23:55:13",
+  "fetched_at": "2026-11-23T22:16:32",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 410365517000,
-    "op_income": 36527785000,
-    "op_margin": 0.089,
-    "net_income": 27342835000,
-    "net_margin": 0.0666,
+    "period": "2026-3Q(누적)",
+    "revenue": 1098324402000,
+    "op_income": 48708019000,
+    "op_margin": 0.0443,
+    "net_income": 38369141000,
+    "net_margin": 0.0349,
     "fs_div": "CFS"
   }
 }

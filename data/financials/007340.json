@@ -2,7 +2,7 @@
   "code": "007340",
   "corp_code": "00116949",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:40:36",
+  "fetched_at": "2026-11-23T22:14:01",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 1017653926000,
-    "op_income": 144619810000,
-    "op_margin": 0.1421,
-    "net_income": 99178001000,
-    "net_margin": 0.0975,
+    "period": "2026-3Q(누적)",
+    "revenue": 3425927490000,
+    "op_income": 509554379000,
+    "op_margin": 0.1487,
+    "net_income": 331833980000,
+    "net_margin": 0.0969,
     "fs_div": "CFS"
   }
 }

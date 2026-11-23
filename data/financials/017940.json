@@ -2,7 +2,7 @@
   "code": "017940",
   "corp_code": "00165583",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:45:22",
+  "fetched_at": "2026-11-23T22:15:54",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 3585260140713,
-    "op_income": -156188703620,
-    "op_margin": -0.0436,
-    "net_income": 81665085104,
-    "net_margin": 0.0228,
+    "period": "2026-3Q(누적)",
+    "revenue": 12262938329057,
+    "op_income": -210486036702,
+    "op_margin": -0.0172,
+    "net_income": 206683751126,
+    "net_margin": 0.0169,
     "fs_div": "CFS"
   }
 }

@@ -33,7 +33,7 @@ model: sonnet
 ## 1차 필터
 
 - `fundamental == null`이면 카드 표시 거부 (분석 거부 — 예: AVOID 등급)
-- `evidence_strength == "WEAK"` AND `overall_risk_level == "HIGH"`이면 verdict를 "관망 권고"로 강제
+- (삭제됨 2026-11-23) "WEAK × HIGH면 관망 강제" — `evidence_strength`는 정량 total_score에서만 나와 해소 판단과 무관했고, 2026-08 실행의 '관망' 10건이 전부 이 기계적 경로에서 나왔다.
 
 ## 통합 룰
 
@@ -50,7 +50,7 @@ model: sonnet
 - **출처 태그(`[출처: ...]`, `확인 필요`, `[정량]`)는 절대 제거하지 말 것**
 
 ### undervaluation_cause (왜 저평가인지 — 카드 본문 / 권장 180~260자, 여유 상한 320자)
-- `fundamental.undervaluation_cause`를 그대로 전달. `text`와 `nature`(TEMPORARY/STRUCTURAL) 모두 보존.
+- `fundamental.undervaluation_cause`를 그대로 전달. `text`·`cause_type`·`cause_type_secondary`·`implied_expectations`·`nature` 모두 보존.
 - 출처 태그 보존. 여유 상한 초과 시에만 원인 핵심구만 남기고 압축 (nature는 절대 변경 금지).
 - `fundamental.undervaluation_cause`가 없으면 risks 중 가장 구조적/시장인식 성격 항목 1개를 출처 태그째 인용해 `text`로 쓰고, 그 성격에 따라 `nature` 부여 (새 사실 생성 금지).
 
@@ -60,7 +60,20 @@ model: sonnet
 - severity HIGH 항목은 정성/정량 무관 우선 표시
 - 여유 상한(110자) 초과 항목만 압축, 모든 출처 태그 보존
 
-### verdict 매트릭스
+### verdict 매트릭스 — `resolution.expectation_gap` × `risk_level` (2026-11-23)
+
+"가격이 증거보다 비관적인가"가 판단의 축이다. `expectation_gap`은 resolution-scout 값을 그대로 쓰고 다시 판정하지 않는다.
+
+| expectation_gap × risk | 결과 |
+|---|---|
+| TOO_PESSIMISTIC × LOW/MEDIUM | "가격이 증거보다 비관적 — 근거 확인" |
+| TOO_PESSIMISTIC × HIGH | "비관 과도하나 하방 리스크 병존" |
+| FAIR × LOW | "전망이 가격에 반영 — 촉매 대기" |
+| FAIR × MEDIUM | "적정 반영 — 관찰" |
+| FAIR × HIGH | "관망 권고" |
+| NOT_PESSIMISTIC_ENOUGH × any | "가치 함정 경계 — 악화가 가격보다 빠름" |
+
+`resolution`(또는 `expectation_gap`)이 없을 때만 아래 옛 매트릭스로 폴백한다.
 
 | evidence × risk | 결과 |
 |---|---|

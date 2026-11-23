@@ -1,0 +1,72 @@
+{
+  "code": "032820",
+  "corp_code": "00231044",
+  "source": "OpenDART",
+  "fetched_at": "2026-11-23T22:14:39",
+  "unit": "원",
+  "annual": [
+    {
+      "year": 2020,
+      "revenue": 49911171537,
+      "op_income": 2705385476,
+      "op_margin": 0.0542,
+      "net_income": -1411519470,
+      "net_margin": -0.0283,
+      "fs_div": "CFS"
+    },
+    {
+      "year": 2021,
+      "revenue": 52141052240,
+      "op_income": 7245494022,
+      "op_margin": 0.139,
+      "net_income": 3695895648,
+      "net_margin": 0.0709,
+      "fs_div": "CFS"
+    },
+    {
+      "year": 2022,
+      "revenue": 49494570488,
+      "op_income": 4801125334,
+      "op_margin": 0.097,
+      "net_income": 3368733524,
+      "net_margin": 0.0681,
+      "fs_div": "CFS"
+    },
+    {
+      "year": 2023,
+      "revenue": 63166127548,
+      "op_income": 6678853804,
+      "op_margin": 0.1057,
+      "net_income": 5032187322,
+      "net_margin": 0.0797,
+      "fs_div": "CFS"
+    },
+    {
+      "year": 2024,
+      "revenue": 71250184948,
+      "op_income": 553922286,
+      "op_margin": 0.0078,
+      "net_income": -4401591680,
+      "net_margin": -0.0618,
+      "fs_div": "CFS"
+    },
+    {
+      "year": 2025,
+      "revenue": 87135395389,
+      "op_income": -5486712823,
+      "op_margin": -0.063,
+      "net_income": -4104661336,
+      "net_margin": -0.0471,
+      "fs_div": "CFS"
+    }
+  ],
+  "latest_quarter": {
+    "period": "2026-3Q(누적)",
+    "revenue": 53041912243,
+    "op_income": -10587833876,
+    "op_margin": -0.1996,
+    "net_income": -19076096827,
+    "net_margin": -0.3596,
+    "fs_div": "CFS"
+  }
+}

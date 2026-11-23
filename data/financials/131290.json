@@ -2,7 +2,7 @@
   "code": "131290",
   "corp_code": "00372226",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:41:47",
+  "fetched_at": "2026-11-23T22:14:20",
   "unit": "원",
   "annual": [
     {
@@ -52,12 +52,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 150671280313,
-    "op_income": 41991772083,
-    "op_margin": 0.2787,
-    "net_income": 40014929161,
-    "net_margin": 0.2656,
+    "period": "2026-3Q(누적)",
+    "revenue": 556857519831,
+    "op_income": 147234693880,
+    "op_margin": 0.2644,
+    "net_income": 102943004864,
+    "net_margin": 0.1849,
     "fs_div": "CFS"
   }
 }

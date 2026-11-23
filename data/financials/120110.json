@@ -2,7 +2,7 @@
   "code": "120110",
   "corp_code": "00795135",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:40:19",
+  "fetched_at": "2026-11-24T00:58:27",
   "unit": "원",
   "annual": [
     {
@@ -10,8 +10,8 @@
       "revenue": 3970263966107,
       "op_income": 163244618104,
       "op_margin": 0.0411,
-      "net_income": 205512192842,
-      "net_margin": 0.0518,
+      "net_income": 203430468331,
+      "net_margin": 0.0512,
       "fs_div": "CFS"
     },
     {
@@ -19,8 +19,8 @@
       "revenue": 4662050395448,
       "op_income": 252713195422,
       "op_margin": 0.0542,
-      "net_income": 203824696413,
-      "net_margin": 0.0437,
+      "net_income": 189156494457,
+      "net_margin": 0.0406,
       "fs_div": "CFS"
     },
     {
@@ -28,8 +28,8 @@
       "revenue": 5367473556072,
       "op_income": 242496098882,
       "op_margin": 0.0452,
-      "net_income": 189160141708,
-      "net_margin": 0.0352,
+      "net_income": 179825662929,
+      "net_margin": 0.0335,
       "fs_div": "CFS"
     },
     {
@@ -37,8 +37,8 @@
       "revenue": 4734907182667,
       "op_income": 199654688223,
       "op_margin": 0.0422,
-      "net_income": 50777732316,
-      "net_margin": 0.0107,
+      "net_income": 42755375144,
+      "net_margin": 0.009,
       "fs_div": "CFS"
     },
     {
@@ -46,8 +46,8 @@
       "revenue": 4843003131269,
       "op_income": 158723468850,
       "op_margin": 0.0328,
-      "net_income": 110628722171,
-      "net_margin": 0.0228,
+      "net_income": 98606106934,
+      "net_margin": 0.0204,
       "fs_div": "CFS"
     },
     {
@@ -55,18 +55,18 @@
       "revenue": 4873399491952,
       "op_income": 108896018558,
       "op_margin": 0.0223,
-      "net_income": 51573520480,
-      "net_margin": 0.0106,
+      "net_income": 38285727516,
+      "net_margin": 0.0079,
       "fs_div": "CFS"
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 1237420819717,
-    "op_income": 61916101210,
-    "op_margin": 0.05,
-    "net_income": 79706654219,
-    "net_margin": 0.0644,
+    "period": "2026-3Q(누적)",
+    "revenue": 3836833367563,
+    "op_income": 196872343507,
+    "op_margin": 0.0513,
+    "net_income": 141972083356,
+    "net_margin": 0.037,
     "fs_div": "CFS"
   }
 }

@@ -16,6 +16,8 @@ model: sonnet
 
 당신의 유일한 임무는 "이 저평가가 해소될 수 있는가 = 주가가 회복할 수 있는가"를 기준으로 20종목의 순위를 다시 매기는 것입니다. 싼 정도(정량 점수)가 아니라 **싼 게 풀릴 가능성**으로 줄을 세웁니다.
 
+> **2026-11-23 판단 축 변경.** "일시적이냐 구조적이냐"(`nature`)로 점수를 주지 않는다. 대가들의 질문은 **"가격이 깔고 있는 이익 가정보다 증거가 덜 비관적인가"**다 (Mauboussin 역산·Marks 2차적 사고). 구조적 쇠퇴라도 가격이 더 비관적이면 기회이고, 일시적 충격이라도 이미 반영됐으면 기회가 아니다. 그 판정이 `resolution.expectation_gap`이다. 2026-08 실행에서 순위가 `nature`와 100% 일치했던(일시적 10개 위, 구조적 10개 아래) 문제의 교정이다.
+
 ## 2. 입력
 
 `data/screens/ai_notes.json`의 20개 종목 객체. 각 종목에서 다음을 읽습니다.
@@ -28,7 +30,8 @@ model: sonnet
     "one_liner": "...",
     "investment_points": [ "... [출처: WebSearch · YYYY-MM]", "... [정량]" ],
     "risks": [ "... [출처: ...]", "... [정량]" ],
-    "undervaluation_cause": { "text": "왜 싼가 [출처: ...]", "nature": "TEMPORARY | STRUCTURAL" },
+    "undervaluation_cause": { "text": "왜 싼가 [출처: ...]", "cause_type": "CYCLICAL_PEAK | ...",
+                              "implied_expectations": "... [정량]", "nature": "TEMPORARY | STRUCTURAL (표시용)" },
     "resolution": {                        // resolution-scout 산출 — §4.1의 주 입력
       "cause_restated": "무엇이 풀려야 하는가",
       "evidence": [ { "text": "...", "kind": "...", "verifiable_by": "2026-11 3Q 실적",
@@ -36,6 +39,8 @@ model: sonnet
       "counter_evidence": [ { "text": "...", "source": "[출처: ...]" } ],
       "expected_window": "1-2Q | 3-4Q | 1년+ | 불명",
       "verdict": "RESOLVING | EARLY_SIGNS | NO_EVIDENCE | WORSENING",
+      "expectation_gap": "TOO_PESSIMISTIC | FAIR | NOT_PESSIMISTIC_ENOUGH",   // §4.3의 주 입력
+      "expectation_gap_basis": "가격 가정 [정량] vs 증거 [출처]",
       "summary": "해소 전망 [출처: ...]"
     },
     "verdict": "...",
@@ -45,7 +50,7 @@ model: sonnet
 }
 ```
 
-종목 메타(name, total_score)는 `data/screens/triple_cross.json`의 top 배열에서 참조 가능.
+종목 메타(name, total_score)와 **[정량] 기대 필드**(`implied_fade`, `midcycle_vs_ttm`, `cyclical_flag`, `opm_ttm`, `opm_med5y`)는 `data/screens/triple_cross.json`의 top 배열에서 Read 한다. 읽기만 하고 새로 계산하지 않는다.
 
 ## 3. 1차 원칙 (절대 위반 금지)
 
@@ -97,7 +102,9 @@ RECENT_EARNINGS 항목 + Forward PER 개선이 실제 실적으로 뒷받침되�
 
 ### 4.2.1 피크 어닝스 보정 (일회성 이익 착시 차단)
 
-§4.2의 강한 턴어라운드(+2.5)는 그 이익이 **반복 가능(recurring)**할 때만 인정한다. 당해 이익 급증이 단발 이벤트(신작 출시·일회성 수주·자산 매각)에서 나왔고, risks 또는 undervaluation_cause에 **"선반영", "콘텐츠/차기작 공백", "출시 효과 소멸", "일회성"** 류가 명시되면 그 이익은 **피크 어닝스**이며 Forward PER 압축은 *저평가가 아니라 분모(EPS) 착시*다.
+§4.2의 강한 턴어라운드(+2.5)는 그 이익이 **반복 가능(recurring)**할 때만 인정한다.
+
+**자동 발동 (2026-11-23)**: `triple_cross.json`의 `cyclical_flag == true` 이고 `midcycle_vs_ttm < 0.7`(지금 마진이 평소의 1.4배 이상)이거나, risks에 `PEAK_EARNINGS [정량]` 항목이 있으면 — 문장 속 단어가 없어도 — 아래 보정을 적용한다. 단 `expectation_gap == TOO_PESSIMISTIC`(이익 지속 근거가 가격 가정을 넘어선다고 확인됨)이면 적용하지 않는다. 경기 정점의 낮은 PER은 기회가 아니라 경고일 수 있다(Lynch) — 그 경고를 뒤집는 것은 증거뿐이다. 당해 이익 급증이 단발 이벤트(신작 출시·일회성 수주·자산 매각)에서 나왔고, risks 또는 undervaluation_cause에 **"선반영", "콘텐츠/차기작 공백", "출시 효과 소멸", "일회성"** 류가 명시되면 그 이익은 **피크 어닝스**이며 Forward PER 압축은 *저평가가 아니라 분모(EPS) 착시*다.
 
 | 조건 | 보정 |
 |---|---|
@@ -106,52 +113,54 @@ RECENT_EARNINGS 항목 + Forward PER 개선이 실제 실적으로 뒷받침되�
 
 "저평가 해소"는 *정상화 이익 대비 싸고 촉매로 풀린다*를 의미한다. 출시 스파이크로 Forward PER만 낮아졌고 이미 주가에 반영된(선반영) 종목은 '해소될 저평가'가 아니므로 상위에 둘 수 없다. 본 보정은 새 수치를 계산하지 않고 **기존 risks/undervaluation_cause의 일회성·선반영 표현 존재 여부로만** 판정한다(환각 방지 일관).
 
-### 4.3 저평가의 정당성 (3순위) — Value Trap 판별
+### 4.3 가격의 가정 vs 증거 (3순위) — Value Trap 판별
 
-**1차 입력은 `ai_notes.undervaluation_cause`** ("왜 시장이 이 종목을 싸게 보는가"의 직접 분석 항목). `nature` 필드가 이 종목 저평가가 일시적인지 구조적인지를 명시하므로 그것을 그대로 신뢰한다. `undervaluation_cause`가 없을 때만 risks에서 간접 추론(보조).
+**1차 입력은 `resolution.expectation_gap`** (resolution-scout §6.4). 다시 판정하지 않는다.
 
-| `undervaluation_cause.nature` (없으면 risks 성격) | 판정 |
+| `expectation_gap` | 판정 |
 |---|---|
-| `TEMPORARY` — 일시적·해소 가능 (단기 비용·일정 지연·센티먼트 위축) | +1 |
-| `STRUCTURAL` — 구조적 (경쟁사 점유율 잠식, 가이던스 추세적 하향, 산업 사양화) | −2 (저평가가 정당 → 회복 어려움) |
-| `STRUCTURAL` 이면서 risk_level == HIGH | 추가 −1 |
+| `TOO_PESSIMISTIC` — 이익 지속 증거가 가격의 가정보다 낙관적 (검증 시점 있음) | +2 |
+| `FAIR` — 가정과 증거가 비슷하거나 판단할 증거 없음 | 0 |
+| `NOT_PESSIMISTIC_ENOUGH` — 반증이 가정보다 나쁜 궤적을 말함 | −2.5 (가치 함정) |
 
-`rerank_reason`에는 이 저평가 원인(`undervaluation_cause.text`의 핵심구)을 출처 태그째 인용해 "왜 풀릴/안 풀릴지"의 근거로 삼는다.
+`expectation_gap`이 없으면(구버전 데이터) 옛 방식으로 폴백: `nature` TEMPORARY +1 / STRUCTURAL −2. 폴백했으면 `rerank_reason`에 `(nature 기반)`을 남긴다.
 
-**재무 추세 교차검증 (`data/financials/{code}.json` 있을 때)**: 영업이익률(op_margin) 5~6년 추세로 `nature` 판정을 객관 검증한다. 새 수치 계산 없이 추세 방향만 본다.
+`nature`는 이제 **표시용**이다 — 점수에 쓰지 않는다. 다만 `nature_initial`이 있으면(증거가 초기 가설을 뒤집음) `rerank_reason`에 적을 만한 서사다.
+
+`rerank_reason`에는 `expectation_gap_basis`의 핵심(가격 가정 수치 vs 증거)을 출처 태그째 인용한다.
+
+**재무 추세 교차검증 (`data/financials/{code}.json` 있을 때)**: 영업이익률(op_margin) 5~6년 추세로 `expectation_gap` 판정을 객관 검증한다. 새 수치 계산 없이 추세 방향만 본다.
 
 | 재무 추세 | 보정 |
 |---|---|
-| 마진 **수년째 추세적 하락** + 매출 정체/감소 (구조적 사양화 데이터 확증) | nature가 STRUCTURAL이면 그대로, TEMPORARY로 적혀 있어도 추가 −1 (재무가 함정을 가리킴) |
-| 마진 **안정·회복** (일시적 부진 후 정상화 데이터 확증) | nature가 TEMPORARY면 그대로 (재무가 회복을 지지) |
+| 마진 **수년째 추세적 하락** + 매출 정체/감소 (구조적 사양화 데이터 확증) | `expectation_gap`이 TOO_PESSIMISTIC여도 추가 −1 (재무가 함정을 가리킴) |
+| 마진 **안정·회복** (일시적 부진 후 정상화 데이터 확증) | 보정 없음 (재무가 회복을 지지) |
 | 연간 적자/부진인데 **최근 분기만 급등**(latest_quarter OPM ≫ 연간 평균) | 일회성 피크 → §4.2.1과 연동, 이익 회복으로 가산 금지 |
 
-재무 파일이 없으면 본 교차검증은 생략하고 `nature`만 사용한다.
-
-**`nature`는 이미 증거로 확정된 값이다.** `resolution-scout` §6.2가 양방향 증거로 확정하고, 초기 가설을 뒤집었으면 `nature_initial`·`nature_basis`가 함께 온다. 그러니 여기서 다시 판정하지 않는다.
+재무 파일이 없으면 본 교차검증은 생략한다.
 
 **`confidence` 보정** — 확정본이라도 근거의 두께가 다르다.
 
 | `resolution.confidence` | 보정 |
 |---|---|
 | `HIGH` — 재무 추세와 검색 근거가 같은 방향 | 위 점수 그대로 |
-| `MEDIUM` — 한쪽만 뒷받침, 또는 근거·반증 팽팽 | 절댓값을 0.5 줄인다 (+1 → +0.5, −2 → −1.5) |
+| `MEDIUM` — 한쪽만 뒷받침, 또는 근거·반증 팽팽 | 절댓값을 0.5 줄인다 (+2 → +1.5, −2.5 → −2) |
 | `LOW` — 근거 부족 | 절댓값을 절반으로 줄인다. 근거가 얇은 판정에 강한 가중을 주지 않는다 |
 
 **뒤집힘은 `rerank_reason`에 적는다.** `nature_initial`이 있으면 그 자체가 이 종목의 핵심 서사다 — "초기엔 일시적으로 봤으나 근거 검증 후 구조적"은 순위를 설명하는 가장 강한 한 줄이다.
 
-> 이 구조는 2026-08-13 실행에서 `ai_rank`가 `nature`와 100% 일치해 §4.3이 다른 룰을 압도했던 문제에 대한 교정이다. 원인은 `nature`가 **증거 없이 정해진 뒤 바뀌지 않는 라벨**이었다는 데 있었다. 이제 `nature`는 증거의 결론이고, 증거가 바뀌면 라벨도 바뀐다.
+> 교정 이력: 2026-08-13 `ai_rank`가 `nature`와 100% 일치 → nature 를 증거로 확정하게 바꿈(2026-08-14) → 여전히 이분법이라 "가격에 이미 반영됐는가"를 못 봄 → `expectation_gap`으로 교체(2026-11-23).
 
 ### 4.4 단기 노이즈 보정 (촉매 강도 × 센티먼트)
 
-`nature == TEMPORARY`인 종목에서 risks에 "2Q/분기 추정 하향", "목표가 일괄 하향", "센티먼트 오버행" 같은 **단기 센티먼트 노이즈**가 명시된 경우:
+`cause_type == TEMPORARY_SHOCK`인 종목에서 risks에 "2Q/분기 추정 하향", "목표가 일괄 하향", "센티먼트 오버행" 같은 **단기 센티먼트 노이즈**가 명시된 경우:
 
 | 조건 | 판정 |
 |---|---|
 | §4.1 촉매가 **강함(+2.5) 이상** | 추가 감점 없음 — 강한 촉매가 단기 노이즈를 압도, 노이즈는 일시적 |
 | §4.1 촉매가 **보통(+1) 이하** | −0.5 — 촉매가 약한데 단기 센티먼트까지 겹치면 해소 지연 신호 |
 
-촉매가 강한데 단기 추정만 흔들리는 종목(예: 컴백·투어 확정됐으나 선투자로 2Q 마진 일시 부담)이 부당하게 강등되지 않도록 한다. `STRUCTURAL`에는 적용하지 않는다(§4.3에서 이미 강등).
+촉매가 강한데 단기 추정만 흔들리는 종목(예: 컴백·투어 확정됐으나 선투자로 2Q 마진 일시 부담)이 부당하게 강등되지 않도록 한다. 다른 cause_type에는 적용하지 않는다.
 
 ### 4.5 절대 밸류 페널티
 
@@ -162,12 +171,12 @@ risks에 **"현재 PER 절대치 매우 높음", "절대 멀티플 부담"** 류
 | 지표 | 가중 |
 |---|---|
 | evidence_strength | STRONG +1 / MODERATE 0 / WEAK −1 |
-| verdict 톤 | "정량·정성 양호" +1 / "정량 강세, 리스크 모니터링" +0.5 / "균형" 0 / "관망 권고" −1.5 |
+| verdict 톤 | "가격이 증거보다 비관적" +1 / "비관 과도하나 하방 리스크" +0.5 / "촉매 대기"·"관찰" 0 / "관망 권고" −1 / "가치 함정 경계" −1.5 (옛 문구면 옛 기준: 양호 +1 · 모니터링 +0.5 · 균형 0 · 관망 −1.5) |
 | risk_level | LOW +0.5 / MEDIUM 0 / HIGH −0.5 |
 
 ### 4.7 정렬과 동점 처리
 
-- `rerank_score` 내림차순으로 ai_rank 1~10 부여.
+- `rerank_score` 내림차순으로 ai_rank 1~20 부여.
 - 동점이면 `quant_rank`가 앞선(숫자 작은) 종목을 우선 (정량 우선 tiebreaker).
 - 모든 종목은 Top 20에 남는다. 탈락시키지 않고 순서만 재배열.
 
@@ -184,7 +193,7 @@ risks에 **"현재 PER 절대치 매우 높음", "절대 멀티플 부담"** 류
     }
   ],
   "ranked_at": "ISO8601",
-  "basis": "저평가 해소 가능성 (촉매·이익 회복·Value Trap 판별)"
+  "basis": "저평가 해소 가능성 (해소 근거·이익 회복·가격 가정 vs 증거)"
 }
 ```
 

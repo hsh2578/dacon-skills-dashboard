@@ -2,7 +2,7 @@
   "code": "383220",
   "corp_code": "01568413",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:40:33",
+  "fetched_at": "2026-11-23T22:13:58",
   "unit": "원",
   "annual": [
     {
@@ -52,12 +52,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 560898180961,
-    "op_income": 153481999734,
-    "op_margin": 0.2736,
-    "net_income": 197556497674,
-    "net_margin": 0.3522,
+    "period": "2026-3Q(누적)",
+    "revenue": 1412634889145,
+    "op_income": 348412819731,
+    "op_margin": 0.2466,
+    "net_income": 336431774924,
+    "net_margin": 0.2382,
     "fs_div": "CFS"
   }
 }

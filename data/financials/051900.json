@@ -2,7 +2,7 @@
   "code": "051900",
   "corp_code": "00356370",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:38:43",
+  "fetched_at": "2026-11-23T22:13:37",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 1576592750887,
-    "op_income": 107831141908,
-    "op_margin": 0.0684,
-    "net_income": 88748514992,
-    "net_margin": 0.0563,
+    "period": "2026-3Q(누적)",
+    "revenue": 4811375964061,
+    "op_income": 281009325729,
+    "op_margin": 0.0584,
+    "net_income": 179170107190,
+    "net_margin": 0.0372,
     "fs_div": "CFS"
   }
 }

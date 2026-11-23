@@ -21,6 +21,19 @@ function natLabel(n) {
   return String(n || '').toUpperCase() === 'STRUCTURAL' ? '구조적' : '일시적';
 }
 
+// v6 (2026-11-24): "일시적/구조적" 이분법 대신 원인 분류 + 기대 괴리(가격 가정 vs 증거)
+const CAUSE_LABEL = {
+  CYCLICAL_PEAK: '경기 정점', STRUCTURAL_DECLINE: '구조적 쇠퇴', TEMPORARY_SHOCK: '일시 충격',
+  ONE_OFF_ACCOUNTING: '일회성 회계', GOVERNANCE_DISCOUNT: '지배구조 할인', NEGLECT: '소외',
+  REGULATORY_MACRO: '규제·거시', BALANCE_SHEET_TRAP: '재무 함정',
+};
+const GAP = {
+  TOO_PESSIMISTIC:        { txt: '가격이 과도하게 비관적', short: '과도 비관', cls: 'nat-temporary',  uc: 'uc-temporary' },
+  FAIR:                   { txt: '가격이 전망 반영',       short: '전망 반영', cls: 'nat-unknown',    uc: '' },
+  NOT_PESSIMISTIC_ENOUGH: { txt: '함정 경계',              short: '함정 경계', cls: 'nat-structural', uc: 'uc-structural' },
+};
+const gapOf = (ai) => GAP[ai?.resolution?.expectation_gap] || null;
+
 function renderAiBlock(code, ai) {
   const evCls = `ev-${(ai.evidence_strength || 'mod').toLowerCase()}`;
   const rkCls = `rk-${(ai.risk_level || 'low').toLowerCase()}`;
@@ -45,11 +58,14 @@ function renderAiBlock(code, ai) {
         <div class="ai-uc">
           <div class="ai-uc-head">
             <span class="ai-uc-lbl">왜 저평가인가</span>
-            <span class="ai-uc-nat uc-${(uc.nature || '').toLowerCase()}">${uc.nature === 'STRUCTURAL' ? '구조적 · 회복 지연' : '일시적 · 해소 가능'}</span>
-            ${flipTxt}
+            ${uc.cause_type ? `<span class="ai-uc-nat ${gapOf(ai)?.uc || ''}">${CAUSE_LABEL[uc.cause_type] || uc.cause_type}</span>`
+              : `<span class="ai-uc-nat uc-${(uc.nature || '').toLowerCase()}">${uc.nature === 'STRUCTURAL' ? '구조적 · 회복 지연' : '일시적 · 해소 가능'}</span>`}
+            ${uc.cause_type ? '' : flipTxt}
           </div>
           <div class="ai-uc-text">${uc.text}</div>
-          ${uc.nature_basis ? `<div class="ai-uc-basis">${uc.nature_basis}</div>` : ''}
+          ${uc.implied_expectations ? `<div class="ai-uc-basis">${uc.implied_expectations}</div>` : ''}
+          ${ai.resolution?.expectation_gap_basis ? `<div class="ai-uc-basis"><b>${gapOf(ai)?.txt || ''}</b> — ${ai.resolution.expectation_gap_basis}</div>`
+            : (uc.nature_basis ? `<div class="ai-uc-basis">${uc.nature_basis}</div>` : '')}
         </div>` : '';
 
   return `
@@ -77,7 +93,7 @@ ${ucBlock}
         <div class="ai-verdict-row">
           <div class="ai-verdict">${ai.verdict || ''}</div>
           <div class="ai-badges">
-            <span class="ai-badge ${evCls}">근거 ${ai.evidence_strength || ''}</span>
+            ${(ai.resolution?.info_grade || ai.info_grade) ? `<span class="ai-badge ev-moderate" title="증권사 리포트 수 기준 정보량 (A 6건 이상 · B 2~5 · C 0~1)">정보 ${ai.resolution?.info_grade || ai.info_grade}</span>` : `<span class="ai-badge ${evCls}">근거 ${ai.evidence_strength || ''}</span>`}
             <span class="ai-badge ${rkCls}">리스크 ${ai.risk_level || ''}</span>
           </div>
         </div>
@@ -115,6 +131,22 @@ function bindAiToggles() {
   });
 }
 
+// 카드 순서: 'ai' = ranker 재순위(저평가 해소 가능성) · 'quant' = 팩터 점수 순위 (2026-11-24 전환 버튼)
+let screenOrder = 'ai';
+let screenTopN = 0;   // Section 2 카드 수 — 검색 목록은 그 다음 순위부터
+
+function bindOrderToggle() {
+  document.querySelectorAll('.order-btn').forEach(btn => {
+    if (btn._bound) return;
+    btn._bound = true;
+    btn.addEventListener('click', () => {
+      screenOrder = btn.dataset.order;
+      document.querySelectorAll('.order-btn').forEach(b => b.classList.toggle('is-active', b === btn));
+      loadTripleCross();
+    });
+  });
+}
+
 async function loadTripleCross() {
   const cardsEl = document.getElementById('screen-cards');
   const metaEl = document.getElementById('screen-meta');
@@ -148,15 +180,19 @@ async function loadTripleCross() {
 
     // ranker가 부여한 ai_rank가 있으면 그 순서로 카드 재정렬 (저평가 해소 가능성 순)
     const hasAiRank = top.some(c => aiRankMap[c.code]?.ai_rank);
-    if (hasAiRank) {
+    screenTopN = top.length;
+    bindOrderToggle();
+    if (screenOrder === 'quant') {
+      top.sort((a, b) => a.rank - b.rank);
+    } else if (hasAiRank) {
       top.sort((a, b) =>
         (aiRankMap[a.code]?.ai_rank ?? 99) - (aiRankMap[b.code]?.ai_rank ?? 99));
     }
 
+    const qFail = (payload.all_ranked || []).filter(r => r.quality_pass === false).length;
+    const cyc = top.filter(r => r.cyclical_flag).length;
     metaEl.textContent =
-      `분석 ${meta.total_analyzed ?? '-'} · 본업적자제외 ${meta.excluded_count ?? 0} · ` +
-      `차단 ${meta.avoid_count ?? 0} · 랭킹 ${meta.ranked_count ?? 0} · ` +
-      `3시그널 통과 ${meta.triple_cross_pass ?? 0}` +
+      `유니버스 ${meta.universe_size ?? '-'} · 퀄리티 탈락 ${qFail} · Top ${top.length} 중 이익 정점 의심 ${cyc}` +
       (meta.updated_at ? ` · ${new Date(meta.updated_at).toLocaleString('ko-KR')}` : '');
 
     if (!top.length) {
@@ -203,17 +239,18 @@ async function loadTripleCross() {
       // 정작 이 시스템의 결론인 "왜 싼가 / 회복하는가"는 AI 블록 안에 접혀 있었다.
       // 결론을 카드 표면으로 끌어올리고 티어 배지는 걷어낸다.
       const rk = aiRankMap[c.code] || {};
-      const nature = (ai?.undervaluation_cause?.nature || '').toUpperCase();
-      const natCls = nature === 'STRUCTURAL' ? 'nat-structural'
-        : nature === 'TEMPORARY' ? 'nat-temporary' : 'nat-unknown';
-      const natTxt = nature === 'STRUCTURAL' ? '구조적'
-        : nature === 'TEMPORARY' ? '일시적' : '판정 없음';
+      // 카드 색 = 기대 괴리 (초록: 가격이 증거보다 비관적 · 회색: 전망 반영 · 빨강: 함정 경계)
+      const gap = gapOf(ai);
+      const natCls = gap ? gap.cls : 'nat-unknown';
+      const cause = ai?.undervaluation_cause?.cause_type;
+      const natTxt = gap ? `${CAUSE_LABEL[cause] || '원인 미분류'} · ${gap.short}` : '판정 없음';
 
       // 정량 후보 순위 → AI 재순위 이동. 이 대비가 2단계 랭킹 구조의 핵심 서사다.
       const move = (rk.quant_rank != null && rk.ai_rank != null)
         ? rk.quant_rank - rk.ai_rank : null;
       const moveCls = move == null ? '' : move > 0 ? 'mv-up' : move < 0 ? 'mv-down' : 'mv-flat';
       const moveTxt = move == null ? ''
+        : screenOrder === 'quant' ? `AI ${rk.ai_rank}위`
         : move === 0 ? '정량과 동일'
         : `정량 ${rk.quant_rank}위 ${move > 0 ? '▲' : '▼'} ${Math.abs(move)}`;
 
@@ -227,6 +264,7 @@ async function loadTripleCross() {
             ${move != null ? `<span class="card-move ${moveCls}">${moveTxt}</span>` : ''}
             <span class="card-nat">${natTxt}</span>
           </div>
+          ${c.cyclical_flag ? `<div class="card-cyc" title="최근 20분기 영업이익률이 크게 출렁였거나 지금이 평소의 2배 이상 — 낮은 PER이 이익 정점 때문일 수 있음">이익 정점 의심</div>` : ''}
           <div class="card-name">${c.name}</div>
           <div class="card-code">${c.code} · ${c.market || 'KR'}</div>
           <div class="card-price">${fmtPrice(c.current_price)}</div>
@@ -236,38 +274,38 @@ async function loadTripleCross() {
           <div class="card-factor-grid">
             ${factor('PER↓', c.s1_per_z)}
             ${factor('PBR↓', c.s1_pbr_z)}
-            ${factor('Fwd↓', c.s3_per_z)}
-            ${factor('Up%', c.upside_z)}
+            ${factor('전망↓', c.s3_per_z)}
+            <div class="factor ${c.quality_pass ? 'on' : ''}" title="퀄리티 필터 (이익률 추세·이익의 질·이자보상) — 하위 20%면 Top 자격 없음">퀄리티</div>
           </div>
 
           <div class="card-per-row">
             <div><div class="lbl">PER</div><div class="val">${fmtPer(c.current_per)}</div></div>
-            <div><div class="lbl">5Y PER</div><div class="val muted">${fmtPer(c.avg_5y_per)}</div></div>
+            <div><div class="lbl">5Y 중앙</div><div class="val muted">${fmtPer(c.avg_5y_per)}</div></div>
             <div><div class="lbl">PBR</div><div class="val">${fmtPer(c.cur_pbr)}</div></div>
-            <div><div class="lbl">5Y PBR</div><div class="val muted">${fmtPer(c.avg_5y_pbr)}</div></div>
+            <div><div class="lbl">5Y 중앙</div><div class="val muted">${fmtPer(c.avg_5y_pbr)}</div></div>
           </div>
 
           <div class="card-fwd-row">
             <div><div class="lbl">Fwd PER</div><div class="val fwd">${fmtPer(c.forward_per)}</div></div>
-            <div><div class="lbl">컨센 목표가</div><div class="val">${fmtPrice(c.avg_target)}</div></div>
-            <div><div class="lbl">상승여력</div><div class="val fwd">${fmtPct(c.upside_raw)}</div></div>
+            <div title="평소(5년 중앙) PER을 받으려면 필요한 이익 ÷ 컨센서스 이익. 0.2면 시장은 이익이 컨센서스의 1/5로 준다고 가격을 매김"><div class="lbl">가격 가정 이익</div><div class="val">${c.implied_fade == null ? '—' : '×' + c.implied_fade.toFixed(2)}</div></div>
+            <div><div class="lbl">컨센 목표가</div><div class="val muted">${fmtPrice(c.avg_target)}</div></div>
           </div>
 
           <div class="card-group-row">
             <div class="g-row">
-              <span class="g-lbl">Value</span>
+              <span class="g-lbl">가치</span>
               ${groupBar(c.value_score)}
               <span class="g-val">${fmtZ(c.value_score)}</span>
             </div>
             <div class="g-row">
-              <span class="g-lbl">Growth</span>
+              <span class="g-lbl">전망</span>
               ${groupBar(c.growth_score)}
               <span class="g-val">${fmtZ(c.growth_score)}</span>
             </div>
           </div>
 
           <div class="card-score">
-            <span class="lbl">Z-Score 종합 (V60 + G40)</span>
+            <span class="lbl">정량 종합 (PER·PBR·전망 각 ⅓)</span>
             <span class="val">${fmtZ(c.total_score)}</span>
           </div>
 
@@ -297,34 +335,25 @@ async function loadSearchPool() {
   if (!resultsEl) return;
 
   try {
-    const [uniR, screenR] = await Promise.all([
-      fetch(`data/universe.json?t=${Date.now()}`),
+    // 검색 대상 = 시총 2,000억+ 보통주 전체 (apply_triple_cross 가 만든 search_index.json).
+    // universe 밖 종목도 현재 PER·5년 중앙값·일별 차트·재무를 볼 수 있다 — 점수·AI 만 universe 안.
+    const [idxR, screenR] = await Promise.all([
+      fetch(`data/screens/search_index.json?t=${Date.now()}`),
       fetch(`data/screens/triple_cross.json?t=${Date.now()}`),
     ]);
-    const universe = uniR.ok ? await uniR.json() : null;
+    const idx = idxR.ok ? await idxR.json() : { items: [] };
     const screen = screenR.ok ? await screenR.json() : null;
-
-    // 점수 맵 생성
     if (screen?.all_ranked) {
       for (const r of screen.all_ranked) scoreMap[r.code] = r;
     }
-
-    // universe 통과 종목 (4팩터 분석 가능)
-    const passed = universe?.passed || universe?.stocks || [];
-    searchPool = passed.map(s => ({
-      code: s.code,
-      name: s.name,
-      market: s.market,
-      market_cap: s.market_cap_억,
-      close: s.close,
-      cur_per: scoreMap[s.code]?.current_per,
-      forward_per: s.forward_per ?? scoreMap[s.code]?.forward_per,
-      avg_target: s.avg_target_price ?? scoreMap[s.code]?.avg_target,
-      total_score: scoreMap[s.code]?.total_score,
-      rank: scoreMap[s.code]?.rank,
-      tier: scoreMap[s.code]?.tier,
-      upside_raw: scoreMap[s.code]?.upside_raw,
-      analyzed: !!scoreMap[s.code],
+    searchPool = (idx.items || []).map(s => ({
+      code: s.code, name: s.name, market: s.market,
+      market_cap: s.market_cap_억, close: s.close,
+      cur_per: s.cur_per, med_per: s.med_per, cur_pbr: s.cur_pbr, med_pbr: s.med_pbr,
+      forward_per: s.forward_per, avg_target: s.avg_target,
+      total_score: s.total_score, rank: s.rank,
+      tier: scoreMap[s.code]?.tier, upside_raw: scoreMap[s.code]?.upside_raw,
+      analyzed: !!s.in_universe,
     }));
 
     countEl.textContent = `${searchPool.length} 종목`;
@@ -363,8 +392,13 @@ function renderSearchResults(query) {
 
   // 정렬
   const sortKey = sortEl.value;
+  // 검색어 없이 순위순이면 Top N(위 카드)은 빼고 그 다음 순위부터 — 같은 종목을 두 번 보여주지 않는다
+  if (!q && sortKey === 'rank' && screenTopN) {
+    filtered = filtered.filter(s => !(s.rank && s.rank <= screenTopN));
+  }
   const sorters = {
-    rank:       (a, b) => (b.total_score ?? -999) - (a.total_score ?? -999),
+    // 순위 번호 기준 — 퀄리티 탈락 종목은 점수가 높아도 뒤로 밀리므로 total_score 로 정렬하면 순서가 어긋난다
+    rank:       (a, b) => (a.rank ?? 9e9) - (b.rank ?? 9e9),
     market_cap: (a, b) => (b.market_cap || 0) - (a.market_cap || 0),
     cur_per:    (a, b) => (a.cur_per ?? 9e9) - (b.cur_per ?? 9e9),
     upside:     (a, b) => (b.upside_raw ?? -9e9) - (a.upside_raw ?? -9e9),
@@ -405,7 +439,7 @@ function renderSearchResults(query) {
       : '';
     const rankBadge = s.rank ? `#${s.rank}` : '';
     const upPct = s.upside_raw == null ? '' :
-      `<span class="srch-up">상승여력 <b>${(s.upside_raw >= 0 ? '+' : '') + (s.upside_raw * 100).toFixed(1)}%</b></span>`;
+      `<span class="srch-up" title="증권사 평균 목표가 대비 — 점수 미반영">목표가 괴리 <b>${(s.upside_raw >= 0 ? '+' : '') + (s.upside_raw * 100).toFixed(1)}%</b></span>`;
     return `
       <a class="srch-card" href="stock.html?code=${s.code}">
         <div class="srch-row1">
@@ -418,10 +452,10 @@ function renderSearchResults(query) {
           <span class="srch-price">${fmtP(s.close)}원</span>
         </div>
         <div class="srch-row3">
-          <span>PER <b>${fmtP(s.cur_per)}</b></span>
-          <span>Fwd <b class="fwd">${fmtP(s.forward_per)}</b></span>
-          ${upPct}
-          <span class="srch-score">Z ${fmtZ(s.total_score)}</span>
+          <span title="현재 / 5년 중앙">PER <b>${fmtP(s.cur_per)}</b> <small>/ ${fmtP(s.med_per)}</small></span>
+          <span title="현재 / 5년 중앙">PBR <b>${fmtP(s.cur_pbr)}</b> <small>/ ${fmtP(s.med_pbr)}</small></span>
+          ${s.analyzed ? `<span>Fwd <b class="fwd">${fmtP(s.forward_per)}</b></span>` : ''}
+          <span class="srch-score">${s.analyzed ? 'Z ' + fmtZ(s.total_score) : 'universe 밖'}</span>
         </div>
       </a>`;
   }).join('');

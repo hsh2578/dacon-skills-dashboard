@@ -2,7 +2,7 @@
   "code": "138930",
   "corp_code": "00858364",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:38:07",
+  "fetched_at": "2026-11-23T22:13:35",
   "unit": "원",
   "annual": [
     {
@@ -34,11 +34,11 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
+    "period": "2026-3Q(누적)",
     "revenue": null,
-    "op_income": 283116163478,
+    "op_income": 758257870906,
     "op_margin": null,
-    "net_income": 216692856546,
+    "net_income": 639499829648,
     "net_margin": null,
     "fs_div": "CFS"
   }

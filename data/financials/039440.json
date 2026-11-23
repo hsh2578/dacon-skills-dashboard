@@ -2,7 +2,7 @@
   "code": "039440",
   "corp_code": "00298340",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:46:04",
+  "fetched_at": "2026-11-23T22:16:59",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 73839621831,
-    "op_income": 364643870,
-    "op_margin": 0.0049,
-    "net_income": 5107271293,
-    "net_margin": 0.0692,
+    "period": "2026-3Q(누적)",
+    "revenue": 227190022719,
+    "op_income": 7386281813,
+    "op_margin": 0.0325,
+    "net_income": 5380643308,
+    "net_margin": 0.0237,
     "fs_div": "CFS"
   }
 }

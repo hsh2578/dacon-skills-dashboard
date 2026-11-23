@@ -2,7 +2,7 @@
   "code": "032830",
   "corp_code": "00126256",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:35:02",
+  "fetched_at": "2026-11-23T22:12:45",
   "unit": "원",
   "annual": [
     {
@@ -34,11 +34,11 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
+    "period": "2026-3Q(누적)",
     "revenue": null,
-    "op_income": 1357813000000,
+    "op_income": 2918116000000,
     "op_margin": null,
-    "net_income": 1240307000000,
+    "net_income": 2791577000000,
     "net_margin": null,
     "fs_div": "CFS"
   }

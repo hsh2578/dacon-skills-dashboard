@@ -2,7 +2,7 @@
   "code": "000810",
   "corp_code": "00139214",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:36:00",
+  "fetched_at": "2026-11-23T22:12:53",
   "unit": "원",
   "annual": [
     {
@@ -34,11 +34,11 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
+    "period": "2026-3Q(누적)",
     "revenue": null,
-    "op_income": 861126626939,
+    "op_income": 2323864780300,
     "op_margin": null,
-    "net_income": 635218715258,
+    "net_income": 1867605291323,
     "net_margin": null,
     "fs_div": "CFS"
   }

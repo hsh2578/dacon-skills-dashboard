@@ -2,7 +2,7 @@
   "code": "073490",
   "corp_code": "00462121",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:47:49",
+  "fetched_at": "2026-11-23T22:17:38",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 45465286478,
-    "op_income": -275805108,
-    "op_margin": -0.0061,
-    "net_income": -269728744,
-    "net_margin": -0.0059,
+    "period": "2026-3Q(누적)",
+    "revenue": 186497847568,
+    "op_income": 14715273520,
+    "op_margin": 0.0789,
+    "net_income": 10965391801,
+    "net_margin": 0.0588,
     "fs_div": "CFS"
   }
 }

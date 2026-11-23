@@ -2,7 +2,7 @@
   "code": "103590",
   "corp_code": "00683469",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:38:32",
+  "fetched_at": "2026-11-23T22:13:54",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 506129977000,
-    "op_income": 50762956000,
-    "op_margin": 0.1003,
-    "net_income": 35906361000,
-    "net_margin": 0.0709,
+    "period": "2026-3Q(누적)",
+    "revenue": 1781119191000,
+    "op_income": 192745717000,
+    "op_margin": 0.1082,
+    "net_income": 137271428000,
+    "net_margin": 0.0771,
     "fs_div": "CFS"
   }
 }

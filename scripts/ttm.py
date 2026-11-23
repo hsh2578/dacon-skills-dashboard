@@ -62,13 +62,31 @@ def available_from(stac: str) -> date:
     return qend + timedelta(days=QUARTER_LAG_DAYS)
 
 
+def latest_due_stac(today: date) -> str:
+    """today 기준 공시 기한이 지난 가장 최근 결산기 (12월 결산 기준).
+
+        2026-11-23 → "202609"   (3분기 기한 11-14 경과)
+        2026-11-10 → "202606"
+    캐시 신선도 판정용: 이 분기가 없는 캐시는 다시 받아야 한다.
+    """
+    y, m = today.year, (today.month - 1) // 3 * 3   # 이미 지난 가장 최근 분기말 월 (0 = 전년 12월)
+    for _ in range(8):
+        if m <= 0:
+            y, m = y - 1, m + 12
+        stac = f"{y}{m:02d}"
+        m -= 3
+        if available_from(stac) <= today:
+            return stac
+    raise ValueError(today)
+
+
 def _ref(series: dict, stac: str, field: str = "eps"):
     """과거 참조값. 불변식 1(0 = 결측)이 적용되는 유일한 지점."""
     v = amount((series.get(stac) or {}).get(field))
     return None if (v is None or v == 0) else v
 
 
-def ttm_eps(series: dict, stac: str):
+def ttm_eps(series: dict, stac: str, field: str = "eps"):
     """TTM EPS = 직전 연간 − 전년 동기 누적 + 당해 누적 (= 최근 4개 분기).
 
     stac이 12월이면 그 자체가 연간이므로 그대로 쓴다.
@@ -81,13 +99,13 @@ def ttm_eps(series: dict, stac: str):
     읽을 이유가 없어 규칙을 일치시켰다.
     """
     y, m = int(stac[:4]), int(stac[4:6])
-    cur = _ref(series, stac)
+    cur = _ref(series, stac, field)
     if cur is None:
         return None
     if m == 12:
         return cur
-    prev_annual = _ref(series, f"{y-1}12")
-    prev_same = _ref(series, f"{y-1}{m:02d}")
+    prev_annual = _ref(series, f"{y-1}12", field)
+    prev_same = _ref(series, f"{y-1}{m:02d}", field)
     if prev_annual is None or prev_same is None:
         return None
     return prev_annual - prev_same + cur

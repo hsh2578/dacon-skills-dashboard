@@ -36,3 +36,15 @@ Thumbs.db
 # === 로그/임시 ===
 *.log
 *.tmp
+.gstack/
+
+# 2026-11-24 v6 — 로컬 전용 (사이트가 쓰지 않거나 공개하면 안 되는 것)
+# (gitignore 는 줄 중간의 # 을 주석으로 보지 않는다 — 주석은 반드시 별도 줄)
+# 뉴스 본문·텔레그램 채널 메시지 원문 — 공개 금지
+data/research/
+# FnGuide 추정치 스크래핑 원본
+data/consensus/
+# DART 분기 원천 (2,700 파일) — 사이트는 파생본만 씀
+data/financials_q/
+# AI 단계 중간 파일
+data/screens/_*

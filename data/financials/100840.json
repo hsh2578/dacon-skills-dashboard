@@ -2,7 +2,7 @@
   "code": "100840",
   "corp_code": "00648721",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:43:05",
+  "fetched_at": "2026-11-23T22:15:59",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 123567021503,
-    "op_income": 22804473617,
-    "op_margin": 0.1846,
-    "net_income": 26583514732,
-    "net_margin": 0.2151,
+    "period": "2026-3Q(누적)",
+    "revenue": 332373203089,
+    "op_income": 61719375405,
+    "op_margin": 0.1857,
+    "net_income": 37271715053,
+    "net_margin": 0.1121,
     "fs_div": "CFS"
   }
 }

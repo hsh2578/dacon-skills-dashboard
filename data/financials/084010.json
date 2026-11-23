@@ -2,7 +2,7 @@
   "code": "084010",
   "corp_code": "00113225",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:47:44",
+  "fetched_at": "2026-11-23T22:17:37",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 305601150491,
-    "op_income": 64456322,
-    "op_margin": 0.0002,
-    "net_income": 167175291,
-    "net_margin": 0.0005,
+    "period": "2026-3Q(누적)",
+    "revenue": 1051528826128,
+    "op_income": 15360746157,
+    "op_margin": 0.0146,
+    "net_income": 2320331087,
+    "net_margin": 0.0022,
     "fs_div": "CFS"
   }
 }

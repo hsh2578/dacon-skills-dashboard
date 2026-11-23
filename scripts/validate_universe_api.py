@@ -1,4 +1,7 @@
-"""universe 2단계 — 5년 실적 검증 (KIS 분기 EPS 기반, pykrx 대체)
+"""universe 2단계 — 5년 실적 검증 (DART 분기 지배순이익 기반)
+
+2026-11-23: KIS 재무비율 API 404 → DART 금액(data/financials_q, fetch_dart_quarterly.py)으로 전환.
+TTM EPS 대신 TTM 지배순이익의 부호를 본다 — 적자 판정은 주당이든 금액이든 같다.
 
 기존 `validate_universe_quick.py`는 pykrx 월별 PER 매트릭스의 NaN/0 패턴으로
 적자분기를 *추정*했다. 이제 KIS에서 분기 EPS를 직접 받으므로 추정할 필요가 없다.
@@ -10,7 +13,7 @@
 TTM EPS를 쓰는 이유: 단일 분기 EPS는 계절성으로 자주 음수가 되지만, 4개 분기를
 합치면 사업의 실제 손익 상태를 본다. "적자 기업"을 거르는 취지에 맞다.
 
-입력  data/universe.json (1단계 통과 종목) + data/.cache/_kis_ratio_q_*.json
+입력  data/universe.json (1단계 통과 종목) + data/financials_q/{code}.json
 출력  data/universe.json 갱신 (passed / excluded_validation / meta.validation)
 """
 import argparse
@@ -21,8 +24,7 @@ from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import feeds  # noqa: E402
-from ttm import latest_annual_eps, recent_stacs, ttm_eps  # noqa: E402
+from ttm import recent_stacs, ttm_eps  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
@@ -42,20 +44,19 @@ MAX_ADVERSE_Q = 4    # 적자 허용 분기 수
 MIN_VALID_Q = 12     # 최소 유효 분기 (3년치)
 
 
-def load_ratios():
-    """접속한 계정의 캐시만 읽는다. **폴백하지 않는다.**
-
-    예전에는 실전 → 모의 → 무접미 순으로 훑었다. 실전 캐시가 없으면 모의투자
-    계정의 작은 데이터셋으로 조용히 내려앉았고, 오류도 경고도 없이 그 결과가
-    그대로 4팩터 모집단이 됐다. 지금은 없으면 그냥 실패한다.
-    """
-    p = feeds.kis_ratio_cache_path()
-    if not p.exists():
-        sys.exit(f"[ERROR] {p.name} 없음 (계정: {feeds.KIS_ACCOUNT}). "
-                 "fetch_matrix_kis.py 를 먼저 실행하세요.")
-    data = json.loads(p.read_text(encoding="utf-8"))
-    print(f"  KIS 캐시: {p.name} ({feeds.KIS_ACCOUNT} 계정 · {len(data)}종목)")
-    return data
+def load_ratios(codes):
+    """{code: {stac: {ni, eq}}} — status 000 인 보고서만. 파일이 없으면 그 종목은 '데이터 없음'."""
+    fq = DATA_DIR / "financials_q"
+    out = {}
+    for c in codes:
+        p = fq / f"{c}.json"
+        if p.exists():
+            ser = json.loads(p.read_text(encoding="utf-8")).get("series", {})
+            out[c] = {k: v for k, v in ser.items() if v.get("status") == "000"}
+    print(f"  DART 분기: {len(out)}/{len(codes)}종목 (fetch_dart_quarterly.py)")
+    if len(out) < len(codes) * 0.9:
+        sys.exit("[ERROR] DART 분기 데이터가 10% 넘게 없습니다 — fetch_dart_quarterly.py 를 먼저 실행하세요.")
+    return out
 
 
 def main():
@@ -66,11 +67,11 @@ def main():
     args = ap.parse_args()
 
     uni = json.loads(UNIVERSE.read_text(encoding="utf-8"))
-    stocks = uni.get("stocks") or []
+    stocks = uni.get("stage1") or uni.get("stocks") or []   # 단계 키 (2026-11-24): stage1 = 1단계 · validated = 실적 검증 · final(=passed=stocks) = 최종. 각 단계는 자기 키에만 쓴다 — 재실행이 이미 줄어든 목록을 다시 검증하지 않게.
     print(f"[validate] 1단계 통과 {len(stocks)}종목 · 최근 {LOOKBACK_Q}분기 검증")
-    print(f"  룰: 적자(TTM EPS<=0) 분기 <= {args.max_adverse} · 유효분기 >= {args.min_valid}\n")
+    print(f"  룰: 적자(TTM 지배순이익<=0) 분기 <= {args.max_adverse} · 유효분기 >= {args.min_valid}\n")
 
-    ratios = load_ratios()
+    ratios = load_ratios([s["code"] for s in stocks])
 
     passed, ex_short, ex_nodata, ex_adverse = [], [], [], []
     for s in stocks:
@@ -83,17 +84,14 @@ def main():
         # 시차는 "과거 시점에 아직 몰랐을 실적"을 막는 장치인데, 이 검증은 과거
         # 시계열이 아니라 **지금 시점의 스크리닝**이다. 캐시에 들어 있다는 건 이미
         # 공시됐다는 뜻이므로 최신 분기를 그대로 쓰는 것이 맞다.
-        vals = [ttm_eps(series, st) for st in recent_stacs(series, LOOKBACK_Q)]
+        vals = [ttm_eps(series, st, "ni") for st in recent_stacs(series, LOOKBACK_Q)]
         valid = [v for v in vals if v is not None]
         if len(valid) < args.min_valid:
             (ex_short if valid else ex_nodata).append(s)
             continue
         adverse = sum(1 for v in valid if v <= 0)
 
-        # 직전 확정 결산 EPS — apply_triple_cross가 close/annual_eps로
-        # "직전 결산 PER"을 복원해 s3_per의 기준을 맞추는 데 쓴다 (ttm.py 참조).
-        rec = {**s, "valid_quarters": len(valid), "adverse_quarters": adverse,
-               "annual_eps": latest_annual_eps(series)}
+        rec = {**s, "valid_quarters": len(valid), "adverse_quarters": adverse}
         if adverse > args.max_adverse:
             ex_adverse.append(rec)
         else:
@@ -113,6 +111,7 @@ def main():
         print("\n  (--dry-run: 파일 미기록)")
         return
 
+    uni["validated"] = passed
     uni["passed"] = passed
     uni["stocks"] = passed
     uni.setdefault("excluded", {})
@@ -120,7 +119,7 @@ def main():
     uni["excluded"]["validation_nodata"] = ex_nodata
     uni["excluded"]["validation_adverse"] = ex_adverse
     uni["meta"]["validation"] = {
-        "method": "kis_quarterly_ttm_eps",
+        "method": "dart_quarterly_ttm_controlling_ni",
         "lookback_quarters": LOOKBACK_Q,
         "max_adverse_quarters": args.max_adverse,
         "min_valid_quarters": args.min_valid,

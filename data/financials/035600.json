@@ -2,7 +2,7 @@
   "code": "035600",
   "corp_code": "00264547",
   "source": "OpenDART",
-  "fetched_at": "2026-06-18T16:48:56",
+  "fetched_at": "2026-11-23T22:17:41",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-1Q(누적)",
-    "revenue": 381671787831,
-    "op_income": 25461848614,
-    "op_margin": 0.0667,
-    "net_income": 17448446958,
-    "net_margin": 0.0457,
+    "period": "2026-3Q(누적)",
+    "revenue": 1103276737535,
+    "op_income": 76137969130,
+    "op_margin": 0.069,
+    "net_income": 51335159123,
+    "net_margin": 0.0465,
     "fs_div": "CFS"
   }
 }
