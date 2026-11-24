@@ -120,7 +120,8 @@ def expected(f, mcap, ai=None, cyclical=False):
     ai = ai or {}
     verdict, flags = ai.get("verdict"), set(ai.get("flags") or [])
     # AI 판정끼리 모순이면 보수적인 쪽 — 구조 변화·일회성 이익 함정이 있는데 '이익률이 구조적'일 수 없다
-    durable = bool(ai.get("durable")) and not (flags & {"STRUCTURAL_BREAK", "ONE_OFF_EARNINGS"})
+    overridden = bool(ai.get("durable")) and bool(flags & {"STRUCTURAL_BREAK", "ONE_OFF_EARNINGS"})
+    durable = bool(ai.get("durable")) and not overridden
     # 이익률 (먼저 정한다 — 과거 상대 PER 을 같은 이익률 기준으로 환산하는 데 쓴다)
     med3 = float(np.median([f["med"], f["recent8"], f["cur"]]))
     if durable:
@@ -131,12 +132,18 @@ def expected(f, mcap, ai=None, cyclical=False):
         margin, m_note = f["med"], "회복 근거 있음(10년 평소)"
     else:
         margin, m_note = med3, "회복 근거 없음(10년 평소·최근 2년·지금의 중앙)"
+    if overridden and margin > f["recent8"]:
+        # '구조적'을 함정 때문에 무효로 했으면 결과가 원래 판정(최근 8분기)보다 낙관적이면 안 된다 (JYP: 평소 25% > 최근 19%)
+        margin, m_note = f["recent8"], "함정 때문에 구조적 판정 무효 — 최근 8분기(더 보수적인 쪽)"
     # 과거 상대 PER 을 지금 쓰는 이익률 기준으로 환산 — 과거 PER 은 그때의 이익률 위에서 매겨졌다.
     # 저마진기에 받은 높은 PER 을 고마진 이익에 그대로 곱하면 프리미엄이 부풀려진다 (grill 3차: 세진중공업 1.86→0.92)
     rows = f.get("rel_rows") or []
     adj = [r * (float(np.clip(m / margin, 1 / 3, 3)) if (m is not None and m > 0 and margin > 0) else 1.0) for r, m in rows]
     rel_hist = float(np.median(adj)) if len(adj) >= 24 else f.get("rel_hist")
     is_premium = (rel_hist or 1.0) > 1
+    if ai.get("reason_type") == "DISCOUNT_STRUCTURAL" and rel_hist is not None:
+        # AI 가 '구조적 할인'으로 판정했으면 할인 종목으로 본다 — 환산 배수가 1을 살짝 넘어도 프리미엄 회복을 기대하지 않는다
+        rel_hist, is_premium = min(rel_hist, 1.0), False
     premium = ai.get("premium") or "WEAKENED"
     if premium == "INTACT" and ai.get("reason_type") in ("CYCLE", "THEME") and is_premium:
         premium = "WEAKENED"      # 경기 호황·테마 프리미엄은 회복 대상이 아니다 (해자와 구분)
@@ -270,8 +277,13 @@ def buy_inputs(code, cur_per, today):
         return None
     mm = f["mkt_per"]
     r = lambda v, n=3: None if v is None else round(float(v), n)
+    def adj_at(margin):
+        rows = f.get("rel_rows") or []
+        v = [x * (float(np.clip(m / margin, 1 / 3, 3)) if (m is not None and m > 0 and margin > 0) else 1.0) for x, m in rows]
+        return r(float(np.median(v)), 2) if len(v) >= 24 else None
     return {"rel_hist": r(f["rel_hist"], 2), "rel_months": f["rel_months"],
+            "rel_hist_at_normal_margin": adj_at(f["med"]), "rel_hist_at_recent_margin": adj_at(f["recent8"]),
             "rel_now": r(cur_per / mm, 2) if (cur_per and mm) else None, "market_per_now": r(mm, 1),
             "margin_now": r(f["cur"]), "margin_normal": r(f["med"]), "margin_recent8": r(f["recent8"]),
             "rev_ttm_억": round(f["rev"] / 1e8), "rev_3y_avg_억": round(f["rev_3y"] / 1e8),
-            "ctrl_share": r(f["ctrl"], 2), "note": "rel = 종목 PER ÷ 같은 날 유니버스 중앙 PER. rel_hist 는 이익이 꺼진 달 제외 5년 중앙."}
+            "ctrl_share": r(f["ctrl"], 2), "note": "rel = 종목 PER ÷ 같은 날 유니버스 중앙 PER. rel_hist 는 5년 중앙(원값). at_*_margin 은 매달 PER 을 그 이익률 기준으로 환산한 값 — 순위 계산은 환산값을 쓴다."}

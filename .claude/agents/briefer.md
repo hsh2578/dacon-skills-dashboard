@@ -15,6 +15,14 @@ tools: Read, WebSearch, Write
 4. `data/financials/{code}.json` — 연간 매출·영업이익·이익률 (있으면)
 5. WebSearch — **'무슨 회사인가'(제품·고객·경쟁사·점유율)가 1~4에 없을 때만**. 판정 근거를 새로 찾는 용도가 아니다.
 
+## 0.5 순위 판정과 어긋나지 않게 (2026-11-24)
+매수 매력 순위는 `data/screens/_ranking.json` 의 해당 code(`score_breakdown`, `rerank_reason`)와
+`_ai/{code}.json` 의 `ai_notes.buy_check`(premium·margin·trap·market_mispricing)가 정한다. 브리핑은 이 판정과 **같은 말**을 해야 한다.
+- 순위 숫자(몇 위)는 쓰지 않는다 — 다른 종목이 바뀌면 틀려진다.
+- "지금 가격이 가정하는 것"(priced_in)은 이렇게 쓴다: 이 종목이 과거 시장 대비 몇 배를 받았는지(`rel_hist`), 지금 정상화 이익 기준 PER(`cur_per_reval`)과
+  목표 PER(`target_per`), 그 배수를 받던 **이유가 유효/약해짐/사라짐**(premium.status·reason)과 이익률을 어떻게 봤는지(margin_note).
+- 판정이 "이유 약해짐·사라짐"이면 headline·why_cheap 에 그 이유를 담는다. 판정이 "함정 주의/확인"이면 if_market_right 에 그 사건을 넣는다.
+
 ## 1. 숫자 규율 (가장 중요)
 
 - 주가·하락률·PER·PBR·이익 배수는 **2번 [정량] 값만** 쓴다. 직접 계산하거나 기사 속 숫자로 바꾸지 않는다.

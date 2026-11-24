@@ -19,7 +19,7 @@ python scripts/update_all.py
 ```
 
 1 유니버스(KRX) → 2 동시 수집(시총·종가 KRX · 분기 재무 dartlab→DART · 연간 EPS 네이버) →
-3 실적 검증 → 컨센서스 → 일별 PER/PBR → 점수 Top 30 → Top 30 재무·자료 묶음 → **AI 대상 선정** →
+3 실적 검증 → 컨센서스 → 일별 PER/PBR → 점수 Top 30 → Top 30 재무·자료 묶음·메자닌(CB/BW/EB) → **AI 대상 선정** →
 4 시장 지수(fetch_kr 는 pykrx — KRX 비밀번호 만료 시 실패해도 계속) → 5 검증.
 
 - 5단계 `verify_data` 가 **"ai_notes 가 현재 Top 에 없는 종목 포함"으로 실패하는 것은 정상** (AI 단계 전).
@@ -27,70 +27,37 @@ python scripts/update_all.py
 - 모든 수집은 이어받기 — 지난 실행 이후 새로 생긴 것만 받는다.
 - KRX 로그인 실패("패스워드 변경 필요") → data.krx.co.kr 에서 비밀번호 변경 → 마스터 `Desktop/.env` 의 `KRX_PW` 수정 → `python C:/Users/hsh/Desktop/sync_env.py --apply`.
 
-## 2단계 — AI 정성 분석 (`--skip-ai` 면 건너뜀)
+## 2단계 — AI (`--skip-ai` 면 건너뜀)
 
-`data/screens/_ai_targets.json` 을 Read. `analyze` 배열 = 다시 분석할 종목(신규 진입·새 공시/리포트·추정치 ±5%),
-`reuse` = 지난 분석 재사용(이미 `data/screens/_ai/{code}.json` 에 복사됨).
+> 순서가 중요하다 (2026-11-24 사고: 병합 전 브리핑 10개 유실). **에이전트 → merge → rank_ai → apply-rank → briefs** 순서를 지킬 것.
+> `ai_stage.py targets` 는 1단계 끝에서 이미 돌았다 — 재사용 종목은 직전 ai_notes(분석·브리핑·buy_check 전부)가 `_ai/{code}.json` 에 복사돼 있다.
 
-`analyze` 종목마다 Agent(`subagent_type=general-purpose`)를 **한 메시지에 최대 10개**, `run_in_background`.
-자리가 비면 다음을 띄운다. 프롬프트:
+`data/screens/_ai_targets.json` 의 `analyze` 종목마다 Agent(`general-purpose`) **하나가 끝까지**(분석→브리핑→매수 점검). 한 메시지에 최대 10개, `run_in_background`. 프롬프트:
 
 ```
 작업 폴더: <repo 절대경로>
-대상: **{종목명}({코드})** 의 ai_notes JSON 작성 (저평가 스크리너 Top 30 중 1종목). 오늘은 {YYYY-MM-DD}.
-
-룰 파일 4개를 Read로 정독하고 아래 순서대로 수행:
-1. .claude/agents/fundamental-analyst.md — 왜 저평가인가 진단 (cause_type, implied_expectations 포함)
-2. .claude/agents/risk-analyst.md — 리스크 (PEAK_EARNINGS 조건 확인)
-3. .claude/agents/resolution-scout.md — 1에서 진단한 원인이 풀리는지 검증 + expectation_gap 판정 (반드시 1 이후)
-4. .claude/agents/synthesizer.md — 통합 (새 verdict 매트릭스)
-
-데이터 (전부 Read):
-- 자료 묶음(가장 먼저): data/research/{코드}.json — DART 공시·증권사 리포트·뉴스·텔레그램·추정치 변화
-- 정량: data/screens/_top_context.json 에서 code="{코드}" (apply_triple_cross 가 만든다)
-- 재무(DART 연간): data/financials/{코드}.json
-- 지난 판단: data/judgments/latest.json 에서 code="{코드}" (있으면 resolution-scout §6.5 — 사실이 바뀔 때만 판정 변경, change_reason 필수)
-
-WebSearch는 자료 묶음에 없는 것(업황·글로벌 가격·해외 경쟁사)만 보충, 합계 4~8회.
-해소 근거를 못 찾으면 verdict NO_EVIDENCE + 빈 evidence, expectation_gap FAIR. 억지로 채우지 말 것.
-모든 정성 항목에 출처 태그([출처: DART · YYYY-MM-DD] / [출처: 리포트 · 증권사 · YYYY-MM] /
-[출처: 뉴스 · 언론사 · YYYY-MM] / [출처: WebSearch · YYYY-MM] / 확인 필요), 정량은 [정량]. 이모지 금지.
-
-출력: {"code","name","ai_notes":{… synthesizer 스키마 전체, resolution 은 구조 그대로 …}} 를
-Write 도구로 data/screens/_ai/{코드}.json 에 저장. 최종 응답은 한 줄:
-"{코드} cause_type=… expectation_gap=… verdict=… info_grade=…"
+대상: **{종목명}({코드})** — 저평가 스크리너 Top 30 중 1종목. 오늘은 {YYYY-MM-DD}. 재분석 사유: {why}.
+룰 파일을 정독하고 순서대로:
+1. .claude/agents/fundamental-analyst.md  2. .claude/agents/risk-analyst.md
+3. .claude/agents/resolution-scout.md(1 이후)  4. .claude/agents/synthesizer.md
+5. .claude/agents/buy-check.md — premium(과거 밸류의 이유: 해자 4유형/업황/테마/구조적 할인 → 유효·약해짐·사라짐)·margin(durable)·trap(WATCH 는 진행 중 사건만)·매수 이유·날카로운 질문
+6. .claude/agents/briefer.md — 브리핑 (§0.5: buy_check 판정과 같은 말, 순위 숫자 금지)
+데이터: data/research/{코드}.json(먼저) · data/screens/_top_context.json 의 code 항목(buy_inputs·price) ·
+data/financials/{코드}.json · data/mezzanine.json · 지난 판단 data/judgments/latest.json(사실이 바뀔 때만 판정 변경, change_reason) ·
+직전 분석 data/screens/_ai/{코드}.json(있으면 참고 후 덮어씀).
+WebSearch 는 자료 묶음에 없는 것만, 합계 4~8회. 출처 태그 필수, 이모지 금지. 한국 시장 맥락(지주·중복상장·주주환원·오너·CB/BW·경기순환·테마).
+출력: {"code","name","ai_notes":{synthesizer 스키마 + buy_check + briefing, generated_at, model}} 를 data/screens/_ai/{코드}.json 에 Write.
+scratchpad 는 scratchpad_{코드}\ 만. 최종 응답 한 줄: "{코드} premium=… durable=… trap=… verdict=…"
 ```
 
-전부 끝나면:
+전부 끝나면 (순서대로):
 
 ```bash
 python scripts/ai_stage.py merge          # _ai/*.json → ai_notes.json (빠진 종목 있으면 멈춤)
-```
-
-재순위는 **코드** (2026-11-24 — ranker 에이전트는 같은 판정에도 돌 때마다 해석이 달라 순위가 흔들렸다):
-
-```bash
-python scripts/rank_ai.py                 # 가격 판정 > 해소 근거 > DART TTM 영업이익 YoY > 리스크 → _ranking.json
-```
-
-```bash
-python scripts/ai_stage.py apply-rank     # ai_rank 반영 + 판단 기록(data/judgments/{날짜}.json, latest.json)
-python scripts/judgments.py grade         # 지난 판단 채점 (1·3·6·12개월 도래분)
-```
-
-### 2-2b. 매수 전 점검 (buy-check — 순위의 함정 감점이 여기서 나온다)
-
-`analyze` 종목만 (재사용 종목은 직전 점검이 ai_notes 에 따라온다). 브리핑과 같은 에이전트에 이어서 시켜도 된다:
-`.claude/agents/buy-check.md 정독 후 그대로. 대상 {코드}. _ai/{코드}.json 에 ai_notes.buy_check 만 추가.`
-점검까지 끝난 뒤 merge → `rank_ai.py` → apply-rank 순서로 돌린다 (trap.level 이 점수에 들어간다).
-
-### 2-3. 종목 브리핑 (사람이 읽는 해설)
-
-`analyze` 종목만 (재사용 종목은 직전 브리핑이 ai_notes 에 따라온다). Agent(`general-purpose`) 최대 10개 동시, 프롬프트:
-`.claude/agents/briefer.md 정독 후 그대로 따를 것. 대상 {코드} {종목명}. 입력 _ai/{코드}.json · _top_context.json price · research/{코드}.json · financials/{코드}.json. _ai/{코드}.json 에 ai_notes.briefing 만 추가해 Write. written_at={오늘}.`
-
-```bash
-python scripts/ai_stage.py briefs         # briefing → ai_notes.json (순위 유지). 빠진 종목이 있으면 멈춘다
+python scripts/rank_ai.py                 # 매수 매력 순위 = (주주이익 수익률 + 재평가) × 확실성 → _ranking.json
+python scripts/ai_stage.py apply-rank     # ai_rank·rank_detail 반영 + 판단 기록(data/judgments/)
+python scripts/ai_stage.py briefs         # 30종목 모두 briefing 있는지 확인 (없으면 멈춤 → 그 종목 briefer 다시)
+python scripts/judgments.py grade         # 지난 판단 채점 (1·3·6·12개월 도래분) — 순위가 실제로 맞았는지
 ```
 
 ## 3단계 — 검증
@@ -109,5 +76,5 @@ python scripts/update_all.py --from 5
 
 ## 보고
 
-마크다운 표: 유니버스 수 · Top 30 1위(정량/AI) · 이익 정점 의심 수 · expectation_gap 분포 · 재분석/재사용 수 ·
+마크다운 표: 유니버스 수 · 매수 매력 상위 5 · premium 판정 분포 · trap 분포 · 재분석/재사용 수 ·
 채점 결과(있으면) · 검증 결과.

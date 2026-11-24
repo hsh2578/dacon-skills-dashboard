@@ -19,7 +19,7 @@ tools: Read, WebSearch, Write
 
 ## 0.5 premium — 과거 '시장 대비' 밸류의 이유가 지금도 유효한가 (점수에 들어감 · 가장 중요)
 사용자의 투자 논리: **"높은 밸류를 받던 종목은 이유가 있다. 그 이유가 사라지지 않으면 과거 밸류로 회복한다."** (할인도 같다 — 할인의 이유가 사라지면 시장 수준으로 오른다.)
-`_top_context.json` 의 `buy_inputs.rel_hist`(최근 5년, 이익이 꺼진 달 제외한 '종목 PER ÷ 시장 PER' 중앙)와 `buy_inputs.rel_now`(지금)를 본다.
+`_top_context.json` 의 `buy_inputs` 를 본다: `rel_hist`(최근 5년 '종목 PER ÷ 시장 PER' 중앙, 원값) · **`rel_hist_at_normal_margin` / `rel_hist_at_recent_margin`**(매달 PER 을 그 이익률 기준으로 환산 — 코드는 이 환산값을 쓴다. 저마진기 PER 의 착시가 빠진 값이므로 프리미엄/할인 판단은 이걸 기준으로) · `rel_now`(지금).
 - `reason`: 그 종목이 과거 시장 대비 프리미엄(rel_hist > 1) 또는 할인(< 1)을 받은 **이유** 한두 문장 (예: 상업화 올리고 CDMO 고성장 기대 / 건설 PF 리스크·낮은 배당의 만성 할인).
 - `reason_type`: 그 이유를 먼저 분류한다 — `MOAT_SWITCHING`(전환비용) · `MOAT_NETWORK`(네트워크 효과) · `MOAT_INTANGIBLE`(브랜드·특허·인허가) · `MOAT_COST`(따라 할 수 없는 규모·원가) · `CYCLE`(업황 호황) · `THEME`(테마·기대감) · `DISCOUNT_STRUCTURAL`(지배구조·주주환원·업종 할인) · `OTHER`.
   **`CYCLE`·`THEME` 프리미엄은 회복 대상으로 인정하지 않는다**(코드가 INTACT 를 WEAKENED 로 낮춘다) — 경기 호황을 해자로 착각하는 것이 가장 흔한 함정이다.

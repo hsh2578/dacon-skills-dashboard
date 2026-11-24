@@ -73,12 +73,17 @@ def targets():
             analyze.append({"code": c, "name": r["name"], "why": why})
         else:
             reuse.append(c)
-            notes = dict(prev_notes[c]["ai_notes"])
+            notes = prev_notes[c]["ai_notes"]
             p = AI / f"{c}.json"
-            if not notes.get("briefing") and p.exists():   # 아직 ai_notes.json 에 병합 안 된 브리핑을 덮어쓰지 않는다 (2026-11-24 10종목 유실)
-                old = json.load(open(p, encoding="utf-8"))["ai_notes"]
-                if old.get("briefing") and old.get("generated_at") == notes.get("generated_at"):
-                    notes["briefing"] = old["briefing"]
+            # 같은 분석(generated_at 동일)의 작업 파일이 이미 있으면 그대로 둔다 — 병합 전 브리핑·buy_check 개정이
+            # 옛 ai_notes.json 내용으로 덮이지 않게 (2026-11-24 브리핑 10개 유실 사고)
+            if p.exists():
+                try:
+                    cur = json.load(open(p, encoding="utf-8"))["ai_notes"]
+                    if cur.get("generated_at") == notes.get("generated_at"):
+                        continue
+                except (ValueError, KeyError):
+                    pass
             p.write_text(json.dumps({"code": c, "name": r["name"], "ai_notes": notes},
                                     ensure_ascii=False, indent=1), encoding="utf-8")
     out = {"made_at": datetime.now().isoformat(timespec="seconds"), "previous": prev and prev["date"],

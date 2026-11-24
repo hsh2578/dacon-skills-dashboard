@@ -1,0 +1,330 @@
+{
+ "033500": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "213420": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "075580": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "237690": {
+  "overhang_pct": 6.26,
+  "unknown_pct": 0,
+  "items": [
+   {
+    "kind": "CB",
+    "rcept_no": "20230807000401",
+    "amount": 100000000000.0,
+    "price": 79648.0,
+    "pct_of_shares": 6.26,
+    "until": "2028-07-09",
+    "live": true,
+    "near_money": true
+   }
+  ],
+  "as_of": "2026-11-24"
+ },
+ "178920": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "068760": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "069620": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "017960": {
+  "overhang_pct": 2.6,
+  "unknown_pct": 0,
+  "items": [
+   {
+    "kind": "CB",
+    "rcept_no": "20250331003204",
+    "amount": 20000000000.0,
+    "price": 14408.0,
+    "pct_of_shares": 2.6,
+    "until": "2030-03-02",
+    "live": true,
+    "near_money": true
+   },
+   {
+    "kind": "EB",
+    "rcept_no": "20250331003140",
+    "amount": 19883500000.0,
+    "price": 17290.0,
+    "pct_of_shares": 2.22,
+    "until": "2028-03-02",
+    "live": true,
+    "near_money": false
+   }
+  ],
+  "as_of": "2026-11-24"
+ },
+ "100090": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "080580": {
+  "overhang_pct": 18.5,
+  "unknown_pct": 0,
+  "items": [
+   {
+    "kind": "CB",
+    "rcept_no": "20230302000561",
+    "amount": 5000000000.0,
+    "price": 19995.0,
+    "pct_of_shares": 1.39,
+    "until": "2028-02-03",
+    "live": true,
+    "near_money": false
+   },
+   {
+    "kind": "CB",
+    "rcept_no": "20230912000226",
+    "amount": 18000000000.0,
+    "price": 5276.0,
+    "pct_of_shares": 16.18,
+    "until": "2028-08-14",
+    "live": true,
+    "near_money": true
+   },
+   {
+    "kind": "EB",
+    "rcept_no": "20260108000626",
+    "amount": 5803928340.0,
+    "price": 12180.0,
+    "pct_of_shares": 2.32,
+    "until": "2030-12-19",
+    "live": true,
+    "near_money": true
+   }
+  ],
+  "as_of": "2026-11-24"
+ },
+ "121600": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [
+   {
+    "kind": "CB",
+    "rcept_no": "20230920000385",
+    "amount": 33000000000.0,
+    "price": 155997.0,
+    "pct_of_shares": 1.71,
+    "until": "2028-08-21",
+    "live": true,
+    "near_money": false
+   },
+   {
+    "kind": "CB",
+    "rcept_no": "20230920000049",
+    "amount": 62000000000.0,
+    "price": 155997.0,
+    "pct_of_shares": 3.17,
+    "until": "2028-08-21",
+    "live": true,
+    "near_money": false
+   },
+   {
+    "kind": "BW",
+    "rcept_no": "20230919000336",
+    "amount": 100000000000.0,
+    "price": 155997.0,
+    "pct_of_shares": 5.01,
+    "until": "2028-08-21",
+    "live": true,
+    "near_money": false
+   }
+  ],
+  "as_of": "2026-11-24"
+ },
+ "018290": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [
+   {
+    "kind": "EB",
+    "rcept_no": "20220316000938",
+    "amount": 10600000000.0,
+    "price": 7417.0,
+    "pct_of_shares": 4.14,
+    "until": "2025-02-18",
+    "live": false,
+    "near_money": true
+   }
+  ],
+  "as_of": "2026-11-24"
+ },
+ "377300": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "036620": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [
+   {
+    "kind": "CB",
+    "rcept_no": "20220128000452",
+    "amount": 6000000000.0,
+    "price": 2250.0,
+    "pct_of_shares": 3.41,
+    "until": "2025-01-24",
+    "live": false,
+    "near_money": true
+   }
+  ],
+  "as_of": "2026-11-24"
+ },
+ "064350": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "086900": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "376300": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "035720": {
+  "overhang_pct": 0.3,
+  "unknown_pct": 0,
+  "items": [
+   {
+    "kind": "CB",
+    "rcept_no": "20250527000422",
+    "amount": 50182840320.0,
+    "price": 37527.0,
+    "pct_of_shares": 0.3,
+    "until": "2028-05-23",
+    "live": true,
+    "near_money": true
+   },
+   {
+    "kind": "EB",
+    "rcept_no": "20240423000177",
+    "amount": 292963320000.0,
+    "price": 63700.0,
+    "pct_of_shares": 1.0,
+    "until": "2029-04-19",
+    "live": true,
+    "near_money": false
+   }
+  ],
+  "as_of": "2026-11-24"
+ },
+ "120110": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "298050": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "267250": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "298020": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "071970": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "052400": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "340570": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "025540": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "003350": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [
+   {
+    "kind": "EB",
+    "rcept_no": "20251001000573",
+    "amount": 58155484167.0,
+    "price": 64119.0,
+    "pct_of_shares": 20.01,
+    "until": "2030-09-14",
+    "live": true,
+    "near_money": false
+   }
+  ],
+  "as_of": "2026-11-24"
+ },
+ "035900": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "100120": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ },
+ "000100": {
+  "overhang_pct": 0,
+  "unknown_pct": 0,
+  "items": [],
+  "as_of": "2026-11-24"
+ }
+}

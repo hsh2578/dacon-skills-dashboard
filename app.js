@@ -33,6 +33,11 @@ const GAP = {
   NOT_PESSIMISTIC_ENOUGH: { txt: '함정 경계',              short: '함정 경계', cls: 'nat-structural', uc: 'uc-structural' },
 };
 const gapOf = (ai) => GAP[ai?.resolution?.expectation_gap] || null;
+// 카드 색·칩 = 매수 매력 순위의 판정 (2026-11-24) — 기대 수익과 '과거 밸류의 이유' 판정
+const PREM_SHORT = { INTACT: '이유 유효', WEAKENED: '이유 약해짐', GONE: '이유 사라짐', NO_HISTORY: '비교 이력 없음' };
+const RTYPE = { MOAT_SWITCHING: '전환비용', MOAT_NETWORK: '네트워크', MOAT_INTANGIBLE: '브랜드·기술', MOAT_COST: '원가 우위',
+                CYCLE: '업황', THEME: '테마', DISCOUNT_STRUCTURAL: '구조적 할인', OTHER: '기타' };
+const erClass = (er) => er == null ? 'nat-unknown' : er >= 0.10 ? 'nat-temporary' : er < 0 ? 'nat-structural' : 'nat-unknown';
 
 // 브리핑이 있으면 카드는 '왜 싸졌나'의 제목과 반론만 — 전체 글은 상세페이지에서 읽는다
 function renderBriefBlock(code, ai) {
@@ -200,6 +205,7 @@ async function loadTripleCross() {
           ai_rank: item.ai_rank,
           quant_rank: item.quant_rank,
           rerank_reason: item.rerank_reason,
+          detail: item.rank_detail,
         };
       }
     }
@@ -266,10 +272,11 @@ async function loadTripleCross() {
       // 결론을 카드 표면으로 끌어올리고 티어 배지는 걷어낸다.
       const rk = aiRankMap[c.code] || {};
       // 카드 색 = 기대 괴리 (초록: 가격이 증거보다 비관적 · 회색: 전망 반영 · 빨강: 함정 경계)
-      const gap = gapOf(ai);
-      const natCls = gap ? gap.cls : 'nat-unknown';
-      const cause = ai?.undervaluation_cause?.cause_type;
-      const natTxt = gap ? `${CAUSE_LABEL[cause] || '원인 미분류'} · ${gap.short}` : '판정 없음';
+      const det = rk.detail || {};
+      const prem = ai?.buy_check?.premium || {};
+      const natCls = erClass(det.er);
+      const natTxt = det.er != null
+        ? `${RTYPE[prem.reason_type] || '판정'} · ${PREM_SHORT[det.premium] || ''}` : '판정 없음';
 
       // 정량 후보 순위 → AI 재순위 이동. 이 대비가 2단계 랭킹 구조의 핵심 서사다.
       const move = (rk.quant_rank != null && rk.ai_rank != null)
@@ -316,8 +323,8 @@ async function loadTripleCross() {
 
           <div class="card-fwd-row">
             <div><div class="lbl">Fwd PER</div><div class="val fwd">${fmtPer(c.forward_per)}</div></div>
-            <div title="평소(5년 중앙) PER을 받으려면 필요한 이익 ÷ 컨센서스 이익. 0.2면 시장은 이익이 컨센서스의 1/5로 준다고 가격을 매김"><div class="lbl">가격 가정 이익</div><div class="val">${c.implied_fade == null ? '—' : '×' + c.implied_fade.toFixed(2)}</div></div>
-            <div><div class="lbl">컨센 목표가</div><div class="val muted">${fmtPrice(c.avg_target)}</div></div>
+            <div title="(주주이익 수익률 + 과거 밸류로 돌아갈 때의 연 재평가) — 확실성을 곱하기 전"><div class="lbl">기대 수익(연)</div><div class="val ${det.er >= 0 ? 'up' : 'down'}">${det.er == null ? '—' : (det.er >= 0 ? '+' : '') + (det.er * 100).toFixed(1) + '%'}</div></div>
+            <div title="좋은 사업 6관문 × 함정 점검 × 메자닌 오버행 × 배당성향"><div class="lbl">확실성</div><div class="val muted">${det.certainty == null ? '—' : det.certainty.toFixed(2)}</div></div>
           </div>
 
           <div class="card-group-row">

@@ -66,6 +66,7 @@ def main():
                           ["scripts/apply_triple_cross.py"],
                           ["scripts/fetch_financials.py"],
                           ["scripts/build_research_pack.py"],
+                          ["scripts/fetch_mezzanine.py"],
                           ["scripts/ai_stage.py", "targets"]], False, True),
         (4, "시장 지수", [["scripts/fetch_kr.py"], ["scripts/fetch_us.py"]], True, False),
         (5, "검증", [["scripts/verify_data.py"], ["scripts/check_golden_matrix.py"],

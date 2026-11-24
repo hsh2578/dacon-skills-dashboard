@@ -1,6 +1,6 @@
 {
  "date": "20261123",
- "recorded_at": "2026-11-24T12:32:10",
+ "recorded_at": "2026-11-24T12:57:21",
  "items": [
   {
    "code": "213420",
@@ -108,40 +108,9 @@
    "mcap0": 231013833250.0
   },
   {
-   "code": "035900",
-   "quant_rank": 28,
-   "ai_rank": 5,
-   "cause_type": "STRUCTURAL_DECLINE",
-   "nature": "STRUCTURAL",
-   "expectation_gap": "FAIR",
-   "verdict_res": "EARLY_SIGNS",
-   "verdict": "관망 권고",
-   "evidence": [
-    {
-     "text": "스키즈 2027 'RUN IT' 북미 14회(5/16~6/29)·유럽 7회(7/9~7/31) 스타디움 투어 발표, 11/19 일반 예매 개시",
-     "kind": "DURABILITY",
-     "verifiable_by": "2027-08 2Q27 실적 (공연·MD 매출)",
-     "source": "[출처: WebSearch · 2026-11]"
-    },
-    {
-     "text": "킥플립 10/6 미니앨범 초동 532,434장으로 커리어하이 경신, NEXZ 4월 싱글 초동 444,730장 커리어하이",
-     "kind": "MIX_SHIFT",
-     "verifiable_by": "2026-10 한터 초동 집계 (확인됨)",
-     "source": "[출처: WebSearch · 2026-10]"
-    },
-    {
-     "text": "신인 보이그룹 oftheblue 2027-01-11 미니 1집 데뷔 확정 — 2028년 공백 대비 IP 파이프라인",
-     "kind": "MIX_SHIFT",
-     "verifiable_by": "2027-01 초동 판매량",
-     "source": "[출처: WebSearch · 2026-11]"
-    }
-   ],
-   "mcap0": 1618505010600.0
-  },
-  {
    "code": "340570",
    "quant_rank": 25,
-   "ai_rank": 6,
+   "ai_rank": 5,
    "cause_type": "NEGLECT",
    "nature": "TEMPORARY",
    "expectation_gap": "TOO_PESSIMISTIC",
@@ -178,7 +147,7 @@
   {
    "code": "064350",
    "quant_rank": 15,
-   "ai_rank": 7,
+   "ai_rank": 6,
    "cause_type": "CYCLICAL_PEAK",
    "nature": "STRUCTURAL",
    "expectation_gap": "TOO_PESSIMISTIC",
@@ -209,7 +178,7 @@
   {
    "code": "052400",
    "quant_rank": 24,
-   "ai_rank": 8,
+   "ai_rank": 7,
    "cause_type": "CYCLICAL_PEAK",
    "nature": "TEMPORARY",
    "expectation_gap": "TOO_PESSIMISTIC",
@@ -246,7 +215,7 @@
   {
    "code": "018290",
    "quant_rank": 12,
-   "ai_rank": 9,
+   "ai_rank": 8,
    "cause_type": "STRUCTURAL_DECLINE",
    "nature": "STRUCTURAL",
    "expectation_gap": "FAIR",
@@ -271,7 +240,7 @@
   {
    "code": "036620",
    "quant_rank": 14,
-   "ai_rank": 10,
+   "ai_rank": 9,
    "cause_type": "TEMPORARY_SHOCK",
    "nature": "TEMPORARY",
    "expectation_gap": "TOO_PESSIMISTIC",
@@ -302,7 +271,7 @@
   {
    "code": "298050",
    "quant_rank": 20,
-   "ai_rank": 11,
+   "ai_rank": 10,
    "cause_type": "TEMPORARY_SHOCK",
    "nature": "TEMPORARY",
    "expectation_gap": "FAIR",
@@ -323,6 +292,37 @@
     }
    ],
    "mcap0": 671096210400.0
+  },
+  {
+   "code": "035900",
+   "quant_rank": 28,
+   "ai_rank": 11,
+   "cause_type": "STRUCTURAL_DECLINE",
+   "nature": "STRUCTURAL",
+   "expectation_gap": "FAIR",
+   "verdict_res": "EARLY_SIGNS",
+   "verdict": "관망 권고",
+   "evidence": [
+    {
+     "text": "스키즈 2027 'RUN IT' 북미 14회(5/16~6/29)·유럽 7회(7/9~7/31) 스타디움 투어 발표, 11/19 일반 예매 개시",
+     "kind": "DURABILITY",
+     "verifiable_by": "2027-08 2Q27 실적 (공연·MD 매출)",
+     "source": "[출처: WebSearch · 2026-11]"
+    },
+    {
+     "text": "킥플립 10/6 미니앨범 초동 532,434장으로 커리어하이 경신, NEXZ 4월 싱글 초동 444,730장 커리어하이",
+     "kind": "MIX_SHIFT",
+     "verifiable_by": "2026-10 한터 초동 집계 (확인됨)",
+     "source": "[출처: WebSearch · 2026-10]"
+    },
+    {
+     "text": "신인 보이그룹 oftheblue 2027-01-11 미니 1집 데뷔 확정 — 2028년 공백 대비 IP 파이프라인",
+     "kind": "MIX_SHIFT",
+     "verifiable_by": "2027-01 초동 판매량",
+     "source": "[출처: WebSearch · 2026-11]"
+    }
+   ],
+   "mcap0": 1618505010600.0
   },
   {
    "code": "075580",

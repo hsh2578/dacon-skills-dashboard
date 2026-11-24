@@ -392,7 +392,8 @@ function rankDetail(item) {
   return `<p class="rank-formula">기대 수익 <b>연 ${pct(d.er, true)}</b> = 주주이익 수익률 <b>${pct(d.owner_yield)}</b> + 재평가 <b>${pct(d.rerate, true)}</b><br>× 확실성 <b>${d.certainty}</b></p>
     ${d.target_per ? `<p class="aside-sub">재평가</p><p class="rank-line">${PREM_TXT[d.premium] || ''}<br>목표 PER <b>${d.target_per}</b> · 지금 ${d.cur_per_reval ?? '—'} (정상화 이익 기준)</p>` : ''}
     <p class="aside-sub">이익률</p><p class="rank-line">${(d.margin_used * 100).toFixed(1)}% — ${escapeHtml(d.margin_note || '')}</p>
-    <p class="aside-sub">좋은 사업 점검 ${d.good_business}${d.payout != null ? ` · 배당성향 ${(d.payout * 100).toFixed(0)}%` : ''}</p><ul class="rank-checks">${rows}</ul>`;
+    <p class="aside-sub">좋은 사업 점검 ${d.good_business}${d.payout != null ? ` · 배당성향 ${(d.payout * 100).toFixed(0)}%` : ''}</p><ul class="rank-checks">${rows}</ul>
+    ${d.overhang_pct ? `<p class="aside-sub">메자닌 오버행</p><p class="rank-line">전환가가 주가 근처인 CB·BW·EB 가 주식의 최대 <b>${d.overhang_pct}%</b> (DART 발행결정 기준 상한)</p>` : ''}`;
 }
 
 function natLabel(n) {

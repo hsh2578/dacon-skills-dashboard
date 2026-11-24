@@ -2122,3 +2122,5 @@ html, body { overflow-x: hidden; }
 .rank-checks li.na span { color: var(--text-faint); }
 .aside-why { font-size: 12px !important; color: var(--text-muted); margin-top: 8px; }
 .rank-line { font-size: 12.5px !important; line-height: 1.6 !important; }
+.card-fwd-row .val.up { color: var(--kr-up); }
+.card-fwd-row .val.down { color: var(--kr-down); }

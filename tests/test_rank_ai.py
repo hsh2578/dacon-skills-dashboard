@@ -78,3 +78,20 @@ def test_일회성_이익이면_재평가도_보수적_이익으로():
     a = expected(f, M, {"premium": "INTACT"})["rerate"]
     b = expected(f, M, {"premium": "INTACT", "flags": ["ONE_OFF_EARNINGS"]})["rerate"]
     assert b < a
+
+
+def test_메자닌_오버행():
+    from rank_ai import overhang_mult
+    assert overhang_mult(None) == 1.0 and overhang_mult(3) == 1.0 and overhang_mult(6) == 0.9 and overhang_mult(18.5) == 0.8
+
+
+def test_구조적_할인_판정이면_환산값이_1을_넘어도_할인으로():
+    f = _f(rel=1.2)
+    e = expected(f, M, {"premium": "INTACT", "reason_type": "DISCOUNT_STRUCTURAL"})
+    assert e["rel_used"] <= 1.0
+
+
+def test_함정으로_구조적_판정을_무효로_해도_더_낙관적이_되지_않는다():
+    f = _f(cur=0.19, med=0.25, recent8=0.19, ni=60e8)
+    e = expected(f, M, {"durable": True, "flags": ["STRUCTURAL_BREAK"], "verdict": "EARLY_SIGNS"})
+    assert e["margin"] <= 0.19
