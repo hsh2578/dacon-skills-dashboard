@@ -253,6 +253,10 @@ def main():
 
     # 8. 정렬
     # 퀄리티 통과 종목을 앞에 — Top N 은 통과 종목에서만 뽑힌다. 탈락 종목도 all_ranked 에는 남긴다.
+    # Top N 선별은 정량 3팩터(사용자가 정한 '자기 과거 대비 저평가') 그대로. 매수 매력 순위는 그 안에서 rank_ai 가 매긴다.
+    # (2026-11-24 새 점수로 선별을 바꿔 봤다가 되돌림 — 스크리너 정의는 사용자 결정. value_core 는 AI 입력·순위에만 쓴다)
+    import value_core
+    today_s = datetime.now().strftime("%Y%m%d")
     df = df.sort_values(["quality_pass", "total_score"], ascending=[False, False]).reset_index(drop=True)
     df["rank"] = df.index + 1
 
@@ -370,6 +374,7 @@ def main():
             "expectations": {k: r.get(k) for k in ("implied_fade", "implied_vs_ttm", "midcycle_vs_ttm",
                                                     "opm_ttm", "opm_med5y", "cyclical_flag")},
             "quality": {k: r.get(k) for k in ("quality_score", "q_trend", "q_accr", "q_icr")},
+            "buy_inputs": value_core.buy_inputs(r["code"], r.get("current_per"), today_s),
             "price": price_facts(r["code"]),
             "note": "avg_5y_* 는 5년 중앙값. forward_per = 시총/(FY0 지배순이익×컨센서스 성장배수). 목표가는 점수 미사용."}
            for r in out_records[:TOP_N]]

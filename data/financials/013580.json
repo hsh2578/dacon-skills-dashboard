@@ -2,7 +2,7 @@
   "code": "013580",
   "corp_code": "00102432",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:17:59",
+  "fetched_at": "2026-11-24T12:09:54",
   "unit": "원",
   "annual": [
     {
@@ -10,8 +10,8 @@
       "revenue": 2199961908176,
       "op_income": 174797290180,
       "op_margin": 0.0795,
-      "net_income": 95413721382,
-      "net_margin": 0.0434,
+      "net_income": 94056016966,
+      "net_margin": 0.0428,
       "fs_div": "CFS"
     },
     {
@@ -19,8 +19,8 @@
       "revenue": 2561801412006,
       "op_income": 232741989538,
       "op_margin": 0.0909,
-      "net_income": 156417920465,
-      "net_margin": 0.0611,
+      "net_income": 155907363835,
+      "net_margin": 0.0609,
       "fs_div": "CFS"
     },
     {
@@ -28,7 +28,7 @@
       "revenue": 2949680250000,
       "op_income": 132836469827,
       "op_margin": 0.045,
-      "net_income": 60339311955,
+      "net_income": 60478812402,
       "net_margin": 0.0205,
       "fs_div": "CFS"
     },
@@ -37,8 +37,8 @@
       "revenue": 2977005044488,
       "op_income": 100697392316,
       "op_margin": 0.0338,
-      "net_income": 51924199347,
-      "net_margin": 0.0174,
+      "net_income": 47243080746,
+      "net_margin": 0.0159,
       "fs_div": "CFS"
     },
     {
@@ -46,8 +46,8 @@
       "revenue": 3127054733663,
       "op_income": 87143166001,
       "op_margin": 0.0279,
-      "net_income": 52435702377,
-      "net_margin": 0.0168,
+      "net_income": 46342119633,
+      "net_margin": 0.0148,
       "fs_div": "CFS"
     },
     {
@@ -55,8 +55,8 @@
       "revenue": 2887440609690,
       "op_income": 166870229835,
       "op_margin": 0.0578,
-      "net_income": 97894344656,
-      "net_margin": 0.0339,
+      "net_income": 99962415842,
+      "net_margin": 0.0346,
       "fs_div": "CFS"
     }
   ],
@@ -65,8 +65,8 @@
     "revenue": 2309400694593,
     "op_income": 160259426074,
     "op_margin": 0.0694,
-    "net_income": 66934047600,
-    "net_margin": 0.029,
+    "net_income": 69280619407,
+    "net_margin": 0.03,
     "fs_div": "CFS"
   }
 }

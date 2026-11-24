@@ -2121,3 +2121,4 @@ html, body { overflow-x: hidden; }
 .rank-checks li.ok span { color: var(--positive); } .rank-checks li.no span { color: var(--negative); } .rank-checks li.no { color: var(--negative); }
 .rank-checks li.na span { color: var(--text-faint); }
 .aside-why { font-size: 12px !important; color: var(--text-muted); margin-top: 8px; }
+.rank-line { font-size: 12.5px !important; line-height: 1.6 !important; }

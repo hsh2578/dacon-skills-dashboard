@@ -376,21 +376,23 @@ function renderBriefPrice() {
   ].map(([k, v, s]) => `<div class="bp"><span class="bp-k">${k}</span><b class="bp-v${String(v).startsWith('-') ? ' neg' : ''}">${v}</b><span class="bp-s">${s}</span></div>`).join('');
 }
 
-// 순위 계산식을 그대로 보여준다 — (평소 주주이익 수익률 + 재평가 여지) × 확실성, 좋은 사업 6관문
-const RANK_CHECKS = ['ROE 평균 ≥8%', '현금흐름/순이익 ≥0.7', '이자보상 ≥2배', '순이익률 평균 ≥5%', '5년 누적 FCF > 0', '주식 수 증가 ≤20%'];
+// 순위 계산식을 그대로 보여준다 — (주주이익 수익률 + 재평가 수익) × 확실성, 좋은 사업 6관문
+const RANK_CHECKS = ['ROE 평균 ≥8%', '현금흐름/순이익 ≥0.7', '이자보상 ≥2배', '순이익률 평균 ≥5%', 'FCF 적자 연도 ≤2 (5년)', '주식 수 증가 ≤20%'];
+const PREM_TXT = { INTACT: '과거 프리미엄의 이유 유효 → 과거 배수로', WEAKENED: '이유 약해짐 → 과거와 시장의 중간(기하평균)', NO_HISTORY: '비교할 과거 이력 없음 → 시장 평균 배수', GONE: '이유 사라짐 → 시장 평균 배수로' };
 function rankDetail(item) {
   const d = item.rank_detail;
-  if (!d) return `<p>${briefText(item.rerank_reason || '')}</p>`;
-  const pct = (v) => v == null ? '—' : `${(v * 100).toFixed(1)}%`;
+  if (!d || d.er == null) return `<p>${briefText(item.rerank_reason || '')}</p>`;
+  const pct = (v, s = false) => v == null ? '—' : `${s && v >= 0 ? '+' : ''}${(v * 100).toFixed(1)}%`;
   const fmt = [(v) => pct(v), (v) => v.toFixed(2), (v) => v >= 99 ? '이자 부담 없음' : `${v.toFixed(1)}배`, (v) => pct(v),
-               (v) => `${Math.round(v / 1e8).toLocaleString('ko-KR')}억`, (v) => `${v >= 0 ? '+' : ''}${(v * 100).toFixed(0)}%`];
+               (v) => `${v}개 해`, (v) => `${v >= 0 ? '+' : ''}${(v * 100).toFixed(0)}%`];
   const rows = RANK_CHECKS.map((name, i) => {
     const ok = d.checks?.[i], v = d.check_vals?.[i];
     return `<li class="${ok === false ? 'no' : ok ? 'ok' : 'na'}"><span>${ok === false ? '✕' : ok ? '✓' : '–'}</span>${name}<em>${v == null ? '자료 없음' : fmt[i](v)}</em></li>`;
   }).join('');
-  return `<p class="rank-formula">(평소 주주이익 수익률 <b>${pct(d.owner_yield)}</b> + 재평가 여지 <b>${d.rerate >= 0 ? '+' : ''}${(d.rerate * 100).toFixed(1)}%p</b>) × 확실성 <b>${d.certainty}</b></p>
-    <p class="aside-sub">좋은 사업 점검 ${d.good_business}</p><ul class="rank-checks">${rows}</ul>
-    <p class="aside-why">${briefText(item.rerank_reason || '')}</p>`;
+  return `<p class="rank-formula">기대 수익 <b>연 ${pct(d.er, true)}</b> = 주주이익 수익률 <b>${pct(d.owner_yield)}</b> + 재평가 <b>${pct(d.rerate, true)}</b><br>× 확실성 <b>${d.certainty}</b></p>
+    ${d.target_per ? `<p class="aside-sub">재평가</p><p class="rank-line">${PREM_TXT[d.premium] || ''}<br>목표 PER <b>${d.target_per}</b> · 지금 ${d.cur_per_reval ?? '—'} (정상화 이익 기준)</p>` : ''}
+    <p class="aside-sub">이익률</p><p class="rank-line">${(d.margin_used * 100).toFixed(1)}% — ${escapeHtml(d.margin_note || '')}</p>
+    <p class="aside-sub">좋은 사업 점검 ${d.good_business}${d.payout != null ? ` · 배당성향 ${(d.payout * 100).toFixed(0)}%` : ''}</p><ul class="rank-checks">${rows}</ul>`;
 }
 
 function natLabel(n) {

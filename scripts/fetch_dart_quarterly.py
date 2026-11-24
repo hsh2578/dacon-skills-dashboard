@@ -29,7 +29,7 @@ import ttm    # noqa: E402
 OUT = ROOT / "data" / "financials_q"
 CORPMAP = ROOT / "data" / "financials" / "_dart_corpmap.json"
 REPORTS = {"03": "11013", "06": "11012", "09": "11014", "12": "11011"}
-START_YEAR = 2020
+START_YEAR = 2015   # 2026-11-24: 2020→2015 — 한국 수출 경기순환(조선·화학·반도체)은 10년 단위라 5년으로는 '평소 이익'을 못 잡는다. 미러에 2015~ 있음
 
 NI_IDS = {"CFS": ["ifrs-full_ProfitLossAttributableToOwnersOfParent"],
           "OFS": ["ifrs-full_ProfitLoss"]}
@@ -49,6 +49,8 @@ def _amt(s):
 
 
 def _pick(rows, ids, field, sj=None):
+    # 2019년 이전 공시는 옛 택소노미 접두사(ifrs_)를 쓴다 — 같은 계정을 둘 다 받는다 (2026-11-24, 2015~ 확장 때 발견)
+    ids = list(ids) + [i.replace("ifrs-full_", "ifrs_") for i in ids if i.startswith("ifrs-full_")]
     for r in rows:
         if r.get("account_id") in ids and (sj is None or r.get("sj_div") in sj):
             v = _amt(r.get(field))
@@ -92,7 +94,10 @@ def extract(rows, fs, annual):
             "ocf": ocf, "assets": stock(["ifrs-full_Assets"]), "fc": flow(["ifrs-full_FinanceCosts"]),
             # 2026-11-24 매수 매력 순위용: 전체 순이익(→ 지배주주 몫 비율 — 지주회사 연결 이익 과대 방지) · 설비투자(→ FCF)
             "ni_tot": flow(["ifrs-full_ProfitLoss"]),
-            "fi": flow(["ifrs-full_FinanceIncome"]),   # 금융수익 — 금융비용의 외환·파생 손실과 상계해 순금융비용을 본다
+            "fi": flow(["ifrs-full_FinanceIncome"]),
+            # 주주환원 (코리아 디스카운트의 핵심) — 현금흐름표 누적, 지급액은 양수로 공시되는 경우가 대부분
+            "div": _pick(rows, ["ifrs-full_DividendsPaidClassifiedAsFinancingActivities", "ifrs-full_DividendsPaidClassifiedAsOperatingActivities"], "thstrm_amount", ("CF",)),
+            "buyback": _pick(rows, ["dart_AcquisitionOfTreasuryShares"], "thstrm_amount", ("CF",)),   # 금융수익 — 금융비용의 외환·파생 손실과 상계해 순금융비용을 본다
             "capex": _pick(rows, ["ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities"], "thstrm_amount", ("CF",)),
             "currency": cur}
 

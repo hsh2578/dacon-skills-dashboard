@@ -2,7 +2,7 @@
   "code": "069260",
   "corp_code": "00426086",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:16:07",
+  "fetched_at": "2026-11-24T12:10:32",
   "unit": "원",
   "annual": [
     {
@@ -46,8 +46,8 @@
       "revenue": 1188238697698,
       "op_income": 80802440875,
       "op_margin": 0.068,
-      "net_income": 77450978710,
-      "net_margin": 0.0652,
+      "net_income": 77655464459,
+      "net_margin": 0.0654,
       "fs_div": "CFS"
     },
     {
@@ -55,8 +55,8 @@
       "revenue": 1127691137096,
       "op_income": 65614572005,
       "op_margin": 0.0582,
-      "net_income": 59207938448,
-      "net_margin": 0.0525,
+      "net_income": 59907479411,
+      "net_margin": 0.0531,
       "fs_div": "CFS"
     }
   ],
@@ -65,8 +65,8 @@
     "revenue": 1103295909134,
     "op_income": 69140099383,
     "op_margin": 0.0627,
-    "net_income": -98232668149,
-    "net_margin": -0.089,
+    "net_income": -95804552079,
+    "net_margin": -0.0868,
     "fs_div": "CFS"
   }
 }

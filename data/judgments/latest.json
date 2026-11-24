@@ -1,11 +1,36 @@
 {
  "date": "20261123",
- "recorded_at": "2026-11-24T11:44:55",
+ "recorded_at": "2026-11-24T12:32:10",
  "items": [
+  {
+   "code": "213420",
+   "quant_rank": 2,
+   "ai_rank": 1,
+   "cause_type": "TEMPORARY_SHOCK",
+   "nature": "TEMPORARY",
+   "expectation_gap": "TOO_PESSIMISTIC",
+   "verdict_res": "EARLY_SIGNS",
+   "verdict": "가격이 증거보다 비관적 — 근거 확인",
+   "evidence": [
+    {
+     "text": "3Q26 잠정 매출 1,068억·영업이익 240억(QoQ +30%), 3Q 누적 OPM 21.7% — 수요 우려 국면에도 본업 마진 유지",
+     "kind": "MIX_SHIFT",
+     "verifiable_by": "2027-02 4Q26 잠정실적",
+     "source": "[출처: DART · 2026-11-05]"
+    },
+    {
+     "text": "삼성디스플레이 애플향 OLED 2026년 1,000만→2027년 2,400만 대(태블릿·폴더블) 확대 보도, 폴더블 OLED 3년 독점 공급 보도",
+     "kind": "DEMAND_RECOVERY",
+     "verifiable_by": "2027 하반기 애플 폴더블·태블릿 출하",
+     "source": "[출처: WebSearch · 2026-09]"
+    }
+   ],
+   "mcap0": 446712910210.0
+  },
   {
    "code": "033500",
    "quant_rank": 1,
-   "ai_rank": 1,
+   "ai_rank": 2,
    "cause_type": "CYCLICAL_PEAK",
    "nature": "TEMPORARY",
    "expectation_gap": "TOO_PESSIMISTIC",
@@ -34,71 +59,9 @@
    "mcap0": 316389161700.0
   },
   {
-   "code": "052400",
-   "quant_rank": 24,
-   "ai_rank": 2,
-   "cause_type": "CYCLICAL_PEAK",
-   "nature": "TEMPORARY",
-   "expectation_gap": "TOO_PESSIMISTIC",
-   "verdict_res": "EARLY_SIGNS",
-   "verdict": "비관 과도하나 하방 리스크 병존",
-   "evidence": [
-    {
-     "text": "3Q26 플랫폼 영업이익 97억(+21.8% yoy)이 분기 처음 해외 DID 87억을 넘어섬 — 메탈카드 노출도 축소",
-     "kind": "MIX_SHIFT",
-     "verifiable_by": "2026-11-04 3Q26 잠정실적 (확인됨)",
-     "source": "[출처: DART · 2026-11-04] [출처: 리포트 · 대신증권 · 2026-11]"
-    },
-    {
-     "text": "국내 3Q 메탈카드 수주량 전년 대비 약 2.5배, 9월 누적 수주 50% 이상 증가(회사 측 IR 설명)",
-     "kind": "DEMAND_RECOVERY",
-     "verifiable_by": "2027-02 4Q26 실적",
-     "source": "[출처: WebSearch · 2026-11]"
-    },
-    {
-     "text": "미국 카드 제조사 PSC 지분 인수(약 2,010만달러) 완료, 4Q부터 연결 반영 및 미국 금융사 신규 입찰 참여",
-     "kind": "CAPACITY_ONLINE",
-     "verifiable_by": "2027-02 4Q26 실적",
-     "source": "[출처: DART · 2026-08-31] [출처: WebSearch · 2026-11]"
-    },
-    {
-     "text": "2027 지역사랑상품권 발행지원 국비 정부안 1조4,500억원(+3,000억), 국비 지원율 3~9%로 확대",
-     "kind": "REGULATORY",
-     "verifiable_by": "2026-12 국회 본회의 예산 확정",
-     "source": "[출처: WebSearch · 2026-09]"
-    }
-   ],
-   "mcap0": 371012474400.0
-  },
-  {
-   "code": "213420",
-   "quant_rank": 2,
-   "ai_rank": 3,
-   "cause_type": "TEMPORARY_SHOCK",
-   "nature": "TEMPORARY",
-   "expectation_gap": "TOO_PESSIMISTIC",
-   "verdict_res": "EARLY_SIGNS",
-   "verdict": "가격이 증거보다 비관적 — 근거 확인",
-   "evidence": [
-    {
-     "text": "3Q26 잠정 매출 1,068억·영업이익 240억(QoQ +30%), 3Q 누적 OPM 21.7% — 수요 우려 국면에도 본업 마진 유지",
-     "kind": "MIX_SHIFT",
-     "verifiable_by": "2027-02 4Q26 잠정실적",
-     "source": "[출처: DART · 2026-11-05]"
-    },
-    {
-     "text": "삼성디스플레이 애플향 OLED 2026년 1,000만→2027년 2,400만 대(태블릿·폴더블) 확대 보도, 폴더블 OLED 3년 독점 공급 보도",
-     "kind": "DEMAND_RECOVERY",
-     "verifiable_by": "2027 하반기 애플 폴더블·태블릿 출하",
-     "source": "[출처: WebSearch · 2026-09]"
-    }
-   ],
-   "mcap0": 446712910210.0
-  },
-  {
    "code": "025540",
    "quant_rank": 26,
-   "ai_rank": 4,
+   "ai_rank": 3,
    "cause_type": "TEMPORARY_SHOCK",
    "nature": "STRUCTURAL",
    "expectation_gap": "FAIR",
@@ -108,29 +71,72 @@
    "mcap0": 416738000000.0
   },
   {
-   "code": "018290",
-   "quant_rank": 12,
+   "code": "100120",
+   "quant_rank": 29,
+   "ai_rank": 4,
+   "cause_type": "CYCLICAL_PEAK",
+   "nature": "TEMPORARY",
+   "expectation_gap": "TOO_PESSIMISTIC",
+   "verdict_res": "EARLY_SIGNS",
+   "verdict": "가격이 증거보다 비관적 — 근거 확인",
+   "evidence": [
+    {
+     "text": "분기 영업이익 1Q 88억→2Q 107억→3Q 110억(OPM 17.8%, +155% YoY), 3개 분기 연속 컨센서스 상회(3Q 컨센 79억 대비 +40%)",
+     "kind": "MIX_SHIFT",
+     "verifiable_by": "2026-11-02 3Q26 잠정실적 공시 (확인됨)",
+     "source": "[출처: DART · 2026-11-02] [출처: 리포트 · 유진투자증권 · 2026-11]"
+    },
+    {
+     "text": "3Q 산업용 카메라 매출 187억원(+90% YoY) — 고마진 머신비전 비중 확대가 의료 디텍터 역성장을 상쇄",
+     "kind": "MIX_SHIFT",
+     "verifiable_by": "2026-11-02 3Q26 잠정실적 공시 (확인됨)",
+     "source": "[출처: 리포트 · 미래에셋증권 · 2026-11]"
+    },
+    {
+     "text": "2Q 이익 개선은 판관비율(32.3%) 상승 속 매출원가 개선에서 발생 — 일회성 비용 절감이 아닌 원가 구조 변화",
+     "kind": "COST_PEAK_PASSED",
+     "verifiable_by": "2027-02 4Q26 잠정실적",
+     "source": "[출처: WebSearch · 2026-08]"
+    },
+    {
+     "text": "FnGuide 2026 영업이익 추정치 1년 전 245억→6개월 전 338억→현재 411억원으로 상향 지속",
+     "kind": "GUIDANCE_UP",
+     "verifiable_by": "2027-02 4Q26 잠정실적",
+     "source": "[정량]"
+    }
+   ],
+   "mcap0": 231013833250.0
+  },
+  {
+   "code": "035900",
+   "quant_rank": 28,
    "ai_rank": 5,
    "cause_type": "STRUCTURAL_DECLINE",
    "nature": "STRUCTURAL",
    "expectation_gap": "FAIR",
    "verdict_res": "EARLY_SIGNS",
-   "verdict": "적정 반영 — 관찰",
+   "verdict": "관망 권고",
    "evidence": [
     {
-     "text": "3Q26 일본 제외 해외 매출 YoY +55%, 연결 매출 +25%·영업이익 +23% — 비일본 성장이 일본 감소를 상쇄하기 시작 [출처: 리포트 · 키움증권 · 2026-11]",
-     "kind": "MIX_SHIFT",
-     "verifiable_by": "2026-11-13 3Q26 분기보고서 (확인 완료)",
-     "source": "[출처: 리포트 · 키움증권 · 2026-11]"
+     "text": "스키즈 2027 'RUN IT' 북미 14회(5/16~6/29)·유럽 7회(7/9~7/31) 스타디움 투어 발표, 11/19 일반 예매 개시",
+     "kind": "DURABILITY",
+     "verifiable_by": "2027-08 2Q27 실적 (공연·MD 매출)",
+     "source": "[출처: WebSearch · 2026-11]"
     },
     {
-     "text": "일본 5~6월부터 시카·리들샷 판매 데이터 반등, 3Q Qoo10 메가와리 엔화 기준 QoQ 개선 — 감소 종료 여부는 미확인 [출처: 리포트 · IBK투자증권 · 2026-10]",
-     "kind": "DEMAND_RECOVERY",
-     "verifiable_by": "2027-02~03 4Q26 실적 (일본 매출)",
-     "source": "[출처: 리포트 · IBK투자증권 · 2026-10]"
+     "text": "킥플립 10/6 미니앨범 초동 532,434장으로 커리어하이 경신, NEXZ 4월 싱글 초동 444,730장 커리어하이",
+     "kind": "MIX_SHIFT",
+     "verifiable_by": "2026-10 한터 초동 집계 (확인됨)",
+     "source": "[출처: WebSearch · 2026-10]"
+    },
+    {
+     "text": "신인 보이그룹 oftheblue 2027-01-11 미니 1집 데뷔 확정 — 2028년 공백 대비 IP 파이프라인",
+     "kind": "MIX_SHIFT",
+     "verifiable_by": "2027-01 초동 판매량",
+     "source": "[출처: WebSearch · 2026-11]"
     }
    ],
-   "mcap0": 348533886400.0
+   "mcap0": 1618505010600.0
   },
   {
    "code": "340570",
@@ -170,170 +176,9 @@
    "mcap0": 434696746000.0
   },
   {
-   "code": "267250",
-   "quant_rank": 21,
-   "ai_rank": 7,
-   "cause_type": "CYCLICAL_PEAK",
-   "nature": "TEMPORARY",
-   "expectation_gap": "TOO_PESSIMISTIC",
-   "verdict_res": "EARLY_SIGNS",
-   "verdict": "비관 과도하나 하방 리스크 병존",
-   "evidence": [
-    {
-     "text": "Clarksons 기준 글로벌 수주잔고 +25% YoY(약 2.25억 CGT)로 2008년 고점 근접, 신조선가 2008년 이후 최고권(2026-11)",
-     "kind": "DURABILITY",
-     "verifiable_by": "2027-02 4Q26 실적 (HD한국조선해양 매출 인식)",
-     "source": "[출처: WebSearch · 2026-11]"
-    },
-    {
-     "text": "HD현대삼호 LPG운반선 2척 3,084억원(척당 약 1,542억원) 수주, 계약기간 2026-11-20~2030-06-12 — 삼호 2025년 매출의 3.82%",
-     "kind": "DURABILITY",
-     "verifiable_by": "2026-11-23 공시 확정, 2030-06 인도",
-     "source": "[출처: DART · 2026-11-23]"
-    },
-    {
-     "text": "Jefferies, 정제마진 FY27까지 고수준 유지 전망 — 싱가포르 GRM 배럴당 15.2달러, CME 2028년 3-2-1 크랙 약 36달러(2025년 평균 대비 +50%)",
-     "kind": "DURABILITY",
-     "verifiable_by": "2027-02 4Q26 실적 (HD현대오일뱅크 영업이익)",
-     "source": "[출처: WebSearch · 2026-10]"
-    },
-    {
-     "text": "2026-07-29·2026-10-27 현금배당결정으로 분기배당 시행 — 밸류업 목표 FY25~27 별도 배당성향 70% 이상 이행 중",
-     "kind": "CAPITAL_POLICY",
-     "verifiable_by": "2027-02 결산배당 공시",
-     "source": "[출처: DART · 2026-10-27] [출처: 리포트 · 미래에셋증권 · 2026-07]"
-    }
-   ],
-   "mcap0": 8420662861000.0
-  },
-  {
-   "code": "100120",
-   "quant_rank": 29,
-   "ai_rank": 8,
-   "cause_type": "CYCLICAL_PEAK",
-   "nature": "TEMPORARY",
-   "expectation_gap": "TOO_PESSIMISTIC",
-   "verdict_res": "EARLY_SIGNS",
-   "verdict": "가격이 증거보다 비관적 — 근거 확인",
-   "evidence": [
-    {
-     "text": "분기 영업이익 1Q 88억→2Q 107억→3Q 110억(OPM 17.8%, +155% YoY), 3개 분기 연속 컨센서스 상회(3Q 컨센 79억 대비 +40%)",
-     "kind": "MIX_SHIFT",
-     "verifiable_by": "2026-11-02 3Q26 잠정실적 공시 (확인됨)",
-     "source": "[출처: DART · 2026-11-02] [출처: 리포트 · 유진투자증권 · 2026-11]"
-    },
-    {
-     "text": "3Q 산업용 카메라 매출 187억원(+90% YoY) — 고마진 머신비전 비중 확대가 의료 디텍터 역성장을 상쇄",
-     "kind": "MIX_SHIFT",
-     "verifiable_by": "2026-11-02 3Q26 잠정실적 공시 (확인됨)",
-     "source": "[출처: 리포트 · 미래에셋증권 · 2026-11]"
-    },
-    {
-     "text": "2Q 이익 개선은 판관비율(32.3%) 상승 속 매출원가 개선에서 발생 — 일회성 비용 절감이 아닌 원가 구조 변화",
-     "kind": "COST_PEAK_PASSED",
-     "verifiable_by": "2027-02 4Q26 잠정실적",
-     "source": "[출처: WebSearch · 2026-08]"
-    },
-    {
-     "text": "FnGuide 2026 영업이익 추정치 1년 전 245억→6개월 전 338억→현재 411억원으로 상향 지속",
-     "kind": "GUIDANCE_UP",
-     "verifiable_by": "2027-02 4Q26 잠정실적",
-     "source": "[정량]"
-    }
-   ],
-   "mcap0": 231013833250.0
-  },
-  {
-   "code": "036620",
-   "quant_rank": 14,
-   "ai_rank": 9,
-   "cause_type": "TEMPORARY_SHOCK",
-   "nature": "TEMPORARY",
-   "expectation_gap": "TOO_PESSIMISTIC",
-   "verdict_res": "EARLY_SIGNS",
-   "verdict": "가격이 증거보다 비관적 — 근거 확인",
-   "evidence": [
-    {
-     "text": "3Q26 매출 546억원(+19.0% YoY)·영업이익 74억원(+19.0%), 9M 영업이익률 15.1%(전년 14.9%) — 내수 부진에도 이익 성장 유지",
-     "kind": "DEMAND_RECOVERY",
-     "verifiable_by": "2026-11-12 3Q 분기보고서 (확인됨)",
-     "source": "[출처: DART · 2026-11-12]"
-    },
-    {
-     "text": "3Q26 중국향 수출 24.9억→52.0억원(+108.7% YoY), 수출총액 95.4억원(+76.2%) — 출점 지연에도 중국 매출 자체는 두 배로 성장",
-     "kind": "MIX_SHIFT",
-     "verifiable_by": "2026-11 3Q 실적 (확인됨) / 2027-03 2026 사업보고서",
-     "source": "[출처: 리포트 · 유안타증권 · 2026-11]"
-    },
-    {
-     "text": "2026년 1~9월 일본 스노우피크 본사향 매출 전년 동기 대비 2배 이상 — 수출 채널이 내수 노출도 축소",
-     "kind": "MIX_SHIFT",
-     "verifiable_by": "2027-03 2026 사업보고서 수출 매출",
-     "source": "[출처: 뉴스 · 뉴스웨이 · 2026-11]"
-    }
-   ],
-   "mcap0": 295358052400.0
-  },
-  {
-   "code": "035900",
-   "quant_rank": 28,
-   "ai_rank": 10,
-   "cause_type": "STRUCTURAL_DECLINE",
-   "nature": "STRUCTURAL",
-   "expectation_gap": "FAIR",
-   "verdict_res": "EARLY_SIGNS",
-   "verdict": "관망 권고",
-   "evidence": [
-    {
-     "text": "스키즈 2027 'RUN IT' 북미 14회(5/16~6/29)·유럽 7회(7/9~7/31) 스타디움 투어 발표, 11/19 일반 예매 개시",
-     "kind": "DURABILITY",
-     "verifiable_by": "2027-08 2Q27 실적 (공연·MD 매출)",
-     "source": "[출처: WebSearch · 2026-11]"
-    },
-    {
-     "text": "킥플립 10/6 미니앨범 초동 532,434장으로 커리어하이 경신, NEXZ 4월 싱글 초동 444,730장 커리어하이",
-     "kind": "MIX_SHIFT",
-     "verifiable_by": "2026-10 한터 초동 집계 (확인됨)",
-     "source": "[출처: WebSearch · 2026-10]"
-    },
-    {
-     "text": "신인 보이그룹 oftheblue 2027-01-11 미니 1집 데뷔 확정 — 2028년 공백 대비 IP 파이프라인",
-     "kind": "MIX_SHIFT",
-     "verifiable_by": "2027-01 초동 판매량",
-     "source": "[출처: WebSearch · 2026-11]"
-    }
-   ],
-   "mcap0": 1618505010600.0
-  },
-  {
-   "code": "298050",
-   "quant_rank": 20,
-   "ai_rank": 11,
-   "cause_type": "TEMPORARY_SHOCK",
-   "nature": "TEMPORARY",
-   "expectation_gap": "FAIR",
-   "verdict_res": "EARLY_SIGNS",
-   "verdict": "적정 반영 — 관찰",
-   "evidence": [
-    {
-     "text": "4Q26 타이어코드 중심 판가 재인상 — 비수기에도 증익, 2026년 영업이익 2,200억으로 낮아진 시장 눈높이 2,000억 상회 전망",
-     "kind": "PRICING",
-     "verifiable_by": "2027-01 4Q26 잠정실적",
-     "source": "[출처: 리포트 · iM증권 · 2026-11]"
-    },
-    {
-     "text": "회사 3Q IR(2026-11-02)에서 탄소섬유 2027년 상반기 흑자전환 가이던스 제시 — 베트남 라인 가동·고압용기·드론향 믹스 개선",
-     "kind": "GUIDANCE_UP",
-     "verifiable_by": "2027-07 2Q27 잠정실적",
-     "source": "[출처: 리포트 · 하나증권 · 2026-11] [출처: 리포트 · 신한투자증권 · 2026-11]"
-    }
-   ],
-   "mcap0": 671096210400.0
-  },
-  {
    "code": "064350",
    "quant_rank": 15,
-   "ai_rank": 12,
+   "ai_rank": 7,
    "cause_type": "CYCLICAL_PEAK",
    "nature": "STRUCTURAL",
    "expectation_gap": "TOO_PESSIMISTIC",
@@ -362,59 +207,127 @@
    "mcap0": 6232024930300.0
   },
   {
-   "code": "298020",
-   "quant_rank": 22,
-   "ai_rank": 13,
+   "code": "052400",
+   "quant_rank": 24,
+   "ai_rank": 8,
    "cause_type": "CYCLICAL_PEAK",
    "nature": "TEMPORARY",
-   "expectation_gap": "FAIR",
+   "expectation_gap": "TOO_PESSIMISTIC",
    "verdict_res": "EARLY_SIGNS",
-   "verdict": "관망 권고",
+   "verdict": "비관 과도하나 하방 리스크 병존",
    "evidence": [
     {
-     "text": "중국 스판덱스 재고일수 8월 말 46일→38일, 가동률 7월 말 77%→84%, 10/8부터 전 규격 톤당 1,000위안 인상 발표 (40D 28,500위안 유지)",
-     "kind": "PRICING",
-     "verifiable_by": "2027-01 4Q26 잠정실적",
-     "source": "[출처: 리포트 · 신한투자증권 · 2026-11]"
+     "text": "3Q26 플랫폼 영업이익 97억(+21.8% yoy)이 분기 처음 해외 DID 87억을 넘어섬 — 메탈카드 노출도 축소",
+     "kind": "MIX_SHIFT",
+     "verifiable_by": "2026-11-04 3Q26 잠정실적 (확인됨)",
+     "source": "[출처: DART · 2026-11-04] [출처: 리포트 · 대신증권 · 2026-11]"
     },
     {
-     "text": "효성 중국 자싱 설비 약 5.44만톤 2026년 단계적 철수, 업계 6만톤 폐쇄(2025 3Q까지) — 하위 업체 퇴출로 과점화 진행",
-     "kind": "SUPPLY_DISCIPLINE",
-     "verifiable_by": "2026-12 자싱 설비 철수 완료",
-     "source": "[출처: WebSearch · 2026-01]"
+     "text": "국내 3Q 메탈카드 수주량 전년 대비 약 2.5배, 9월 누적 수주 50% 이상 증가(회사 측 IR 설명)",
+     "kind": "DEMAND_RECOVERY",
+     "verifiable_by": "2027-02 4Q26 실적",
+     "source": "[출처: WebSearch · 2026-11]"
+    },
+    {
+     "text": "미국 카드 제조사 PSC 지분 인수(약 2,010만달러) 완료, 4Q부터 연결 반영 및 미국 금융사 신규 입찰 참여",
+     "kind": "CAPACITY_ONLINE",
+     "verifiable_by": "2027-02 4Q26 실적",
+     "source": "[출처: DART · 2026-08-31] [출처: WebSearch · 2026-11]"
+    },
+    {
+     "text": "2027 지역사랑상품권 발행지원 국비 정부안 1조4,500억원(+3,000억), 국비 지원율 3~9%로 확대",
+     "kind": "REGULATORY",
+     "verifiable_by": "2026-12 국회 본회의 예산 확정",
+     "source": "[출처: WebSearch · 2026-09]"
     }
    ],
-   "mcap0": 1029988316000.0
+   "mcap0": 371012474400.0
   },
   {
-   "code": "003350",
-   "quant_rank": 27,
-   "ai_rank": 14,
-   "cause_type": "CYCLICAL_PEAK",
+   "code": "018290",
+   "quant_rank": 12,
+   "ai_rank": 9,
+   "cause_type": "STRUCTURAL_DECLINE",
+   "nature": "STRUCTURAL",
+   "expectation_gap": "FAIR",
+   "verdict_res": "EARLY_SIGNS",
+   "verdict": "적정 반영 — 관찰",
+   "evidence": [
+    {
+     "text": "3Q26 일본 제외 해외 매출 YoY +55%, 연결 매출 +25%·영업이익 +23% — 비일본 성장이 일본 감소를 상쇄하기 시작 [출처: 리포트 · 키움증권 · 2026-11]",
+     "kind": "MIX_SHIFT",
+     "verifiable_by": "2026-11-13 3Q26 분기보고서 (확인 완료)",
+     "source": "[출처: 리포트 · 키움증권 · 2026-11]"
+    },
+    {
+     "text": "일본 5~6월부터 시카·리들샷 판매 데이터 반등, 3Q Qoo10 메가와리 엔화 기준 QoQ 개선 — 감소 종료 여부는 미확인 [출처: 리포트 · IBK투자증권 · 2026-10]",
+     "kind": "DEMAND_RECOVERY",
+     "verifiable_by": "2027-02~03 4Q26 실적 (일본 매출)",
+     "source": "[출처: 리포트 · IBK투자증권 · 2026-10]"
+    }
+   ],
+   "mcap0": 348533886400.0
+  },
+  {
+   "code": "036620",
+   "quant_rank": 14,
+   "ai_rank": 10,
+   "cause_type": "TEMPORARY_SHOCK",
+   "nature": "TEMPORARY",
+   "expectation_gap": "TOO_PESSIMISTIC",
+   "verdict_res": "EARLY_SIGNS",
+   "verdict": "가격이 증거보다 비관적 — 근거 확인",
+   "evidence": [
+    {
+     "text": "3Q26 매출 546억원(+19.0% YoY)·영업이익 74억원(+19.0%), 9M 영업이익률 15.1%(전년 14.9%) — 내수 부진에도 이익 성장 유지",
+     "kind": "DEMAND_RECOVERY",
+     "verifiable_by": "2026-11-12 3Q 분기보고서 (확인됨)",
+     "source": "[출처: DART · 2026-11-12]"
+    },
+    {
+     "text": "3Q26 중국향 수출 24.9억→52.0억원(+108.7% YoY), 수출총액 95.4억원(+76.2%) — 출점 지연에도 중국 매출 자체는 두 배로 성장",
+     "kind": "MIX_SHIFT",
+     "verifiable_by": "2026-11 3Q 실적 (확인됨) / 2027-03 2026 사업보고서",
+     "source": "[출처: 리포트 · 유안타증권 · 2026-11]"
+    },
+    {
+     "text": "2026년 1~9월 일본 스노우피크 본사향 매출 전년 동기 대비 2배 이상 — 수출 채널이 내수 노출도 축소",
+     "kind": "MIX_SHIFT",
+     "verifiable_by": "2027-03 2026 사업보고서 수출 매출",
+     "source": "[출처: 뉴스 · 뉴스웨이 · 2026-11]"
+    }
+   ],
+   "mcap0": 295358052400.0
+  },
+  {
+   "code": "298050",
+   "quant_rank": 20,
+   "ai_rank": 11,
+   "cause_type": "TEMPORARY_SHOCK",
    "nature": "TEMPORARY",
    "expectation_gap": "FAIR",
    "verdict_res": "EARLY_SIGNS",
-   "verdict": "관망 권고",
+   "verdict": "적정 반영 — 관찰",
    "evidence": [
     {
-     "text": "3Q 매출 735억(2Q 712억·1Q 522억), 3Q 누적 매출 1,969억으로 2025 연간 1,846억 초과, 누적 OPM 18.2% [출처: DART · 2026-11-16]",
-     "kind": "DEMAND_RECOVERY",
-     "verifiable_by": "2026-11-16 3Q 분기보고서 (확인 완료)",
-     "source": "[출처: DART · 2026-11-16]"
+     "text": "4Q26 타이어코드 중심 판가 재인상 — 비수기에도 증익, 2026년 영업이익 2,200억으로 낮아진 시장 눈높이 2,000억 상회 전망",
+     "kind": "PRICING",
+     "verifiable_by": "2027-01 4Q26 잠정실적",
+     "source": "[출처: 리포트 · iM증권 · 2026-11]"
     },
     {
-     "text": "한국 화장품 수출 10월 +55.7% YoY(달러), 1~10월 누적이 전년 연간 기록 초과 — 전방 수요 지속 [출처: WebSearch · 2026-11]",
-     "kind": "DEMAND_RECOVERY",
-     "verifiable_by": "2026-12 11월 화장품 수출 통계",
-     "source": "[출처: WebSearch · 2026-11]"
+     "text": "회사 3Q IR(2026-11-02)에서 탄소섬유 2027년 상반기 흑자전환 가이던스 제시 — 베트남 라인 가동·고압용기·드론향 믹스 개선",
+     "kind": "GUIDANCE_UP",
+     "verifiable_by": "2027-07 2Q27 잠정실적",
+     "source": "[출처: 리포트 · 하나증권 · 2026-11] [출처: 리포트 · 신한투자증권 · 2026-11]"
     }
    ],
-   "mcap0": 267841200000.0
+   "mcap0": 671096210400.0
   },
   {
    "code": "075580",
    "quant_rank": 3,
-   "ai_rank": 15,
+   "ai_rank": 12,
    "cause_type": "CYCLICAL_PEAK",
    "nature": "STRUCTURAL",
    "expectation_gap": "FAIR",
@@ -431,102 +344,9 @@
    "mcap0": 330295339360.0
   },
   {
-   "code": "071970",
-   "quant_rank": 23,
-   "ai_rank": 16,
-   "cause_type": "CYCLICAL_PEAK",
-   "nature": "TEMPORARY",
-   "expectation_gap": "TOO_PESSIMISTIC",
-   "verdict_res": "EARLY_SIGNS",
-   "verdict": "비관 과도하나 하방 리스크 병존",
-   "evidence": [
-    {
-     "text": "1Q26말 수주잔고 1.3조원으로 2028년 상반기까지 슬롯 확보, 2Q 추가 수주 3천억원 — 풀캐파 상태 [출처: 리포트 · 대신증권 · 2026-08]",
-     "kind": "DURABILITY",
-     "verifiable_by": "2027-03 2026 사업보고서 수주잔고",
-     "source": "[출처: 리포트 · 대신증권 · 2026-08]"
-    },
-    {
-     "text": "2026-11-09 삼성중공업向 선박엔진 361억원(매출 대비 9.0%) 수주, 납기 2029-06 — 2026년 신규 공급계약 공시 22건 [출처: DART · 2026-11-09]",
-     "kind": "CONTRACT_WIN",
-     "verifiable_by": "2026-11-09 공시 (확인 완료) · 2029-06 납기",
-     "source": "[출처: DART · 2026-11-09]"
-    },
-    {
-     "text": "3Q26 OPM 28.5% 사상 최대 — 매출 빈티지 2025년 수주분 69%(2Q 40%)로 고선가 물량 인식 확대, DF 엔진 비중 8%→20% [출처: 리포트 · SK증권 · 2026-10]",
-     "kind": "PRICING",
-     "verifiable_by": "2026-10-28 3Q26 잠정실적 (확인 완료) · 2027-02 4Q26 실적",
-     "source": "[출처: DART · 2026-10-28] [출처: 리포트 · SK증권 · 2026-10]"
-    },
-    {
-     "text": "글로벌 수주잔고 1Q26말 191M CGT로 17년 최고(선대 대비 17%), 2026년 상반기 발주 42.95M CGT로 +66% YoY [출처: WebSearch · 2026-07]",
-     "kind": "DEMAND_RECOVERY",
-     "verifiable_by": "2027-01 Clarksons 2026 연간 발주 집계",
-     "source": "[출처: WebSearch · 2026-07]"
-    }
-   ],
-   "mcap0": 1019340924750.0
-  },
-  {
-   "code": "376300",
-   "quant_rank": 17,
-   "ai_rank": 17,
-   "cause_type": "STRUCTURAL_DECLINE",
-   "nature": "TEMPORARY",
-   "expectation_gap": "FAIR",
-   "verdict_res": "EARLY_SIGNS",
-   "verdict": "적정 반영 — 관찰",
-   "evidence": [
-    {
-     "text": "3Q26 분기 평균 구독수 197만 명으로 QoQ 보합 — 3Q25 219만 명 이후 네 분기 연속 역성장 정지",
-     "kind": "DEMAND_RECOVERY",
-     "verifiable_by": "2026-11-03 3Q26 잠정실적 (확인됨)",
-     "source": "[출처: 리포트 · 키움증권 · 2026-11]"
-    },
-    {
-     "text": "버블 포 재팬 분기말 구독수 11.1만 명(+58% YoY), 중국 QQ뮤직 버블 입점 아티스트 489명으로 해외 로열티 비중 확대",
-     "kind": "MIX_SHIFT",
-     "verifiable_by": "2026-11-03 3Q26 실적 (확인됨)",
-     "source": "[출처: 리포트 · 키움증권 · 2026-11]"
-    },
-    {
-     "text": "QQ뮤직 버블에 연내 덩쯔치(웨이보 팔로워 약 3,600만) 입점 예상 — 대형 C팝 팬덤의 구독 전환 기대",
-     "kind": "CONTRACT_WIN",
-     "verifiable_by": "2026-12 입점 여부 / 2027-02 4Q26 실적",
-     "source": "[출처: 리포트 · iM증권 · 2026-11]"
-    }
-   ],
-   "mcap0": 477141960600.0
-  },
-  {
-   "code": "178920",
-   "quant_rank": 5,
-   "ai_rank": 18,
-   "cause_type": "CYCLICAL_PEAK",
-   "nature": "STRUCTURAL",
-   "expectation_gap": "FAIR",
-   "verdict_res": "WORSENING",
-   "verdict": "관망 권고",
-   "evidence": [
-    {
-     "text": "3Q26 첨단산업용 매출 195억원(+28.6% YoY, -8.0% QoQ) — 시장 다변화로 모바일 부문 감소 일부 상쇄",
-     "kind": "MIX_SHIFT",
-     "verifiable_by": "2027-02 4Q26 실적",
-     "source": "[출처: 리포트 · iM증권 · 2026-11]"
-    },
-    {
-     "text": "가동률 41.0%에도 3Q26 영업이익 125억원(+7.7% YoY), OPM 22.5% — 고부가 FPCB 비중 확대로 마진 방어",
-     "kind": "PRICING",
-     "verifiable_by": "2027-02 4Q26 실적",
-     "source": "[출처: DART · 2026-10-28] [출처: 리포트 · iM증권 · 2026-11]"
-    }
-   ],
-   "mcap0": 372952289400.0
-  },
-  {
    "code": "017960",
    "quant_rank": 8,
-   "ai_rank": 19,
+   "ai_rank": 13,
    "cause_type": "CYCLICAL_PEAK",
    "nature": "TEMPORARY",
    "expectation_gap": "TOO_PESSIMISTIC",
@@ -555,9 +375,34 @@
    "mcap0": 611849594240.0
   },
   {
+   "code": "120110",
+   "quant_rank": 19,
+   "ai_rank": 14,
+   "cause_type": "TEMPORARY_SHOCK",
+   "nature": "TEMPORARY",
+   "expectation_gap": "FAIR",
+   "verdict_res": "EARLY_SIGNS",
+   "verdict": "적정 반영 — 관찰",
+   "evidence": [
+    {
+     "text": "Dubai 유가 11/2 102$/bbl로 하루 -11% 급락, 10월 중동 4개국 원유 수출 1,553만b/d로 전쟁 이전 수준 회복 — 원가 역래깅 완화 조건",
+     "kind": "COST_PEAK_PASSED",
+     "verifiable_by": "2027-02 4Q26 실적",
+     "source": "[출처: 리포트 · 하나증권 · 2026-11]"
+    },
+    {
+     "text": "mPPO 김천 2공장 2027년 1Q Full 가동 예상, 전방 수요가 Capa 상회 — 고부가 믹스 확대로 원가 노출 축소",
+     "kind": "MIX_SHIFT",
+     "verifiable_by": "2027-05 1Q27 실적",
+     "source": "[출처: 리포트 · 신한투자증권 · 2026-11]"
+    }
+   ],
+   "mcap0": 994208262400.0
+  },
+  {
    "code": "086900",
    "quant_rank": 16,
-   "ai_rank": 20,
+   "ai_rank": 15,
    "cause_type": "TEMPORARY_SHOCK",
    "nature": "TEMPORARY",
    "expectation_gap": "FAIR",
@@ -592,34 +437,121 @@
    "mcap0": 489729148700.0
   },
   {
-   "code": "120110",
-   "quant_rank": 19,
-   "ai_rank": 21,
+   "code": "178920",
+   "quant_rank": 5,
+   "ai_rank": 16,
+   "cause_type": "CYCLICAL_PEAK",
+   "nature": "STRUCTURAL",
+   "expectation_gap": "FAIR",
+   "verdict_res": "WORSENING",
+   "verdict": "관망 권고",
+   "evidence": [
+    {
+     "text": "3Q26 첨단산업용 매출 195억원(+28.6% YoY, -8.0% QoQ) — 시장 다변화로 모바일 부문 감소 일부 상쇄",
+     "kind": "MIX_SHIFT",
+     "verifiable_by": "2027-02 4Q26 실적",
+     "source": "[출처: 리포트 · iM증권 · 2026-11]"
+    },
+    {
+     "text": "가동률 41.0%에도 3Q26 영업이익 125억원(+7.7% YoY), OPM 22.5% — 고부가 FPCB 비중 확대로 마진 방어",
+     "kind": "PRICING",
+     "verifiable_by": "2027-02 4Q26 실적",
+     "source": "[출처: DART · 2026-10-28] [출처: 리포트 · iM증권 · 2026-11]"
+    }
+   ],
+   "mcap0": 372952289400.0
+  },
+  {
+   "code": "069620",
+   "quant_rank": 7,
+   "ai_rank": 17,
    "cause_type": "TEMPORARY_SHOCK",
    "nature": "TEMPORARY",
    "expectation_gap": "FAIR",
    "verdict_res": "EARLY_SIGNS",
-   "verdict": "적정 반영 — 관찰",
+   "verdict": "관망 권고",
    "evidence": [
     {
-     "text": "Dubai 유가 11/2 102$/bbl로 하루 -11% 급락, 10월 중동 4개국 원유 수출 1,553만b/d로 전쟁 이전 수준 회복 — 원가 역래깅 완화 조건",
-     "kind": "COST_PEAK_PASSED",
-     "verifiable_by": "2027-02 4Q26 실적",
-     "source": "[출처: 리포트 · 하나증권 · 2026-11]"
-    },
-    {
-     "text": "mPPO 김천 2공장 2027년 1Q Full 가동 예상, 전방 수요가 Capa 상회 — 고부가 믹스 확대로 원가 노출 축소",
+     "text": "펙수클루 연내 전 용량 직판 전환 완료, 1Q27부터 100% 직판 — 최종 공급가가 매출로 인식되는 구조로 전환",
      "kind": "MIX_SHIFT",
      "verifiable_by": "2027-05 1Q27 실적",
-     "source": "[출처: 리포트 · 신한투자증권 · 2026-11]"
+     "source": "[출처: 리포트 · 교보증권 · 2026-11] [출처: 리포트 · 키움증권 · 2026-11]"
+    },
+    {
+     "text": "에볼루스 3Q26 톡신 매출 7,010만달러(YoY 약 +11%)·연간 가이던스 3.30~3.37억달러 유지 — 조기선적은 최종 수요 감소가 아닌 시점 이동",
+     "kind": "DEMAND_RECOVERY",
+     "verifiable_by": "2027-02 에볼루스 4Q26 실적",
+     "source": "[출처: WebSearch · 2026-11]"
     }
    ],
-   "mcap0": 994208262400.0
+   "mcap0": 1071758187500.0
+  },
+  {
+   "code": "298020",
+   "quant_rank": 22,
+   "ai_rank": 18,
+   "cause_type": "CYCLICAL_PEAK",
+   "nature": "TEMPORARY",
+   "expectation_gap": "FAIR",
+   "verdict_res": "EARLY_SIGNS",
+   "verdict": "관망 권고",
+   "evidence": [
+    {
+     "text": "중국 스판덱스 재고일수 8월 말 46일→38일, 가동률 7월 말 77%→84%, 10/8부터 전 규격 톤당 1,000위안 인상 발표 (40D 28,500위안 유지)",
+     "kind": "PRICING",
+     "verifiable_by": "2027-01 4Q26 잠정실적",
+     "source": "[출처: 리포트 · 신한투자증권 · 2026-11]"
+    },
+    {
+     "text": "효성 중국 자싱 설비 약 5.44만톤 2026년 단계적 철수, 업계 6만톤 폐쇄(2025 3Q까지) — 하위 업체 퇴출로 과점화 진행",
+     "kind": "SUPPLY_DISCIPLINE",
+     "verifiable_by": "2026-12 자싱 설비 철수 완료",
+     "source": "[출처: WebSearch · 2026-01]"
+    }
+   ],
+   "mcap0": 1029988316000.0
+  },
+  {
+   "code": "267250",
+   "quant_rank": 21,
+   "ai_rank": 19,
+   "cause_type": "CYCLICAL_PEAK",
+   "nature": "TEMPORARY",
+   "expectation_gap": "TOO_PESSIMISTIC",
+   "verdict_res": "EARLY_SIGNS",
+   "verdict": "비관 과도하나 하방 리스크 병존",
+   "evidence": [
+    {
+     "text": "Clarksons 기준 글로벌 수주잔고 +25% YoY(약 2.25억 CGT)로 2008년 고점 근접, 신조선가 2008년 이후 최고권(2026-11)",
+     "kind": "DURABILITY",
+     "verifiable_by": "2027-02 4Q26 실적 (HD한국조선해양 매출 인식)",
+     "source": "[출처: WebSearch · 2026-11]"
+    },
+    {
+     "text": "HD현대삼호 LPG운반선 2척 3,084억원(척당 약 1,542억원) 수주, 계약기간 2026-11-20~2030-06-12 — 삼호 2025년 매출의 3.82%",
+     "kind": "DURABILITY",
+     "verifiable_by": "2026-11-23 공시 확정, 2030-06 인도",
+     "source": "[출처: DART · 2026-11-23]"
+    },
+    {
+     "text": "Jefferies, 정제마진 FY27까지 고수준 유지 전망 — 싱가포르 GRM 배럴당 15.2달러, CME 2028년 3-2-1 크랙 약 36달러(2025년 평균 대비 +50%)",
+     "kind": "DURABILITY",
+     "verifiable_by": "2027-02 4Q26 실적 (HD현대오일뱅크 영업이익)",
+     "source": "[출처: WebSearch · 2026-10]"
+    },
+    {
+     "text": "2026-07-29·2026-10-27 현금배당결정으로 분기배당 시행 — 밸류업 목표 FY25~27 별도 배당성향 70% 이상 이행 중",
+     "kind": "CAPITAL_POLICY",
+     "verifiable_by": "2027-02 결산배당 공시",
+     "source": "[출처: DART · 2026-10-27] [출처: 리포트 · 미래에셋증권 · 2026-07]"
+    }
+   ],
+   "mcap0": 8420662861000.0
   },
   {
    "code": "237690",
    "quant_rank": 4,
-   "ai_rank": 22,
+   "ai_rank": 20,
    "cause_type": "TEMPORARY_SHOCK",
    "nature": "TEMPORARY",
    "expectation_gap": "TOO_PESSIMISTIC",
@@ -648,29 +580,97 @@
    "mcap0": 1471802979000.0
   },
   {
-   "code": "069620",
-   "quant_rank": 7,
-   "ai_rank": 23,
-   "cause_type": "TEMPORARY_SHOCK",
+   "code": "003350",
+   "quant_rank": 27,
+   "ai_rank": 21,
+   "cause_type": "CYCLICAL_PEAK",
    "nature": "TEMPORARY",
    "expectation_gap": "FAIR",
    "verdict_res": "EARLY_SIGNS",
    "verdict": "관망 권고",
    "evidence": [
     {
-     "text": "펙수클루 연내 전 용량 직판 전환 완료, 1Q27부터 100% 직판 — 최종 공급가가 매출로 인식되는 구조로 전환",
-     "kind": "MIX_SHIFT",
-     "verifiable_by": "2027-05 1Q27 실적",
-     "source": "[출처: 리포트 · 교보증권 · 2026-11] [출처: 리포트 · 키움증권 · 2026-11]"
+     "text": "3Q 매출 735억(2Q 712억·1Q 522억), 3Q 누적 매출 1,969억으로 2025 연간 1,846억 초과, 누적 OPM 18.2% [출처: DART · 2026-11-16]",
+     "kind": "DEMAND_RECOVERY",
+     "verifiable_by": "2026-11-16 3Q 분기보고서 (확인 완료)",
+     "source": "[출처: DART · 2026-11-16]"
     },
     {
-     "text": "에볼루스 3Q26 톡신 매출 7,010만달러(YoY 약 +11%)·연간 가이던스 3.30~3.37억달러 유지 — 조기선적은 최종 수요 감소가 아닌 시점 이동",
+     "text": "한국 화장품 수출 10월 +55.7% YoY(달러), 1~10월 누적이 전년 연간 기록 초과 — 전방 수요 지속 [출처: WebSearch · 2026-11]",
      "kind": "DEMAND_RECOVERY",
-     "verifiable_by": "2027-02 에볼루스 4Q26 실적",
+     "verifiable_by": "2026-12 11월 화장품 수출 통계",
      "source": "[출처: WebSearch · 2026-11]"
     }
    ],
-   "mcap0": 1071758187500.0
+   "mcap0": 267841200000.0
+  },
+  {
+   "code": "100090",
+   "quant_rank": 9,
+   "ai_rank": 22,
+   "cause_type": "TEMPORARY_SHOCK",
+   "nature": "TEMPORARY",
+   "expectation_gap": "FAIR",
+   "verdict_res": "EARLY_SIGNS",
+   "verdict": "적정 반영 — 관찰",
+   "evidence": [
+    {
+     "text": "3Q26 신규 수주 8,687억원(상선 6,815억·해상풍력 1,605억·MRO 267억), 수주잔고 11,072억→17,692억원 [출처: 리포트 · 하나증권 · 2026-11]",
+     "kind": "CONTRACT_WIN",
+     "verifiable_by": "2026-07-31·2026-08-31 단일판매·공급계약 공시, 3Q26 분기보고서",
+     "source": "[출처: DART · 2026-08-31]"
+    },
+    {
+     "text": "SK에코플랜트 보유 2,225만주(35.62%) 4,100억원 매각 SPA 체결, 거래 종결 예정 2026-12 [출처: WebSearch · 2026-09]",
+     "kind": "GOVERNANCE",
+     "verifiable_by": "2026-12 최대주주 변경 공시",
+     "source": "[출처: DART · 2026-08-31]"
+    },
+    {
+     "text": "2026 영업이익 컨센서스 1개월 전 573.9억→639.2억원 상향, 퀀트 이익모멘텀 '상향 전환' 분류 [정량]",
+     "kind": "GUIDANCE_UP",
+     "verifiable_by": "2027-02 4Q26 잠정실적",
+     "source": "[정량] [출처: 텔레그램 · 2026-11]"
+    },
+    {
+     "text": "안마 하부구조물 계약은 해지가 아닌 일시중단 유지, 사업 재개 거론 — 단 과거 해지·중단 사례로 재개 확인 필요 [출처: 뉴스 · 핀포인트뉴스 · 2026-11]",
+     "kind": "DEMAND_RECOVERY",
+     "verifiable_by": "안마 착공·하부구조물 매출 재개 공시 (2H27 예상)",
+     "source": "[출처: WebSearch · 2026-04] [출처: 리포트 · 유진투자증권 · 2026-08]"
+    }
+   ],
+   "mcap0": 580421818410.0
+  },
+  {
+   "code": "376300",
+   "quant_rank": 17,
+   "ai_rank": 23,
+   "cause_type": "STRUCTURAL_DECLINE",
+   "nature": "TEMPORARY",
+   "expectation_gap": "FAIR",
+   "verdict_res": "EARLY_SIGNS",
+   "verdict": "적정 반영 — 관찰",
+   "evidence": [
+    {
+     "text": "3Q26 분기 평균 구독수 197만 명으로 QoQ 보합 — 3Q25 219만 명 이후 네 분기 연속 역성장 정지",
+     "kind": "DEMAND_RECOVERY",
+     "verifiable_by": "2026-11-03 3Q26 잠정실적 (확인됨)",
+     "source": "[출처: 리포트 · 키움증권 · 2026-11]"
+    },
+    {
+     "text": "버블 포 재팬 분기말 구독수 11.1만 명(+58% YoY), 중국 QQ뮤직 버블 입점 아티스트 489명으로 해외 로열티 비중 확대",
+     "kind": "MIX_SHIFT",
+     "verifiable_by": "2026-11-03 3Q26 실적 (확인됨)",
+     "source": "[출처: 리포트 · 키움증권 · 2026-11]"
+    },
+    {
+     "text": "QQ뮤직 버블에 연내 덩쯔치(웨이보 팔로워 약 3,600만) 입점 예상 — 대형 C팝 팬덤의 구독 전환 기대",
+     "kind": "CONTRACT_WIN",
+     "verifiable_by": "2026-12 입점 여부 / 2027-02 4Q26 실적",
+     "source": "[출처: 리포트 · iM증권 · 2026-11]"
+    }
+   ],
+   "mcap0": 477141960600.0
   },
   {
    "code": "035720",
@@ -735,41 +735,41 @@
    "mcap0": 708754639800.0
   },
   {
-   "code": "100090",
-   "quant_rank": 9,
+   "code": "071970",
+   "quant_rank": 23,
    "ai_rank": 26,
-   "cause_type": "TEMPORARY_SHOCK",
+   "cause_type": "CYCLICAL_PEAK",
    "nature": "TEMPORARY",
-   "expectation_gap": "FAIR",
+   "expectation_gap": "TOO_PESSIMISTIC",
    "verdict_res": "EARLY_SIGNS",
-   "verdict": "적정 반영 — 관찰",
+   "verdict": "비관 과도하나 하방 리스크 병존",
    "evidence": [
     {
-     "text": "3Q26 신규 수주 8,687억원(상선 6,815억·해상풍력 1,605억·MRO 267억), 수주잔고 11,072억→17,692억원 [출처: 리포트 · 하나증권 · 2026-11]",
+     "text": "1Q26말 수주잔고 1.3조원으로 2028년 상반기까지 슬롯 확보, 2Q 추가 수주 3천억원 — 풀캐파 상태 [출처: 리포트 · 대신증권 · 2026-08]",
+     "kind": "DURABILITY",
+     "verifiable_by": "2027-03 2026 사업보고서 수주잔고",
+     "source": "[출처: 리포트 · 대신증권 · 2026-08]"
+    },
+    {
+     "text": "2026-11-09 삼성중공업向 선박엔진 361억원(매출 대비 9.0%) 수주, 납기 2029-06 — 2026년 신규 공급계약 공시 22건 [출처: DART · 2026-11-09]",
      "kind": "CONTRACT_WIN",
-     "verifiable_by": "2026-07-31·2026-08-31 단일판매·공급계약 공시, 3Q26 분기보고서",
-     "source": "[출처: DART · 2026-08-31]"
+     "verifiable_by": "2026-11-09 공시 (확인 완료) · 2029-06 납기",
+     "source": "[출처: DART · 2026-11-09]"
     },
     {
-     "text": "SK에코플랜트 보유 2,225만주(35.62%) 4,100억원 매각 SPA 체결, 거래 종결 예정 2026-12 [출처: WebSearch · 2026-09]",
-     "kind": "GOVERNANCE",
-     "verifiable_by": "2026-12 최대주주 변경 공시",
-     "source": "[출처: DART · 2026-08-31]"
+     "text": "3Q26 OPM 28.5% 사상 최대 — 매출 빈티지 2025년 수주분 69%(2Q 40%)로 고선가 물량 인식 확대, DF 엔진 비중 8%→20% [출처: 리포트 · SK증권 · 2026-10]",
+     "kind": "PRICING",
+     "verifiable_by": "2026-10-28 3Q26 잠정실적 (확인 완료) · 2027-02 4Q26 실적",
+     "source": "[출처: DART · 2026-10-28] [출처: 리포트 · SK증권 · 2026-10]"
     },
     {
-     "text": "2026 영업이익 컨센서스 1개월 전 573.9억→639.2억원 상향, 퀀트 이익모멘텀 '상향 전환' 분류 [정량]",
-     "kind": "GUIDANCE_UP",
-     "verifiable_by": "2027-02 4Q26 잠정실적",
-     "source": "[정량] [출처: 텔레그램 · 2026-11]"
-    },
-    {
-     "text": "안마 하부구조물 계약은 해지가 아닌 일시중단 유지, 사업 재개 거론 — 단 과거 해지·중단 사례로 재개 확인 필요 [출처: 뉴스 · 핀포인트뉴스 · 2026-11]",
+     "text": "글로벌 수주잔고 1Q26말 191M CGT로 17년 최고(선대 대비 17%), 2026년 상반기 발주 42.95M CGT로 +66% YoY [출처: WebSearch · 2026-07]",
      "kind": "DEMAND_RECOVERY",
-     "verifiable_by": "안마 착공·하부구조물 매출 재개 공시 (2H27 예상)",
-     "source": "[출처: WebSearch · 2026-04] [출처: 리포트 · 유진투자증권 · 2026-08]"
+     "verifiable_by": "2027-01 Clarksons 2026 연간 발주 집계",
+     "source": "[출처: WebSearch · 2026-07]"
     }
    ],
-   "mcap0": 580421818410.0
+   "mcap0": 1019340924750.0
   },
   {
    "code": "068760",
@@ -784,9 +784,21 @@
    "mcap0": 1727250714800.0
   },
   {
+   "code": "080580",
+   "quant_rank": 10,
+   "ai_rank": 28,
+   "cause_type": "CYCLICAL_PEAK",
+   "nature": "STRUCTURAL",
+   "expectation_gap": "FAIR",
+   "verdict_res": "NO_EVIDENCE",
+   "verdict": "관망 권고",
+   "evidence": [],
+   "mcap0": 281986068350.0
+  },
+  {
    "code": "377300",
    "quant_rank": 13,
-   "ai_rank": 28,
+   "ai_rank": 29,
    "cause_type": "CYCLICAL_PEAK",
    "nature": "TEMPORARY",
    "expectation_gap": "FAIR",
@@ -817,7 +829,7 @@
   {
    "code": "000100",
    "quant_rank": 30,
-   "ai_rank": 29,
+   "ai_rank": 30,
    "cause_type": "ONE_OFF_ACCOUNTING",
    "nature": "TEMPORARY",
    "expectation_gap": "FAIR",
@@ -844,18 +856,6 @@
     }
    ],
    "mcap0": 5580076199800.0
-  },
-  {
-   "code": "080580",
-   "quant_rank": 10,
-   "ai_rank": 30,
-   "cause_type": "CYCLICAL_PEAK",
-   "nature": "STRUCTURAL",
-   "expectation_gap": "FAIR",
-   "verdict_res": "NO_EVIDENCE",
-   "verdict": "관망 권고",
-   "evidence": [],
-   "mcap0": 281986068350.0
   }
  ]
 }

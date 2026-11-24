@@ -2,7 +2,7 @@
   "code": "004690",
   "corp_code": "00128555",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:16:10",
+  "fetched_at": "2026-11-24T12:10:22",
   "unit": "원",
   "annual": [
     {
@@ -37,8 +37,8 @@
       "revenue": 5664041261167,
       "op_income": 174490517245,
       "op_margin": 0.0308,
-      "net_income": 145238917827,
-      "net_margin": 0.0256,
+      "net_income": 120239425597,
+      "net_margin": 0.0212,
       "fs_div": "CFS"
     },
     {
@@ -46,8 +46,8 @@
       "revenue": 5120527432173,
       "op_income": 114302576748,
       "op_margin": 0.0223,
-      "net_income": 121658500696,
-      "net_margin": 0.0238,
+      "net_income": 101372349407,
+      "net_margin": 0.0198,
       "fs_div": "CFS"
     },
     {
@@ -55,8 +55,8 @@
       "revenue": 5275461012669,
       "op_income": 159630890886,
       "op_margin": 0.0303,
-      "net_income": 131326078663,
-      "net_margin": 0.0249,
+      "net_income": 111505582731,
+      "net_margin": 0.0211,
       "fs_div": "CFS"
     }
   ],
@@ -65,8 +65,8 @@
     "revenue": 4085721215692,
     "op_income": 181073408343,
     "op_margin": 0.0443,
-    "net_income": 164202695561,
-    "net_margin": 0.0402,
+    "net_income": 145307140721,
+    "net_margin": 0.0356,
     "fs_div": "CFS"
   }
 }

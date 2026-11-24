@@ -2,7 +2,7 @@
   "code": "214320",
   "corp_code": "00565154",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:15:26",
+  "fetched_at": "2026-11-24T12:10:14",
   "unit": "원",
   "annual": [
     {
@@ -10,8 +10,8 @@
       "revenue": 1221072413932,
       "op_income": 111506787321,
       "op_margin": 0.0913,
-      "net_income": 87143789362,
-      "net_margin": 0.0714,
+      "net_income": 63475555623,
+      "net_margin": 0.052,
       "fs_div": "CFS"
     },
     {
@@ -19,8 +19,8 @@
       "revenue": 1502034400962,
       "op_income": 135732279008,
       "op_margin": 0.0904,
-      "net_income": 87143789362,
-      "net_margin": 0.058,
+      "net_income": 65889488204,
+      "net_margin": 0.0439,
       "fs_div": "CFS"
     },
     {
@@ -28,8 +28,8 @@
       "revenue": 1750407624440,
       "op_income": 136891845495,
       "op_margin": 0.0782,
-      "net_income": 89736619409,
-      "net_margin": 0.0513,
+      "net_income": 70606324970,
+      "net_margin": 0.0403,
       "fs_div": "CFS"
     },
     {
@@ -37,8 +37,8 @@
       "revenue": 2092893299026,
       "op_income": 150018225572,
       "op_margin": 0.0717,
-      "net_income": 116716827655,
-      "net_margin": 0.0558,
+      "net_income": 101762236926,
+      "net_margin": 0.0486,
       "fs_div": "CFS"
     },
     {
@@ -46,8 +46,8 @@
       "revenue": 2120578469848,
       "op_income": 155663117200,
       "op_margin": 0.0734,
-      "net_income": 116121811100,
-      "net_margin": 0.0548,
+      "net_income": 100252830933,
+      "net_margin": 0.0473,
       "fs_div": "CFS"
     },
     {
@@ -55,8 +55,8 @@
       "revenue": 2146040997442,
       "op_income": 162799995269,
       "op_margin": 0.0759,
-      "net_income": 108971717082,
-      "net_margin": 0.0508,
+      "net_income": 91762335304,
+      "net_margin": 0.0428,
       "fs_div": "CFS"
     }
   ],
@@ -65,8 +65,8 @@
     "revenue": 1533774036461,
     "op_income": 133557019034,
     "op_margin": 0.0871,
-    "net_income": 108678172113,
-    "net_margin": 0.0709,
+    "net_income": 94542226619,
+    "net_margin": 0.0616,
     "fs_div": "CFS"
   }
 }

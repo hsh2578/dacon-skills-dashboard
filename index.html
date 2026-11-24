@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="style.css?v=30">
+<link rel="stylesheet" href="style.css?v=31">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -151,9 +151,10 @@
             DART 공시·증권사 리포트·뉴스 자료 묶음을 먼저 읽고(WebSearch는 보충) 저평가 원인을 8가지로 분류(경기 정점·구조적 쇠퇴·일시 충격 등) →
             가격이 깔고 있는 이익 가정(<b>가격 가정 이익</b>)과 증거를 비교해 <b>과도하게 비관적 / 전망 반영 / 함정 경계</b> 판정 →
             매수 전 점검(시장이 틀린 지점 · 숫자로 안 잡히는 함정) →
-            <b>(평소 주주이익 수익률 + 재평가 여지) × 확실성</b> 순으로 정렬. 평소 이익 = 최근 4분기 매출 × 자기 5년 중앙 영업이익률
-            (정점 마진은 믿지 않고, 회복 근거 없이 회복을 가정하지 않음) − 순금융비용, 세후, 지배주주 몫.
-            확실성 = 좋은 사업 6관문(ROE·현금흐름·이자보상·순이익률·FCF·희석) × 함정 점검. AI 는 판정만, 점수는 코드.
+            <b>(주주이익 수익률 + 재평가 수익) × 확실성</b> 순으로 정렬.
+            재평가 = 그 종목이 과거 시장 대비 받던 밸류(상대 PER)로 돌아갈 때의 연 수익 — AI 가 '과거 프리미엄·할인의 이유가 지금도 유효한가'를 판정
+            (경기 호황·테마 프리미엄은 회복으로 인정 안 함). 주주이익 = 믿을 수 있는 이익(정점 이익률 불신·근거 없는 회복 불가정, 이자·일회성·비지배 제외) ÷ 시총.
+            확실성 = 좋은 사업 6관문 × 한국 함정 점검(회계·지배구조·CB 오버행·본업 무관 확장) × 배당성향. AI 는 판정만, 점수는 코드.
           </div>
         </div>
       </li>

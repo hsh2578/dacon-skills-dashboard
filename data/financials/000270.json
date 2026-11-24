@@ -2,7 +2,7 @@
   "code": "000270",
   "corp_code": "00106641",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:12:48",
+  "fetched_at": "2026-11-24T12:10:05",
   "unit": "원",
   "annual": [
     {
@@ -19,7 +19,7 @@
       "revenue": 69862366000000,
       "op_income": 5065685000000,
       "op_margin": 0.0725,
-      "net_income": 4760311000000,
+      "net_income": 4760450000000,
       "net_margin": 0.0681,
       "fs_div": "CFS"
     },
@@ -28,7 +28,7 @@
       "revenue": 86559029000000,
       "op_income": 7233120000000,
       "op_margin": 0.0836,
-      "net_income": 5408976000000,
+      "net_income": 5409429000000,
       "net_margin": 0.0625,
       "fs_div": "CFS"
     },
@@ -37,7 +37,7 @@
       "revenue": 99808420000000,
       "op_income": 11607873000000,
       "op_margin": 0.1163,
-      "net_income": 8777817000000,
+      "net_income": 8776970000000,
       "net_margin": 0.0879,
       "fs_div": "CFS"
     },
@@ -46,7 +46,7 @@
       "revenue": 107448752000000,
       "op_income": 12667139000000,
       "op_margin": 0.1179,
-      "net_income": 9775005000000,
+      "net_income": 9772957000000,
       "net_margin": 0.091,
       "fs_div": "CFS"
     },
@@ -55,7 +55,7 @@
       "revenue": 114140919000000,
       "op_income": 9078148000000,
       "op_margin": 0.0795,
-      "net_income": 7554174000000,
+      "net_income": 7560983000000,
       "net_margin": 0.0662,
       "fs_div": "CFS"
     }
@@ -65,8 +65,8 @@
     "revenue": 94136383000000,
     "op_income": 6651936000000,
     "op_margin": 0.0707,
-    "net_income": 5443487000000,
-    "net_margin": 0.0578,
+    "net_income": 5445830000000,
+    "net_margin": 0.0579,
     "fs_div": "CFS"
   }
 }

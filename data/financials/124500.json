@@ -2,7 +2,7 @@
   "code": "124500",
   "corp_code": "00620868",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:16:30",
+  "fetched_at": "2026-11-24T12:10:23",
   "unit": "원",
   "annual": [
     {
@@ -10,8 +10,8 @@
       "revenue": 2275082680581,
       "op_income": 14562145227,
       "op_margin": 0.0064,
-      "net_income": 3143849171,
-      "net_margin": 0.0014,
+      "net_income": 6116879711,
+      "net_margin": 0.0027,
       "fs_div": "CFS"
     },
     {
@@ -19,8 +19,8 @@
       "revenue": 3280884490810,
       "op_income": 31538468377,
       "op_margin": 0.0096,
-      "net_income": -2729009946,
-      "net_margin": -0.0008,
+      "net_income": -7182919783,
+      "net_margin": -0.0022,
       "fs_div": "CFS"
     },
     {
@@ -28,8 +28,8 @@
       "revenue": 2621054378127,
       "op_income": 30445407072,
       "op_margin": 0.0116,
-      "net_income": 31183106015,
-      "net_margin": 0.0119,
+      "net_income": 1697865017,
+      "net_margin": 0.0006,
       "fs_div": "CFS"
     },
     {
@@ -37,8 +37,8 @@
       "revenue": 2815145201364,
       "op_income": 30518767988,
       "op_margin": 0.0108,
-      "net_income": -6202603892,
-      "net_margin": -0.0022,
+      "net_income": 650164821,
+      "net_margin": 0.0002,
       "fs_div": "CFS"
     },
     {
@@ -46,8 +46,8 @@
       "revenue": 4961847499151,
       "op_income": 58564721273,
       "op_margin": 0.0118,
-      "net_income": 36063285864,
-      "net_margin": 0.0073,
+      "net_income": 4254566047,
+      "net_margin": 0.0009,
       "fs_div": "CFS"
     },
     {
@@ -55,8 +55,8 @@
       "revenue": 8870844790093,
       "op_income": 279925759631,
       "op_margin": 0.0316,
-      "net_income": 198284338685,
-      "net_margin": 0.0224,
+      "net_income": 46649996492,
+      "net_margin": 0.0053,
       "fs_div": "CFS"
     }
   ],
@@ -65,8 +65,8 @@
     "revenue": 7111417919351,
     "op_income": 101253382698,
     "op_margin": 0.0142,
-    "net_income": 120843012714,
-    "net_margin": 0.017,
+    "net_income": 39551636043,
+    "net_margin": 0.0056,
     "fs_div": "CFS"
   }
 }

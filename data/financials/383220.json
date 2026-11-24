@@ -2,7 +2,7 @@
   "code": "383220",
   "corp_code": "01568413",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:13:58",
+  "fetched_at": "2026-11-24T12:10:20",
   "unit": "원",
   "annual": [
     {
@@ -19,8 +19,8 @@
       "revenue": 1808894546708,
       "op_income": 524882680312,
       "op_margin": 0.2902,
-      "net_income": 442664517277,
-      "net_margin": 0.2447,
+      "net_income": 441758153408,
+      "net_margin": 0.2442,
       "fs_div": "CFS"
     },
     {
@@ -28,7 +28,7 @@
       "revenue": 1978495535892,
       "op_income": 551835228989,
       "op_margin": 0.2789,
-      "net_income": 425017760533,
+      "net_income": 425073840979,
       "net_margin": 0.2148,
       "fs_div": "CFS"
     },
@@ -37,8 +37,8 @@
       "revenue": 1896009590086,
       "op_income": 450737459737,
       "op_margin": 0.2377,
-      "net_income": 355959818501,
-      "net_margin": 0.1877,
+      "net_income": 360375370051,
+      "net_margin": 0.1901,
       "fs_div": "CFS"
     },
     {
@@ -46,8 +46,8 @@
       "revenue": 1933995926896,
       "op_income": 468574150329,
       "op_margin": 0.2423,
-      "net_income": 400686468976,
-      "net_margin": 0.2072,
+      "net_income": 398531197364,
+      "net_margin": 0.2061,
       "fs_div": "CFS"
     }
   ],
