@@ -67,10 +67,11 @@ Write 도구로 data/screens/_ai/{코드}.json 에 저장. 최종 응답은 한 
 python scripts/ai_stage.py merge          # _ai/*.json → ai_notes.json (빠진 종목 있으면 멈춤)
 ```
 
-ranker Agent 1개 (general-purpose): `.claude/agents/ranker.md` 정독 → `ai_notes.json` + `triple_cross.json` top
-([정량] 기대 필드) + 필요 시 `data/financials/` → `data/screens/_ranking.json` 에 Write
-(`{"ranking":[{code, ai_rank, quant_rank, rerank_score, score_breakdown, rerank_reason}], "ranked_at", "basis"}`).
-새 사실 생성·정량 점수 변경 금지, `nature` 는 점수에 쓰지 않는다.
+재순위는 **코드** (2026-11-24 — ranker 에이전트는 같은 판정에도 돌 때마다 해석이 달라 순위가 흔들렸다):
+
+```bash
+python scripts/rank_ai.py                 # 가격 판정 > 해소 근거 > DART TTM 영업이익 YoY > 리스크 → _ranking.json
+```
 
 ```bash
 python scripts/ai_stage.py apply-rank     # ai_rank 반영 + 판단 기록(data/judgments/{날짜}.json, latest.json)

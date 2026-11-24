@@ -33,6 +33,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 에이전트는 **자료 묶음(`data/research/`)을 먼저 Read**, WebSearch(미국 중심이라 한국 중소형주에 약함)는 보충. 정보량 등급 A/B/C.
 - **재분석 대상만 돌린다** (`ai_stage.py targets`): 신규 진입·새 공시/리포트·추정치 ±5%. 나머지는 직전 노트 재사용. resolution-scout §6.5 = 사실이 바뀔 때만 판정 변경.
 - 판단 기록·채점: `judgments.py record/grade` → `data/judgments/`. AI 단계 효과는 이 사후 채점으로만 검증 가능(웹 근거라 백테스트 불가).
+- **AI 재순위는 코드** (`scripts/rank_ai.py`, 2026-11-24): 가격 판정(expectation_gap ×확신도, 1순위) > 해소 근거 > DART TTM 영업이익 YoY(발표 숫자) > risk_level. AI 는 판정만, 합산은 코드 — ranker 에이전트 폐기(같은 판정에 순위가 흔들림·보조 점수 중복).
 - **종목 브리핑** (`briefer.md`, 2026-11-24): 분석 뒤에 사람이 읽는 해설을 쓴다(무슨 회사·주가 흐름·왜 싸졌나·반문 Q&A·가격 가정·시장이 맞다면·볼 것). 판정은 바꾸지 않고, 숫자는 `_top_context.json` 의 `price`(apply_triple_cross `price_facts`)만 쓴다. `ai_notes.briefing` 에 저장되므로 재사용 종목은 따라온다 → `ai_stage.py briefs`. 상세 페이지 맨 위에 표시하고 기존 분석은 "근거 자세히 보기"로 접는다. 목적은 '조사할 3~5종목 고르기'이지 매수 근거가 아니다 — 잘 쓴 글일수록 확신만 오른다.
 - **뉴스 수집 수정** (2026-11-24): 옛 `grounding.get_news_context` 는 display=10 최신순이라 '90일'이 실제로는 일주일이었다. 지금은 네이버증권 종목 뉴스 피드(1년) + 네이버 검색 API 보조, 월 12건 상한. 대형주(삼성전자 등)는 기사량이 많아 여전히 최근 몇 주만 잡힌다 — 리포트(1년·40건)와 WebSearch 가 메운다.
 

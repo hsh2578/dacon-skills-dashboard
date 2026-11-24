@@ -254,9 +254,25 @@ async function loadAiNotes() {
 }
 
 // ── 종목 브리핑 (briefer) — 처음 보는 사람이 2~3분에 이해하도록. 숫자 칸은 일별 데이터에서 직접 계산한다 ──
+// 출처 태그는 본문에서 각주 번호로 — 문장 흐름을 끊지 않되, 같은 출처는 같은 번호로 끝에 모은다
+let briefNotes = [];
 function briefText(t) {
-  // 출처 태그는 지우지 않고 작게 — 의심 가는 문장을 바로 확인할 수 있게
-  return escapeHtml(t || '').replace(/\[(출처:[^\]]+|정량|확인 필요)\]/g, '<span class="brief-src">[$1]</span>');
+  return escapeHtml(t || '')
+    .replace(/\s*\[확인 필요\]/g, ' <span class="brief-unk">확인 필요</span>')
+    .replace(/\s*\[(출처:[^\]]+|정량)\]/g, (_, src) => {
+      const label = src === '정량' ? '정량 — 일별 시총·DART 공시로 코드가 계산한 값' : src.replace(/^출처:\s*/, '');
+      let n = briefNotes.indexOf(label) + 1;
+      if (!n) n = briefNotes.push(label);
+      return `<sup class="fn" title="${label}">${n}</sup>`;
+    });
+}
+
+// 긴 문단은 두 문장씩 끊는다 — 에이전트가 쓴 4~5문장 덩어리가 벽처럼 읽힌다
+function briefParas(t) {
+  const sents = String(t || '').split(/(?<=[다요](?:\s*\[[^\]]+\])*\.(?:\s*\[[^\]]+\])*)\s+/);   // '…입니다 [출처]. 다음' 형태도
+  const out = [];
+  for (let i = 0; i < sents.length; i += 2) out.push(sents.slice(i, i + 2).join(' '));
+  return out.map(x => `<p>${briefText(x)}</p>`).join('');
 }
 
 function renderBriefing(b, grade) {
@@ -264,24 +280,38 @@ function renderBriefing(b, grade) {
   const ai = document.getElementById('ai-section-detail');
   if (!b || !sec) return;
   sec.style.display = '';
+  briefNotes = [];
   document.getElementById('brief-headline').textContent = b.headline || '';
   document.getElementById('brief-date').textContent = b.written_at ? `· ${b.written_at} 작성` : '';
   const warn = document.getElementById('brief-warn');
   const note = b.confidence_note || (grade === 'C' ? '자료가 적은 종목이라 이 해설의 신뢰도가 낮습니다. 출처를 직접 확인하세요.' : '');
-  if (note) { warn.style.display = ''; warn.textContent = note; }
+  if (note) { warn.style.display = ''; warn.innerHTML = briefText(note); }
 
-  const p = (t) => `<p>${briefText(t)}</p>`;
-  const blk = (title, html, cls = '') => html ? `<section class="brief-blk ${cls}"><h3>${title}</h3>${html}</section>` : '';
+  const blk = (id, title, html, cls = '') => html ? `<section class="brief-blk ${cls}" id="bk-${id}"><h3>${title}</h3>${html}</section>` : '';
   const list = (arr, f) => (arr || []).map(f).join('');
   document.getElementById('brief-body').innerHTML = [
-    blk('무슨 회사인가', b.business && p(b.business)),
-    blk('주가는 어떻게 왔나', b.price_story && p(b.price_story)),
-    blk('왜 싸졌나', list(b.why_cheap, x => `<div class="brief-item"><h4>${escapeHtml(x.title || '')}</h4>${p(x.body)}</div>`)),
-    blk('"그런데 ~ 아닌가요?"', list(b.qa, x => `<div class="brief-qa"><p class="q">${escapeHtml(x.q || '')}</p>${p(x.a)}</div>`)),
-    `<div class="brief-pair">${blk('지금 가격이 가정하는 것', b.priced_in && p(b.priced_in))}${blk('시장이 맞다면', b.if_market_right && p(b.if_market_right), 'brief-bear')}</div>`,
-    blk('다음에 볼 것', b.watch?.length ? `<table class="brief-watch"><thead><tr><th>볼 것</th><th>시점</th><th>좋은 신호</th><th>나쁜 신호</th></tr></thead><tbody>${
-      list(b.watch, w => `<tr><td>${briefText(w.what)}</td><td>${escapeHtml(w.when || '')}</td><td>${briefText(w.good)}</td><td>${briefText(w.bad)}</td></tr>`)}</tbody></table>` : ''),
+    blk('biz', '무슨 회사인가', b.business && briefParas(b.business)),
+    blk('price', '주가는 어떻게 왔나', b.price_story && briefParas(b.price_story)),
+    blk('why', '왜 싸졌나', list(b.why_cheap, (x, i) =>
+      `<div class="brief-item"><h4><span class="num">${i + 1}</span>${escapeHtml(x.title || '')}</h4>${briefParas(x.body)}</div>`)),
+    blk('qa', '"그런데 ~ 아닌가요?"', list(b.qa, x =>
+      `<div class="brief-qa"><p class="q">${escapeHtml(x.q || '')}</p><div class="a">${briefParas(x.a)}</div></div>`)),
+    blk('priced', '지금 가격이 가정하는 것', b.priced_in && briefParas(b.priced_in)),
+    blk('watch', '다음에 볼 것', b.watch?.length ? `<div class="brief-watch">${list(b.watch, w => `
+      <div class="w-row">
+        <div class="w-head"><b>${briefText(w.what)}</b><span>${escapeHtml(w.when || '')}</span></div>
+        <div class="w-sig good"><em>좋은 신호</em>${briefText(w.good)}</div>
+        <div class="w-sig bad"><em>나쁜 신호</em>${briefText(w.bad)}</div>
+      </div>`)}</div>` : ''),
   ].join('');
+
+  // 옆 칸: 30초 요약 — 왜 싸졌나 제목 + 시장이 맞다면 (반론을 결론만큼 크게)
+  document.getElementById('brief-aside').innerHTML = `
+    ${b.why_cheap?.length ? `<div class="aside-box"><p class="aside-lbl">왜 싸졌나 — 요약</p><ol>${list(b.why_cheap, x => `<li><a href="#bk-why">${escapeHtml(x.title || '')}</a></li>`)}</ol></div>` : ''}
+    ${b.if_market_right ? `<div class="aside-box bear"><p class="aside-lbl">시장이 맞다면</p>${briefParas(b.if_market_right)}</div>` : ''}`;
+
+  const src = document.getElementById('brief-sources');
+  src.innerHTML = briefNotes.length ? `<summary>출처 ${briefNotes.length}개</summary><ol>${briefNotes.map(n => `<li>${n}</li>`).join('')}</ol>` : '';
 
   // 기존 분석 원문은 접어 둔다 — 같은 이야기를 두 번 읽지 않게
   const btn = document.getElementById('brief-more');

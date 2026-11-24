@@ -9,7 +9,7 @@
 <meta http-equiv="Expires" content="0">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="style.css?v=27">
+<link rel="stylesheet" href="style.css?v=28">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 </head>
 <body>
@@ -39,8 +39,14 @@
     <p class="brief-kicker">종목 브리핑 <span id="brief-date"></span></p>
     <h2 class="brief-headline" id="brief-headline"></h2>
     <div class="brief-warn" id="brief-warn" style="display:none"></div>
-    <div class="brief-price" id="brief-price"></div>
-    <div id="brief-body"></div>
+    <div class="brief-grid">
+      <div class="brief-main" id="brief-body"></div>
+      <aside class="brief-aside">
+        <div class="brief-price" id="brief-price"></div>
+        <div id="brief-aside"></div>
+      </aside>
+    </div>
+    <details class="brief-sources" id="brief-sources"></details>
     <button type="button" class="brief-more" id="brief-more" aria-expanded="false">근거 자세히 보기 — AI 분석 원문 · 출처 전체</button>
   </article>
 </section>
@@ -185,6 +191,6 @@
   </section>
 </main>
 
-<script src="stock.js?v=18"></script>
+<script src="stock.js?v=19"></script>
 </body>
 </html>

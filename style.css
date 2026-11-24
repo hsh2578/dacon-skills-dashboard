@@ -1973,17 +1973,17 @@ html, body { overflow-x: hidden; }
 .brief-section { margin: 16px 24px 0; }
 .brief-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card); padding: 26px 30px 22px; max-width: 980px;
+  box-shadow: var(--shadow-card); padding: 28px 32px 22px; max-width: 1180px;
 }
 .brief-kicker { font-size: 11px; font-weight: 700; letter-spacing: .06em; color: var(--text-faint); margin-bottom: 6px; }
 .brief-kicker span { font-weight: 500; letter-spacing: 0; }
-.brief-headline { font-size: 21px; font-weight: 800; letter-spacing: -.025em; line-height: 1.4; color: var(--text-strong); }
+.brief-headline { font-size: 23px; max-width: 34ch; font-weight: 800; letter-spacing: -.025em; line-height: 1.4; color: var(--text-strong); }
 .brief-warn {
   margin-top: 12px; padding: 9px 12px; font-size: 13px; line-height: 1.55;
   background: #fffbeb; border: 1px solid #fde68a; color: #92400e; border-radius: var(--radius-sm);
 }
 .brief-price {
-  display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; margin: 18px 0 6px;
+  display: grid; grid-template-columns: 1fr; gap: 1px; margin: 0;
   background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
 }
 .bp { background: var(--surface-soft); padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
@@ -1996,7 +1996,8 @@ html, body { overflow-x: hidden; }
   font-size: 13px; font-weight: 800; letter-spacing: -.01em; color: var(--text-strong);
   padding-bottom: 6px; margin-bottom: 8px; border-bottom: 1px solid var(--border);
 }
-.brief-blk p { font-size: 14.5px; line-height: 1.75; color: var(--text); letter-spacing: -.01em; max-width: 72ch; }
+.brief-blk p { font-size: 15.5px; line-height: 1.8; color: var(--text); letter-spacing: -.012em; max-width: 64ch; }
+.brief-blk p + p { margin-top: 10px; }
 .brief-item + .brief-item, .brief-qa + .brief-qa { margin-top: 12px; }
 .brief-item h4 { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
 .brief-qa .q { font-weight: 700; color: var(--text-strong); }
@@ -2034,3 +2035,55 @@ html, body { overflow-x: hidden; }
 .card-brief-p { font-size: 12px; line-height: 1.6; color: var(--text-muted); }
 .card-brief-link { display: block; margin-top: 10px; font-size: 12.5px; font-weight: 700; color: var(--link); text-decoration: none; }
 .card-brief-link:hover { text-decoration: underline; }
+
+/* ── 브리핑 가독성 v2 (2026-11-24): 본문 + 옆 요약 칸, 각주, 두 문장 문단 ── */
+.brief-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 40px; margin-top: 22px; align-items: start; }
+.brief-aside { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 14px; }
+.brief-blk:first-child { margin-top: 0; }
+.brief-blk { margin-top: 34px; scroll-margin-top: 90px; }
+.brief-blk h3 { font-size: 17px; font-weight: 800; letter-spacing: -.02em; border-bottom: 0; padding-bottom: 0; margin-bottom: 10px; }
+.brief-item { padding: 14px 16px; background: var(--surface-soft); border-radius: var(--radius); }
+.brief-item + .brief-item { margin-top: 10px; }
+.brief-item h4 { display: flex; gap: 8px; align-items: baseline; font-size: 15.5px; margin-bottom: 6px; }
+.brief-item .num { flex: none; width: 20px; height: 20px; border-radius: 50%; background: var(--text); color: var(--surface);
+  font-size: 11.5px; display: inline-grid; place-items: center; transform: translateY(-1px); }
+.brief-qa { border-left: 3px solid var(--border-strong); padding: 2px 0 2px 16px; }
+.brief-qa + .brief-qa { margin-top: 18px; }
+.brief-qa .q { font-size: 15.5px; margin-bottom: 6px; }
+.brief-qa .q::before { content: 'Q '; font-weight: 800; color: var(--text-faint); }
+.brief-qa .a p::before, .brief-qa .q + p::before { content: none; }
+.fn { font-size: 10px; font-weight: 700; color: var(--text-faint); margin-left: 1px; cursor: help; }
+.brief-unk { font-size: 11px; font-weight: 600; color: #92400e; background: #fffbeb; padding: 0 5px; border-radius: 4px; }
+.brief-watch { display: flex; flex-direction: column; gap: 10px; }
+.w-row { border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+.w-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; margin-bottom: 8px; font-size: 14.5px; }
+.w-head span { flex: none; font-size: 12px; color: var(--text-muted); }
+.w-sig { font-size: 13.5px; line-height: 1.6; padding-left: 10px; border-left: 2px solid; }
+.w-sig + .w-sig { margin-top: 6px; }
+.w-sig em { font-style: normal; font-weight: 700; margin-right: 6px; }
+.w-sig.good { border-color: var(--positive); } .w-sig.good em { color: var(--positive); }
+.w-sig.bad { border-color: var(--negative); } .w-sig.bad em { color: var(--negative); }
+.aside-box { border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+.aside-box.bear { border-color: #fecaca; background: #fef2f2; }
+.aside-lbl { font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 8px; }
+.aside-box.bear .aside-lbl { color: var(--negative); }
+.aside-box ol { padding-left: 18px; font-size: 13.5px; line-height: 1.6; }
+.aside-box ol a { color: var(--text); text-decoration: none; } .aside-box ol a:hover { text-decoration: underline; }
+.aside-box p { font-size: 13.5px; line-height: 1.65; }
+.aside-box p + p { margin-top: 6px; }
+.brief-price .bp { flex-direction: row; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 0 8px; }
+.brief-price .bp-s { flex-basis: 100%; }
+.brief-sources { margin-top: 24px; font-size: 12.5px; color: var(--text-muted); }
+.brief-sources summary { cursor: pointer; font-weight: 600; }
+.brief-sources ol { margin-top: 8px; padding-left: 22px; line-height: 1.7; columns: 2; column-gap: 32px; }
+@media (max-width: 1100px) {
+  .brief-grid { grid-template-columns: 1fr; gap: 20px; }
+  .brief-aside { position: static; order: -1; }
+  .brief-price { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 768px) {
+  .brief-headline { font-size: 19px; }
+  .brief-price { grid-template-columns: repeat(2, 1fr); }
+  .brief-blk p { font-size: 15.5px; }
+  .brief-sources ol { columns: 1; }
+}
