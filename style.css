@@ -1966,3 +1966,71 @@ html, body { overflow-x: hidden; }
 .order-btn.is-active { background: var(--accent); color: #fff; }
 .order-btn.is-active small { color: #d6d3d1; }
 .order-btn:focus-visible { outline: 2px solid var(--kr-down); outline-offset: -2px; }
+
+/* ============================================================ */
+/* 종목 브리핑 — 읽는 글. 카드 UI 보다 본문 타이포가 우선              */
+/* ============================================================ */
+.brief-section { margin: 16px 24px 0; }
+.brief-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card); padding: 26px 30px 22px; max-width: 980px;
+}
+.brief-kicker { font-size: 11px; font-weight: 700; letter-spacing: .06em; color: var(--text-faint); margin-bottom: 6px; }
+.brief-kicker span { font-weight: 500; letter-spacing: 0; }
+.brief-headline { font-size: 21px; font-weight: 800; letter-spacing: -.025em; line-height: 1.4; color: var(--text-strong); }
+.brief-warn {
+  margin-top: 12px; padding: 9px 12px; font-size: 13px; line-height: 1.55;
+  background: #fffbeb; border: 1px solid #fde68a; color: #92400e; border-radius: var(--radius-sm);
+}
+.brief-price {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; margin: 18px 0 6px;
+  background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+}
+.bp { background: var(--surface-soft); padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.bp-k { font-size: 11px; color: var(--text-muted); }
+.bp-v { font-size: 17px; font-weight: 800; letter-spacing: -.02em; }
+.bp-v.neg { color: var(--kr-down); }
+.bp-s { font-size: 10.5px; color: var(--text-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brief-blk { margin-top: 22px; }
+.brief-blk h3 {
+  font-size: 13px; font-weight: 800; letter-spacing: -.01em; color: var(--text-strong);
+  padding-bottom: 6px; margin-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.brief-blk p { font-size: 14.5px; line-height: 1.75; color: var(--text); letter-spacing: -.01em; max-width: 72ch; }
+.brief-item + .brief-item, .brief-qa + .brief-qa { margin-top: 12px; }
+.brief-item h4 { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+.brief-qa .q { font-weight: 700; color: var(--text-strong); }
+.brief-qa .q::before { content: 'Q. '; color: var(--text-faint); }
+.brief-qa .q + p::before { content: 'A. '; font-weight: 700; color: var(--text-faint); }
+.brief-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
+.brief-bear h3 { color: var(--negative); border-bottom-color: #fecaca; }
+.brief-src { font-size: 11px; color: var(--text-faint); }
+.brief-watch { width: 100%; border-collapse: collapse; }
+.brief-watch th { font-size: 11px; font-weight: 700; color: var(--text-muted); text-align: left; padding: 6px 8px; background: var(--surface-soft); }
+.brief-watch td { font-size: 13px; line-height: 1.55; padding: 8px; border-top: 1px solid var(--border); vertical-align: top; }
+.brief-watch td:nth-child(2) { white-space: nowrap; color: var(--text-muted); }
+.brief-more {
+  margin-top: 24px; width: 100%; padding: 11px; font: inherit; font-size: 13px; font-weight: 600;
+  background: var(--surface-soft); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text-muted); cursor: pointer;
+}
+.brief-more:hover { background: var(--accent-soft); color: var(--text); }
+.brief-more:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ai-collapsed { display: none !important; }
+@media (max-width: 768px) {
+  .brief-section { margin: 12px 12px 0; }
+  .brief-card { padding: 18px 16px; }
+  .brief-headline { font-size: 18px; }
+  .brief-price { grid-template-columns: repeat(2, 1fr); }
+  .bp:last-child { grid-column: 1 / -1; }
+  .brief-pair { grid-template-columns: 1fr; }
+  .brief-blk p { font-size: 15px; }
+  .brief-watch thead { display: none; }
+  .brief-watch tr { display: block; border-top: 1px solid var(--border); padding: 8px 0; }
+  .brief-watch td { display: block; border: 0; padding: 2px 0; }
+  .brief-watch td:nth-child(3)::before { content: '좋은 신호 · '; color: var(--positive); font-weight: 700; }
+  .brief-watch td:nth-child(4)::before { content: '나쁜 신호 · '; color: var(--negative); font-weight: 700; }
+}
+.card-brief-warn { font-size: 11px; color: #92400e; background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-sm); padding: 4px 8px; margin: 6px 0; }
+.card-brief-p { font-size: 12px; line-height: 1.6; color: var(--text-muted); }
+.card-brief-link { display: block; margin-top: 10px; font-size: 12.5px; font-weight: 700; color: var(--link); text-decoration: none; }
+.card-brief-link:hover { text-decoration: underline; }

@@ -33,6 +33,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 에이전트는 **자료 묶음(`data/research/`)을 먼저 Read**, WebSearch(미국 중심이라 한국 중소형주에 약함)는 보충. 정보량 등급 A/B/C.
 - **재분석 대상만 돌린다** (`ai_stage.py targets`): 신규 진입·새 공시/리포트·추정치 ±5%. 나머지는 직전 노트 재사용. resolution-scout §6.5 = 사실이 바뀔 때만 판정 변경.
 - 판단 기록·채점: `judgments.py record/grade` → `data/judgments/`. AI 단계 효과는 이 사후 채점으로만 검증 가능(웹 근거라 백테스트 불가).
+- **종목 브리핑** (`briefer.md`, 2026-11-24): 분석 뒤에 사람이 읽는 해설을 쓴다(무슨 회사·주가 흐름·왜 싸졌나·반문 Q&A·가격 가정·시장이 맞다면·볼 것). 판정은 바꾸지 않고, 숫자는 `_top_context.json` 의 `price`(apply_triple_cross `price_facts`)만 쓴다. `ai_notes.briefing` 에 저장되므로 재사용 종목은 따라온다 → `ai_stage.py briefs`. 상세 페이지 맨 위에 표시하고 기존 분석은 "근거 자세히 보기"로 접는다. 목적은 '조사할 3~5종목 고르기'이지 매수 근거가 아니다 — 잘 쓴 글일수록 확신만 오른다.
+- **뉴스 수집 수정** (2026-11-24): 옛 `grounding.get_news_context` 는 display=10 최신순이라 '90일'이 실제로는 일주일이었다. 지금은 네이버증권 종목 뉴스 피드(1년) + 네이버 검색 API 보조, 월 12건 상한. 대형주(삼성전자 등)는 기사량이 많아 여전히 최근 몇 주만 잡힌다 — 리포트(1년·40건)와 WebSearch 가 메운다.
 
 ### 실행
 `python scripts/update_all.py` (정량 전부, `--from N`) → AI 단계(`/update-data` 문서) → `ai_stage.py merge` → ranker → `ai_stage.py apply-rank`. **폐기**: `fetch_matrix_kis.py`(실행하면 새 매트릭스를 옛 KIS 값으로 덮어씀), `fetch_batch_api.py`·`data/stocks/`(삭제됨), `fetch_matrix_api.py`.
@@ -42,6 +44,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### 이번 세션에서 실제로 난 사고 (재발 방지)
 KIS 404 를 예외로 삼켜 2,200종목이 옛 캐시로 남음 · KRX 당일 빈 응답을 휴장일로 캐시 · 대형주 공시 50건 상한이 한 달 치 · 외화 공시로 PBR 930배 · 지배 태그 미사용 회사(유한양행) · `triple_cross.json` 의 NaN 으로 사이트 Top 목록 전체 미표시 · 네이버 요약표만 비는 스로틀로 목표가 90% 소실. 공통 교훈: **실패를 빈 값으로 굳히지 말 것.**
+2026-11-24 추가: **무상증자·분할 권리락 ~ 신주 상장 사이 KRX 시총이 1/k 로 과소**(1년 약 40건, 코나아이 PER 5.0→3.35 로 Top 30 진입) → `build_valuation.fix_listing_lag` + `tests/test_listing_lag.py` · 브리핑 주가 흐름은 원주가가 아니라 **시총 비례 수정주가** · `ai_stage targets` 가 ai_notes.json 에 병합 전인 브리핑 10개를 덮어씀 → 재사용 시 기존 브리핑 보존(`briefs` 를 targets 전에 돌릴 것) · 추정치 '1개월 변화'를 직전 분석 이후 변화로 오인(20일 미만이면 무시).
 
 ## Project Overview
 

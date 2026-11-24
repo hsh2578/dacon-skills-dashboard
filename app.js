@@ -34,7 +34,33 @@ const GAP = {
 };
 const gapOf = (ai) => GAP[ai?.resolution?.expectation_gap] || null;
 
+// 브리핑이 있으면 카드는 '왜 싸졌나'의 제목과 반론만 — 전체 글은 상세페이지에서 읽는다
+function renderBriefBlock(code, ai) {
+  const b = ai.briefing;
+  const esc = (t) => String(t || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const strip = (t) => esc(String(t || '').replace(/\s*\[(출처:[^\]]+|정량|확인 필요)\]/g, ''));
+  const grade = ai.resolution?.info_grade || ai.info_grade;
+  return `
+    <div class="ai-block">
+      <button class="ai-toggle" type="button" data-code="${code}" aria-expanded="false">
+        <span class="ai-toggle-lbl">브리핑 요약 보기</span>
+        <span class="ai-toggle-chev">▾</span>
+      </button>
+      <div class="ai-panel" id="ai-panel-${code}" hidden>
+        <div class="ai-oneliner">${esc(b.headline)}</div>
+        ${grade === 'C' ? '<div class="card-brief-warn">자료가 적은 종목 — 해설 신뢰도 낮음</div>' : ''}
+        <div class="ai-section">
+          <div class="ai-section-lbl">왜 싸졌나</div>
+          <ul class="ai-risks">${(b.why_cheap || []).map(x => `<li>${esc(x.title)}</li>`).join('')}</ul>
+        </div>
+        ${b.if_market_right ? `<div class="ai-section"><div class="ai-section-lbl">시장이 맞다면</div><p class="card-brief-p">${strip(b.if_market_right)}</p></div>` : ''}
+        <div class="card-brief-link">카드를 누르면 브리핑 전체 →</div>
+      </div>
+    </div>`;
+}
+
 function renderAiBlock(code, ai) {
+  if (ai.briefing) return renderBriefBlock(code, ai);
   const evCls = `ev-${(ai.evidence_strength || 'mod').toLowerCase()}`;
   const rkCls = `rk-${(ai.risk_level || 'low').toLowerCase()}`;
   // 카드는 압축형: 투자 포인트 3개, 리스크 2개만. 전체는 상세페이지에서.
@@ -254,7 +280,9 @@ async function loadTripleCross() {
         : move === 0 ? '정량과 동일'
         : `정량 ${rk.quant_rank}위 ${move > 0 ? '▲' : '▼'} ${Math.abs(move)}`;
 
-      const ucText = ai?.undervaluation_cause?.text || '';
+      // 브리핑이 있으면 카드 표면은 쉬운 한 줄 — 압축 진단문은 상세페이지 '근거'로
+      const ucText = ai?.briefing?.headline || ai?.undervaluation_cause?.text || '';
+      const ucLbl = ai?.briefing?.headline ? '한 줄 요약' : '왜 저평가인가';
       const rankTier = i < 3 ? 'rk-top' : i < 10 ? 'rk-mid' : 'rk-low';
 
       return `
@@ -269,7 +297,7 @@ async function loadTripleCross() {
           <div class="card-code">${c.code} · ${c.market || 'KR'}</div>
           <div class="card-price">${fmtPrice(c.current_price)}</div>
 
-          ${ucText ? `<div class="card-uc"><span class="card-uc-lbl">왜 저평가인가</span><p>${ucText}</p></div>` : ''}
+          ${ucText ? `<div class="card-uc"><span class="card-uc-lbl">${ucLbl}</span><p>${ucText}</p></div>` : ''}
 
           <div class="card-factor-grid">
             ${factor('PER↓', c.s1_per_z)}

@@ -16,7 +16,7 @@ PER 100배 등)에 끌려가지 않게 하려고 평균 대신 쓴다.
 import json
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import numpy as np
@@ -126,6 +126,28 @@ def expectations(ser, st, mcap, med_per, cur_per, fwd_ni):
         if cur > 0:
             out["midcycle_vs_ttm"] = med / cur
     return out
+
+
+def price_facts(code):
+    """브리핑용 주가 흐름 [정량] — 에이전트가 숫자를 지어내지 않게 코드가 계산한다 (일별 원주가 종가)."""
+    p = DAILY / f"{code}.json"
+    if not p.exists():
+        return None
+    d = json.loads(p.read_text(encoding="utf-8"))
+    # 수정주가 = 시총 비례 (원주가는 분할·무상증자 때 계단이 생긴다 — 한국화장품제조 5:1, 티앤엘 100% 무증 실측)
+    # ponytail: 유상증자·전환 희석도 '주가 상승'으로 섞인다. 주식수 이력이 생기면 그걸로 보정할 것
+    raw = [(t, c, m) for t, c, m in zip(d["dates"], d.get("close") or [], d.get("mcap_억") or []) if c and m]
+    if not raw:
+        return None
+    last_t, last, last_m = raw[-1]
+    pts = [(t, m * last / last_m) for t, c, m in raw]
+    def window(days):
+        cut = (datetime.strptime(last_t, "%Y%m%d") - timedelta(days=days)).strftime("%Y%m%d")
+        w = [x for x in pts if x[0] >= cut]
+        hi, lo = max(w, key=lambda x: x[1]), min(w, key=lambda x: x[1])
+        return {"high": round(hi[1]), "high_date": hi[0], "low": round(lo[1]), "low_date": lo[0],
+                "from_high": round(last / hi[1] - 1, 3), "change": round(last / w[0][1] - 1, 3)}
+    return {"as_of": last_t, "close": last, "adjusted": "시총 비례 수정주가", "y1": window(365), "y3": window(365 * 3)}
 
 
 def main():
@@ -348,6 +370,7 @@ def main():
             "expectations": {k: r.get(k) for k in ("implied_fade", "implied_vs_ttm", "midcycle_vs_ttm",
                                                     "opm_ttm", "opm_med5y", "cyclical_flag")},
             "quality": {k: r.get(k) for k in ("quality_score", "q_trend", "q_accr", "q_icr")},
+            "price": price_facts(r["code"]),
             "note": "avg_5y_* 는 5년 중앙값. forward_per = 시총/(FY0 지배순이익×컨센서스 성장배수). 목표가는 점수 미사용."}
            for r in out_records[:TOP_N]]
     (SCREENS_DIR / "_top_context.json").write_text(json.dumps(_clean(ctx), ensure_ascii=False, indent=1,

@@ -47,6 +47,38 @@ def company_mcap(day: dict, code: str, prefs: dict = None):
     return base + sum(day.get(p, 0) for p in prefs.get(code, ()))
 
 
+def fix_listing_lag(mc: list, cl: list) -> list:
+    """무상증자·액면분할 권리락일 ~ 신주 상장일 사이 시총 보정 (보통주 시총·종가 같은 길이 리스트).
+
+    KRX 시총 = 상장주식수 × 종가. 권리락일에 종가는 1/k 로 떨어지는데 신주는 2~4주 뒤 상장되므로 그 사이
+    시총(→PER·PBR)이 1/k 로 과소 계상된다 (2026-11 코나아이 실측: 0.5주 무증, PER 5.0 → 3.35 로 표시).
+    지난 1년 약 40건. 신호: 하루 −30% 초과 하락(가격제한폭 밖) + 주식수 그대로.
+    상장 후 주식수를 알면 그 값으로, 아직 미상장이면 가격 비율로 추정한다.
+    ponytail: 추정 경로는 그날 수익률이 비율에 섞인다(코나아이 1.65 vs 실제 1.5) — 상장되면 다음 실행에 저절로 맞춰진다.
+    """
+    n, out = len(mc), list(mc)
+    sh = [m / c if (m and c) else None for m, c in zip(mc, cl)]
+    for i in range(1, n):
+        if not (cl[i] and cl[i - 1] and sh[i] and sh[i - 1]):
+            continue
+        k = cl[i - 1] / cl[i]
+        if k <= 1 / 0.7 or k > 11 or abs(sh[i] / sh[i - 1] - 1) > 0.01:
+            continue
+        j = next((t for t in range(i + 1, min(n, i + 40)) if sh[t] and sh[t] / sh[i] > 1.05), None)
+        if j is not None:
+            new = sh[j]
+            if not 0.75 < (new / sh[i]) / k < 1.25:    # 주식수 증가가 가격 하락과 안 맞으면 다른 사건 — 건드리지 않음
+                continue
+        elif n - i <= 40:
+            new = sh[i] * k
+        else:
+            continue
+        for t in range(i, j if j is not None else n):
+            if cl[t]:
+                out[t] = cl[t] * new
+    return out
+
+
 def valuation_series(series: dict, dates: list, mcaps: list):
     """일별 (per, pbr, stac). series = {stac: {ni, eq}} — status 000 만 넘길 것."""
     out = []
@@ -90,6 +122,9 @@ def main():
             if m:
                 dates.append(d)
                 mcaps.append(m)
+        base = [mc_all[d].get(code) for d in dates]
+        fixed = fix_listing_lag(base, [(cl_all.get(d) or {}).get(code) for d in dates])
+        mcaps = [m - (b0 or 0) + (f or 0) for m, b0, f in zip(mcaps, base, fixed)]   # 우선주 몫은 그대로
         vals = valuation_series(series, dates, mcaps)
         r = lambda x, k=2: None if x is None else round(x, k)
         (DAILY / f"{code}.json").write_text(json.dumps({

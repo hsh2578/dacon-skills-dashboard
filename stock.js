@@ -157,6 +157,7 @@ async function load() {
 
   bindControls();
   render();
+  renderBriefPrice();
   loadTripleCrossSignal();
   loadAiNotes();
   renderFinChart(code);
@@ -176,6 +177,7 @@ async function loadAiNotes() {
     }
     const ai = item.ai_notes;
     sectionEl.style.display = '';
+    renderBriefing(ai.briefing, ai.info_grade || ai.resolution?.info_grade);
 
     document.getElementById('ai-detail-oneliner').textContent = ai.one_liner || '';
 
@@ -249,6 +251,74 @@ async function loadAiNotes() {
     console.warn('[ai_notes] 로드 실패:', e.message);
     sectionEl.style.display = 'none';
   }
+}
+
+// ── 종목 브리핑 (briefer) — 처음 보는 사람이 2~3분에 이해하도록. 숫자 칸은 일별 데이터에서 직접 계산한다 ──
+function briefText(t) {
+  // 출처 태그는 지우지 않고 작게 — 의심 가는 문장을 바로 확인할 수 있게
+  return escapeHtml(t || '').replace(/\[(출처:[^\]]+|정량|확인 필요)\]/g, '<span class="brief-src">[$1]</span>');
+}
+
+function renderBriefing(b, grade) {
+  const sec = document.getElementById('brief-section');
+  const ai = document.getElementById('ai-section-detail');
+  if (!b || !sec) return;
+  sec.style.display = '';
+  document.getElementById('brief-headline').textContent = b.headline || '';
+  document.getElementById('brief-date').textContent = b.written_at ? `· ${b.written_at} 작성` : '';
+  const warn = document.getElementById('brief-warn');
+  const note = b.confidence_note || (grade === 'C' ? '자료가 적은 종목이라 이 해설의 신뢰도가 낮습니다. 출처를 직접 확인하세요.' : '');
+  if (note) { warn.style.display = ''; warn.textContent = note; }
+
+  const p = (t) => `<p>${briefText(t)}</p>`;
+  const blk = (title, html, cls = '') => html ? `<section class="brief-blk ${cls}"><h3>${title}</h3>${html}</section>` : '';
+  const list = (arr, f) => (arr || []).map(f).join('');
+  document.getElementById('brief-body').innerHTML = [
+    blk('무슨 회사인가', b.business && p(b.business)),
+    blk('주가는 어떻게 왔나', b.price_story && p(b.price_story)),
+    blk('왜 싸졌나', list(b.why_cheap, x => `<div class="brief-item"><h4>${escapeHtml(x.title || '')}</h4>${p(x.body)}</div>`)),
+    blk('"그런데 ~ 아닌가요?"', list(b.qa, x => `<div class="brief-qa"><p class="q">${escapeHtml(x.q || '')}</p>${p(x.a)}</div>`)),
+    `<div class="brief-pair">${blk('지금 가격이 가정하는 것', b.priced_in && p(b.priced_in))}${blk('시장이 맞다면', b.if_market_right && p(b.if_market_right), 'brief-bear')}</div>`,
+    blk('다음에 볼 것', b.watch?.length ? `<table class="brief-watch"><thead><tr><th>볼 것</th><th>시점</th><th>좋은 신호</th><th>나쁜 신호</th></tr></thead><tbody>${
+      list(b.watch, w => `<tr><td>${briefText(w.what)}</td><td>${escapeHtml(w.when || '')}</td><td>${briefText(w.good)}</td><td>${briefText(w.bad)}</td></tr>`)}</tbody></table>` : ''),
+  ].join('');
+
+  // 기존 분석 원문은 접어 둔다 — 같은 이야기를 두 번 읽지 않게
+  const btn = document.getElementById('brief-more');
+  ai.classList.add('ai-collapsed');
+  btn.onclick = () => {
+    const open = !ai.classList.toggle('ai-collapsed');
+    btn.setAttribute('aria-expanded', open);
+    btn.textContent = open ? '근거 접기' : '근거 자세히 보기 — AI 분석 원문 · 출처 전체';
+    if (open) ai.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+}
+
+function renderBriefPrice() {
+  const el = document.getElementById('brief-price');
+  if (!el || !dataset || dataset._source !== 'daily') return;
+  // 시총 비례 수정주가 — 원주가는 분할·무상증자 때 계단이 생겨 '고점 대비'가 부풀려진다
+  const raw = dataset.dates.map((d, i) => [d, dataset.close[i], dataset.market_cap[i]]).filter(x => x[1] && x[2]);
+  if (!raw.length) return;
+  const [lastD, last, lastM] = raw[raw.length - 1];
+  const pts = raw.map(([d, , m]) => [d, m * last / lastM]);
+  const stat = (years) => {
+    const cut = new Date(lastD); cut.setFullYear(cut.getFullYear() - years);
+    const w = pts.filter(x => new Date(x[0]) >= cut);
+    const hi = w.reduce((a, b) => (b[1] > a[1] ? b : a));
+    return { hi, from: last / hi[1] - 1, chg: last / w[0][1] - 1 };
+  };
+  const pct = (v) => `${v >= 0 ? '+' : ''}${(v * 100).toFixed(0)}%`;
+  const won = (v) => `${Math.round(v).toLocaleString('ko-KR')}원`;
+  const y1 = stat(1), y3 = stat(3);
+  const per = lastNonNull(dataset.per)?.val, pbr = lastNonNull(dataset.pbr)?.val;
+  el.innerHTML = [
+    ['현재가', won(last), lastD],
+    ['1년 고점 대비', pct(y1.from), `수정 고점 ${won(y1.hi[1])} · ${y1.hi[0]}`],
+    ['1년 수익률', pct(y1.chg), '1년 전 종가 대비'],
+    ['3년 고점 대비', pct(y3.from), `수정 고점 ${won(y3.hi[1])} · ${y3.hi[0]}`],
+    ['PER · PBR', `${per != null ? per.toFixed(1) : '—'} · ${pbr != null ? pbr.toFixed(2) : '—'}`, 'TTM 지배주주 기준'],
+  ].map(([k, v, s]) => `<div class="bp"><span class="bp-k">${k}</span><b class="bp-v${String(v).startsWith('-') ? ' neg' : ''}">${v}</b><span class="bp-s">${s}</span></div>`).join('');
 }
 
 function natLabel(n) {

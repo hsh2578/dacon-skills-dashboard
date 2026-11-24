@@ -3,6 +3,9 @@
     python scripts/ai_stage.py targets      # 다시 분석할 종목 고르기 → data/screens/_ai_targets.json
     python scripts/ai_stage.py merge        # data/screens/_ai/{code}.json → ai_notes.json (Top N 순서)
     python scripts/ai_stage.py apply-rank   # data/screens/_ranking.json 의 ai_rank 반영 + 판단 기록(judgments record)
+    python scripts/ai_stage.py briefs       # briefer 가 _ai/{code}.json 에 쓴 briefing → ai_notes.json (순위 그대로). 없는 종목 목록 출력
+
+briefing 은 ai_notes 안에 있으므로 재사용 종목은 직전 브리핑이 그대로 따라온다 — briefer 는 새로 분석한 종목만 돌면 된다.
 
 targets 규칙 (2026-11-24 — 비용 효율화 + "사실이 바뀔 때만 판정 변경"):
   다시 분석 = Top N 신규 진입 · 직전 분석 이후 새 DART 공시/증권사 리포트 · 당해 EPS 추정치 1개월 변화 ±5% 이상
@@ -39,7 +42,12 @@ def _changed(code, since):
     if any((x.get("date") or "") > s for x in d.get("reports") or [] if isinstance(x, dict)):
         why.append("새 리포트")
     eps = ((d.get("revisions") or {}).get("rows") or {}).get("EPS") or {}
+    # '1개월 변화'는 직전 분석 이후 변화가 아니다 — 분석한 지 20일도 안 됐으면 이미 보고 판단한 변화다
+    # (2026-11-24: 4일 만에 재실행했더니 18종목이 '추정치 변화'로 잡힘). ponytail: 분석 시점 EPS 를 기록해 비교하면 정확해진다
+    fresh = (datetime.now() - datetime.strptime(since, "%Y%m%d")).days < 20
     try:
+        if fresh:
+            raise ValueError
         now, m1 = float(eps.get("now")), float(eps.get("1m"))
         if m1 and abs(now / m1 - 1) >= REVISION_THRESHOLD:
             why.append(f"추정치 {now / m1 - 1:+.0%}")
@@ -65,8 +73,14 @@ def targets():
             analyze.append({"code": c, "name": r["name"], "why": why})
         else:
             reuse.append(c)
-            (AI / f"{c}.json").write_text(json.dumps({"code": c, "name": r["name"], "ai_notes": prev_notes[c]["ai_notes"]},
-                                                     ensure_ascii=False, indent=1), encoding="utf-8")
+            notes = dict(prev_notes[c]["ai_notes"])
+            p = AI / f"{c}.json"
+            if not notes.get("briefing") and p.exists():   # 아직 ai_notes.json 에 병합 안 된 브리핑을 덮어쓰지 않는다 (2026-11-24 10종목 유실)
+                old = json.load(open(p, encoding="utf-8"))["ai_notes"]
+                if old.get("briefing") and old.get("generated_at") == notes.get("generated_at"):
+                    notes["briefing"] = old["briefing"]
+            p.write_text(json.dumps({"code": c, "name": r["name"], "ai_notes": notes},
+                                    ensure_ascii=False, indent=1), encoding="utf-8")
     out = {"made_at": datetime.now().isoformat(timespec="seconds"), "previous": prev and prev["date"],
            "analyze": analyze, "reuse": reuse}
     (SC / "_ai_targets.json").write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -111,5 +125,21 @@ def apply_rank():
     judgments.record()
 
 
+def briefs():
+    doc = json.load(open(SC / "ai_notes.json", encoding="utf-8"))
+    missing = []
+    for i in doc["items"]:
+        p = AI / f"{i['code']}.json"
+        b = json.load(open(p, encoding="utf-8"))["ai_notes"].get("briefing") if p.exists() else None
+        if b:
+            i["ai_notes"]["briefing"] = b
+        elif not i["ai_notes"].get("briefing"):
+            missing.append(f"{i['code']} {i['name']}")
+    (SC / "ai_notes.json").write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"[ai] 브리핑 {len(doc['items']) - len(missing)}/{len(doc['items'])}")
+    if missing:
+        sys.exit("[ERROR] 브리핑 없음 — briefer 를 돌릴 것: " + ", ".join(missing))
+
+
 if __name__ == "__main__":
-    {"targets": targets, "merge": merge, "apply-rank": apply_rank}[sys.argv[1]]()
+    {"targets": targets, "merge": merge, "apply-rank": apply_rank, "briefs": briefs}[sys.argv[1]]()

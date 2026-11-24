@@ -77,6 +77,15 @@ python scripts/ai_stage.py apply-rank     # ai_rank 반영 + 판단 기록(data/
 python scripts/judgments.py grade         # 지난 판단 채점 (1·3·6·12개월 도래분)
 ```
 
+### 2-3. 종목 브리핑 (사람이 읽는 해설)
+
+`analyze` 종목만 (재사용 종목은 직전 브리핑이 ai_notes 에 따라온다). Agent(`general-purpose`) 최대 10개 동시, 프롬프트:
+`.claude/agents/briefer.md 정독 후 그대로 따를 것. 대상 {코드} {종목명}. 입력 _ai/{코드}.json · _top_context.json price · research/{코드}.json · financials/{코드}.json. _ai/{코드}.json 에 ai_notes.briefing 만 추가해 Write. written_at={오늘}.`
+
+```bash
+python scripts/ai_stage.py briefs         # briefing → ai_notes.json (순위 유지). 빠진 종목이 있으면 멈춘다
+```
+
 ## 3단계 — 검증
 
 ```bash
