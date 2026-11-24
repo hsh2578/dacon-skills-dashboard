@@ -1,7 +1,8 @@
 # PER · PBR Lens — 한국 주식 시계열 가치 평가 + 4팩터 스크리너
 
 > **Live**: https://hsh2578.github.io/dacon-skills-dashboard/
-> **DACON 월간 해커톤 — "투자 데이터를 시각화하라 · Skills 기반 대시보드 설계" 출품작**
+> **DACON 월간 해커톤 — "투자 데이터를 시각화하라 · Skills 기반 대시보드 설계" 출품작 · 최종 1등 수상**
+> 이 저장소는 수상 당시 상태로 보존합니다. 실투자용으로 재설계한 후속 버전 → **[kr-value-lens](https://github.com/hsh2578/kr-value-lens)** ([사이트](https://hsh2578.github.io/kr-value-lens/))
 
 한국 웹에 PER·PBR 시계열 차트를 정리해 놓은 곳이 거의 없다는 시장 갭에서 출발한 가치투자 대시보드입니다. **시장 지수(KOSPI/KOSDAQ/S&P 500)와 개별 종목 300+종을 같은 스케일의 60개월 PER·PBR 시계열 + 평균 ±1σ 밴드**로 보여주고, 그 위에 **4팩터 Z-Score 가치투자 시그널**과 **AI 서브에이전트 정성 분석**을 결합한 정적 사이트입니다.
 

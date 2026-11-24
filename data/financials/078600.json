@@ -2,7 +2,7 @@
   "code": "078600",
   "corp_code": "00177816",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:14:49",
+  "fetched_at": "2026-08-13T22:13:05",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 301519702416,
-    "op_income": 21143886605,
-    "op_margin": 0.0701,
-    "net_income": -6121554863,
-    "net_margin": -0.0203,
+    "period": "2026-1Q(누적)",
+    "revenue": 90914250683,
+    "op_income": 9223750516,
+    "op_margin": 0.1015,
+    "net_income": -3522803478,
+    "net_margin": -0.0387,
     "fs_div": "CFS"
   }
 }

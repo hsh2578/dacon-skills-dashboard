@@ -2,7 +2,7 @@
   "code": "067160",
   "corp_code": "00399694",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:16:27",
+  "fetched_at": "2026-06-18T16:45:30",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 315543941751,
-    "op_income": 48367704366,
-    "op_margin": 0.1533,
-    "net_income": 42175689509,
-    "net_margin": 0.1337,
+    "period": "2026-1Q(누적)",
+    "revenue": 106017902692,
+    "op_income": 21221271018,
+    "op_margin": 0.2002,
+    "net_income": 22480835370,
+    "net_margin": 0.212,
     "fs_div": "CFS"
   }
 }

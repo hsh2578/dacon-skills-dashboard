@@ -2,7 +2,7 @@
   "code": "004000",
   "corp_code": "00157681",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:15:16",
+  "fetched_at": "2026-06-18T16:42:06",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 1622198597023,
-    "op_income": 116532517473,
-    "op_margin": 0.0718,
-    "net_income": 169059827206,
-    "net_margin": 0.1042,
+    "period": "2026-1Q(누적)",
+    "revenue": 510654014171,
+    "op_income": 32664949261,
+    "op_margin": 0.064,
+    "net_income": 44691359941,
+    "net_margin": 0.0875,
     "fs_div": "CFS"
   }
 }

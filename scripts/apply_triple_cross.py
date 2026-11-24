@@ -1,22 +1,25 @@
-"""저평가 점수 → data/screens/triple_cross.json   (v6, 2026-11-23)
+"""4팩터 점수 계산 → data/screens/triple_cross.json
 
-목적: 자기 과거 대비 싼 종목을 찾되, 싼 이유가 '미래 이익 악화'·'사업 훼손'인 함정은 거른다.
+알고리즘 (multi_factor.py 패턴, Winsorize 제외):
+  1. 각 팩터별 Rank 변환 (큰 값이 좋음)
+  2. 각 팩터별 Rank의 Z-Score (평균 0, 표준편차 1)
+  3. 그룹별 Z-Score 합산 (Value, Growth)
+  4. Re-Z (그룹 합산값 다시 Z-Score → 그룹 간 분포 일치)
+  5. 가중 합산 (Value 60% / Growth 40%)
+  6. 정렬 → Top 10
 
-  가치   s1_per = 1 - 현재PER / 5년 PER 중앙값      s1_pbr = 1 - 현재PBR / 5년 PBR 중앙값
-  전망   outlook = 1 - ForwardPER / 5년 PER 중앙값   — 미래 이익으로 봐도 평소보다 싼가
-           ForwardPER = 시총 / (FY0 지배순이익 × g),  g = 컨센서스 FwdEPS / FY0 EPS (같은 FnGuide 잣대)
-           FwdEPS = (내년E+내후년E)/2, 내후년E 없으면 내년E   (fetch_consensus.forward_eps)
-  점수   total = ⅓·Z(PER할인) + ⅓·Z(PBR할인) + ⅓·Z(전망)   — 가중 민감도 백테스트상 차이 없음 → 동일 비중
-  필터   퀄리티(quality.py) 하위 20% 는 Top N 자격 없음 — 점수에는 섞지 않는다
-  제외   목표가 괴리(upside)는 점수에서 뺐다 (Bradshaw 2013 등: 과대·예측력 약함). 표시용으로만 남김.
-
-PER/PBR 은 시총(보통주+우선주) / DART 지배순이익·지배자본 (build_valuation.py). 중앙값은 이상치(이익 바닥 해의
-PER 100배 등)에 끌려가지 않게 하려고 평균 대신 쓴다.
+팩터 (4개):
+  Value 그룹 (저평가):
+    s1_per = (avg_5y_per - cur_per) / avg_5y_per       [큰 값 = 5Y 평균 대비 PER 저평가]
+    s1_pbr = (avg_5y_pbr - cur_pbr) / avg_5y_pbr       [큰 값 = 5Y 평균 대비 PBR 저평가]
+  Growth 그룹 (미래 안전):
+    s3_per = (cur_per - fwd_per) / cur_per             [큰 값 = Cur 대비 Fwd PER 개선]
+    upside = (avg_target - cur_close) / cur_close      [큰 값 = 목표가 상승여력]
 """
 import json
 import os
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 import numpy as np
@@ -30,20 +33,14 @@ UNIVERSE = PROJECT / "data" / "universe.json"
 # 2026-08-13 10 → 20으로 확대 (ranker가 고를 수 있는 폭을 넓힘).
 # 바꾸면 fetch_batch_api / fetch_financials / AI 분석 대상이 함께 따라온다
 # (셋 다 triple_cross.json의 top 배열을 읽는다).
-TOP_N = 30   # 2026-11-24 20 → 30: 백테스트상 싼 종목 안의 정량 순서는 잡음 → AI 가 더 넓은 후보에서 거른다
+TOP_N = 20
 PER_MATRIX = PROJECT / "data" / "matrix" / "per_monthly.json"
 PBR_MATRIX = PROJECT / "data" / "matrix" / "pbr_monthly.json"
 SCREENS_DIR = PROJECT / "data" / "screens"
 SCREENS_DIR.mkdir(parents=True, exist_ok=True)
 OUT = SCREENS_DIR / "triple_cross.json"
 
-WEIGHTS = {"per": 1 / 3, "pbr": 1 / 3, "outlook": 1 / 3}
-FQ = PROJECT / "data" / "financials_q"
-DAILY = PROJECT / "data" / ".cache" / "daily"
-PUBLISH = PROJECT / "data" / "daily"   # 사이트 종목 상세 일별 차트 — Top N 만
-sys.path.insert(0, str(PROJECT / "scripts"))
-import quality  # noqa: E402
-import ttm  # noqa: E402
+WEIGHTS = {"value": 0.60, "growth": 0.40}
 LOOKBACK_6M_MONTHS = 6
 
 
@@ -63,15 +60,15 @@ def _safe_zscore(series: pd.Series) -> pd.Series:
 
 
 def _calc_avg_and_cur(matrix_data: dict, code: str) -> tuple:
-    """월별 매트릭스에서 최근 60개월 **중앙값** + 가장 최근 값 (적자=0/null 제외). 필드명 avg_* 는 UI 호환용."""
+    """월별 매트릭스에서 5Y avg + 가장 최근 값 (적자=0/null 제외)."""
     series = matrix_data.get(code) or {}
     if not series:
         return None, None
 
-    sorted_dates = sorted(series.keys())[-60:]
+    sorted_dates = sorted(series.keys())
     valid_values = [series[d] for d in sorted_dates if series[d] is not None and series[d] > 0]
 
-    if len(valid_values) < 24:   # 백테스트(backtest_value.MIN_HIST)와 같은 기준 — 2년 미만 이력은 '평소'가 없다
+    if len(valid_values) < 6:
         return None, None
 
     # 가장 최근 양수 값
@@ -81,73 +78,8 @@ def _calc_avg_and_cur(matrix_data: dict, code: str) -> tuple:
             cur = series[d]
             break
 
-    return round(float(np.median(valid_values)), 4), round(cur, 4) if cur else None
-
-
-def _clean(o):
-    """NaN → None (JSON 표준·브라우저는 NaN 을 못 읽는다)."""
-    if isinstance(o, float) and o != o:
-        return None
-    if isinstance(o, dict):
-        return {k: _clean(v) for k, v in o.items()}
-    if isinstance(o, list):
-        return [_clean(v) for v in o]
-    return o
-
-
-def expectations(ser, st, mcap, med_per, cur_per, fwd_ni):
-    """가격이 깔고 있는 기대 — Mauboussin 역산·Damodaran 정상화의 단순판.
-
-      implied_ni      = 시총 / 5년 PER 중앙값          (평소 PER을 받으려면 필요한 이익)
-      implied_fade    = implied_ni / Forward 이익       (<1: 시장이 컨센서스보다 이익이 줄어든다고 가격을 매김)
-      implied_vs_ttm  = implied_ni / TTM 이익
-      midcycle_vs_ttm = (5년 영업이익률 중앙값 × TTM 매출) / TTM 영업이익   (<1: 지금 마진이 평소보다 높다)
-      cyclical_flag   = 최근 20분기 TTM 영업이익률이 적자를 오갔거나, 최고/최저 ≥ 3배, 또는 현재가 중앙값의 2배 이상
-    """
-    out = {"implied_fade": np.nan, "implied_vs_ttm": np.nan, "midcycle_vs_ttm": np.nan,
-           "opm_ttm": np.nan, "opm_med5y": np.nan, "cyclical_flag": False}
-    if not (mcap and med_per):
-        return out
-    implied = mcap / med_per
-    if fwd_ni and fwd_ni > 0:
-        out["implied_fade"] = implied / fwd_ni
-    if cur_per:
-        out["implied_vs_ttm"] = implied / (mcap / cur_per)
-    if not st:
-        return out
-    mg = [m for _, m in sorted(quality.margins(ser).items())][-20:]
-    if len(mg) >= 8:
-        cur, med = mg[-1], float(np.median(mg))
-        out["opm_ttm"], out["opm_med5y"] = cur, med
-        pos = [m for m in mg if m > 0]
-        out["cyclical_flag"] = bool(min(mg) <= 0 < max(mg)
-                                    or (pos and min(pos) > 0 and max(pos) / min(pos) >= 3)
-                                    or (med > 0 and cur >= 2 * med))
-        if cur > 0:
-            out["midcycle_vs_ttm"] = med / cur
-    return out
-
-
-def price_facts(code):
-    """브리핑용 주가 흐름 [정량] — 에이전트가 숫자를 지어내지 않게 코드가 계산한다 (일별 원주가 종가)."""
-    p = DAILY / f"{code}.json"
-    if not p.exists():
-        return None
-    d = json.loads(p.read_text(encoding="utf-8"))
-    # 수정주가 = 시총 비례 (원주가는 분할·무상증자 때 계단이 생긴다 — 한국화장품제조 5:1, 티앤엘 100% 무증 실측)
-    # ponytail: 유상증자·전환 희석도 '주가 상승'으로 섞인다. 주식수 이력이 생기면 그걸로 보정할 것
-    raw = [(t, c, m) for t, c, m in zip(d["dates"], d.get("close") or [], d.get("mcap_억") or []) if c and m]
-    if not raw:
-        return None
-    last_t, last, last_m = raw[-1]
-    pts = [(t, m * last / last_m) for t, c, m in raw]
-    def window(days):
-        cut = (datetime.strptime(last_t, "%Y%m%d") - timedelta(days=days)).strftime("%Y%m%d")
-        w = [x for x in pts if x[0] >= cut]
-        hi, lo = max(w, key=lambda x: x[1]), min(w, key=lambda x: x[1])
-        return {"high": round(hi[1]), "high_date": hi[0], "low": round(lo[1]), "low_date": lo[0],
-                "from_high": round(last / hi[1] - 1, 3), "change": round(last / w[0][1] - 1, 3)}
-    return {"as_of": last_t, "close": last, "adjusted": "시총 비례 수정주가", "y1": window(365), "y3": window(365 * 3)}
+    avg = sum(valid_values) / len(valid_values)
+    return round(avg, 4), round(cur, 4) if cur else None
 
 
 def main():
@@ -173,41 +105,27 @@ def main():
         avg_per, cur_per = _calc_avg_and_cur(per_matrix, code)
         # PBR
         avg_pbr, cur_pbr = _calc_avg_and_cur(pbr_matrix, code)
+        # Forward, target, price
+        fwd_per = s.get("forward_per")
         target = s.get("avg_target_price")
         close = s.get("close")
 
-        ser, mcap = {}, None
-        fq = FQ / f"{code}.json"
-        if fq.exists():
-            ser = {k: v for k, v in json.loads(fq.read_text(encoding="utf-8"))["series"].items()
-                   if v.get("status") == "000" and v.get("currency", "KRW") == "KRW"}
-        dp = DAILY / f"{code}.json"
-        if dp.exists():
-            dd = json.loads(dp.read_text(encoding="utf-8"))
-            mcap = dd["mcap_억"][-1] * 1e8 if dd["mcap_억"] else None
+        # s3_per 의 기준선 — 직전 확정 결산 PER.
+        #
+        # forward_per(네이버)는 "직전 결산 실적 → 추정 실적" 이라는 같은 잣대 안의 값이다.
+        # 반면 cur_per 는 우리가 만든 TTM 기준이라, 둘을 그대로 빼면 사과-오렌지가 된다.
+        # 실측(2026-08-13): s3_per 절대 차이 중앙 0.127·최대 0.586, 대주전자재료는
+        # CB 파생평가손으로 TTM 순이익이 눌려 s3 가 +0.348(개선)로 나왔으나
+        # 네이버 잣대로는 -0.238(악화) — 부호가 뒤집혔다.
+        # 따라서 Growth 축은 네이버 내부 정합성을 쓰고, TTM 은 Value 축에서만 쓴다.
+        annual_eps = s.get("annual_eps")
+        base_per = (close / annual_eps) if (close and annual_eps and annual_eps > 0) else None
 
-        # 전망: FY0(직전 결산) 지배순이익 × 컨센서스 성장배수 → 시총 기준 Forward PER
-        fy0_eps, fwd_eps = s.get("fy0_eps"), s.get("fwd_eps")
-        fy0_stac = f"{datetime.now().year - 1}12"
-        ni_fy0 = ttm.amount((ser.get(fy0_stac) or {}).get("ni"))
-        if ni_fy0 is None and ser:
-            # 1~3월엔 직전 연도 사업보고서가 아직 없다 → 최근 4분기 합(TTM)으로 대신.
-            # 안 하면 매년 1분기에 전 종목 전망 팩터가 비어 점수 ⅓이 조용히 0이 된다 (2026-11-24 grill 발견)
-            ni_fy0 = ttm.ttm_eps(ser, max(ser), "ni")
-        g = fwd_eps / fy0_eps if (fwd_eps and fy0_eps and fy0_eps > 0) else None
-        fwd_per = mcap / (ni_fy0 * g) if (mcap and ni_fy0 and ni_fy0 > 0 and g and g > 0) else None
-
+        # 시그널 raw
         s1_per = (avg_per - cur_per) / avg_per if avg_per and cur_per else np.nan
         s1_pbr = (avg_pbr - cur_pbr) / avg_pbr if avg_pbr and cur_pbr else np.nan
-        outlook = 1 - fwd_per / avg_per if (fwd_per and avg_per) else np.nan
-        upside = (target - close) / close if target and close else np.nan   # 표시용
-
-        st = max(ser) if ser else None
-        q = quality.metrics(ser, st) if st else (np.nan,) * 3
-        exp = expectations(ser, st, mcap, avg_per, cur_per, ni_fy0 * g if (ni_fy0 and g) else None)
-        annual_eps = fy0_eps
-        base_per = None
-        s3_per = outlook
+        s3_per = (base_per - fwd_per) / base_per if base_per and fwd_per else np.nan
+        upside = (target - close) / close if target and close else np.nan
 
         rows.append({
             "code": code,
@@ -222,42 +140,47 @@ def main():
             "fwd_per": fwd_per,
             "base_per": base_per,          # s3_per 기준선 (직전 결산 PER)
             "annual_eps": annual_eps,
-            "fwd_year": s.get("fwd_basis"),
-            "fwd_eps": fwd_eps,
+            "fwd_year": s.get("fwd_year"),
             "avg_target": target,
             "broker_count": s.get("broker_count"),
             "s1_per": s1_per,
             "s1_pbr": s1_pbr,
             "s3_per": s3_per,
             "upside": upside,
-            "q_trend": q[0], "q_accr": q[1], "q_icr": q[2],
-            **exp,
         })
 
     df = pd.DataFrame(rows)
     print(f"  종목 {len(df)}개")
 
-    print("\n[2/4] Rank → Z ...")
-    for col in ["s1_per", "s1_pbr", "s3_per"]:
-        df[f"{col}_z"] = _safe_zscore(df[col].rank(ascending=True, na_option="keep"))
-    df["upside_z"] = np.nan                       # 점수 미사용 (UI 호환 필드)
-    df["value_score"] = _safe_zscore(df[["s1_per_z", "s1_pbr_z"]].sum(axis=1, skipna=True, min_count=1))
-    df["growth_score"] = df["s3_per_z"]           # = 전망(outlook). 필드명은 UI 호환
-    # 2026-11-24 ⅓씩: 가치50/전망50 이면 PER 계열(PER할인·전망, 상관 0.56)이 실효 75%를 차지했다.
-    # 백테스트(40개월)에서 PER:PBR 가중을 1:0~0:1 로 바꿔도 IC 0.034~0.040 — 최적화할 근거가 없어 동일 비중.
-    print("[3/4] 동일 비중 합산 (PER할인 ⅓ · PBR할인 ⅓ · 전망 ⅓)...")
-    df["total_score"] = (df["s1_per_z"].fillna(0) * WEIGHTS["per"] + df["s1_pbr_z"].fillna(0) * WEIGHTS["pbr"]
-                         + df["s3_per_z"].fillna(0) * WEIGHTS["outlook"])
-    print("[4/4] 퀄리티 필터 (하위 20% → Top N 자격 없음)...")
-    df["quality_pass"], df["quality_score"] = quality.passes(df[["q_trend", "q_accr", "q_icr"]])
+    # 3. Rank 변환 (각 팩터별, ascending=True = 큰 값이 큰 등수)
+    print("\n[2/5] Rank 변환...")
+    factors = ["s1_per", "s1_pbr", "s3_per", "upside"]
+    for col in factors:
+        df[f"{col}_rank"] = df[col].rank(ascending=True, na_option="keep")
+
+    # 4. Rank의 Z-Score
+    print("[3/5] Rank Z-Score 정규화...")
+    for col in factors:
+        df[f"{col}_z"] = _safe_zscore(df[f"{col}_rank"])
+
+    # 5. 그룹별 합산
+    print("[4/5] 그룹별 합산 → Re-Z...")
+    df["value_raw"] = df[["s1_per_z", "s1_pbr_z"]].sum(axis=1, skipna=True, min_count=1)
+    df["growth_raw"] = df[["s3_per_z", "upside_z"]].sum(axis=1, skipna=True, min_count=1)
+
+    # 6. Re-Z
+    df["value_score"] = _safe_zscore(df["value_raw"])
+    df["growth_score"] = _safe_zscore(df["growth_raw"])
+
+    # 7. 가중 합산
+    print("[5/5] 가중 합산 (Value 60% / Growth 40%)...")
+    df["total_score"] = (
+        df["value_score"].fillna(0) * WEIGHTS["value"]
+        + df["growth_score"].fillna(0) * WEIGHTS["growth"]
+    )
 
     # 8. 정렬
-    # 퀄리티 통과 종목을 앞에 — Top N 은 통과 종목에서만 뽑힌다. 탈락 종목도 all_ranked 에는 남긴다.
-    # Top N 선별은 정량 3팩터(사용자가 정한 '자기 과거 대비 저평가') 그대로. 매수 매력 순위는 그 안에서 rank_ai 가 매긴다.
-    # (2026-11-24 새 점수로 선별을 바꿔 봤다가 되돌림 — 스크리너 정의는 사용자 결정. value_core 는 AI 입력·순위에만 쓴다)
-    import value_core
-    today_s = datetime.now().strftime("%Y%m%d")
-    df = df.sort_values(["quality_pass", "total_score"], ascending=[False, False]).reset_index(drop=True)
+    df = df.sort_values("total_score", ascending=False).reset_index(drop=True)
     df["rank"] = df.index + 1
 
     # 9. 출력
@@ -328,25 +251,14 @@ def main():
             "value_score": _round(r["value_score"], 3),
             "growth_score": _round(r["growth_score"], 3),
             "total_score": _round(r["total_score"], 3),
-            "outlook_raw": _round(r["s3_per"]),
-            "quality_pass": bool(r["quality_pass"]),
-            "quality_score": _round(r["quality_score"], 3),
-            "q_trend": _round(r["q_trend"]), "q_accr": _round(r["q_accr"]), "q_icr": _round(r["q_icr"], 2),
-            # 기대 역산 [정량] — 에이전트가 '가격이 깐 가정 vs 증거'를 판정하는 입력 (계산은 여기서만)
-            "implied_fade": _round(r["implied_fade"], 3),
-            "implied_vs_ttm": _round(r["implied_vs_ttm"], 3),
-            "midcycle_vs_ttm": _round(r["midcycle_vs_ttm"], 3),
-            "opm_ttm": _round(r["opm_ttm"]), "opm_med5y": _round(r["opm_med5y"]),
-            "cyclical_flag": bool(r["cyclical_flag"]),
         })
 
     triple_count = sum(1 for r in out_records if r["triple_cross"])
     out = {
         "meta": {
-            "rule": "v6 — PER할인·PBR할인·전망(Forward PER vs 5년 중앙값) 동일 비중, 퀄리티 하위 20% Top N 제외",
+            "rule": "Triple Cross v5 — 4팩터 (Value 2 + Growth 2), Rank → Z → Re-Z → 가중합 (60:40)",
             "universe_size": len(universe),
-            "factors": ["s1_per", "s1_pbr", "outlook(s3_per 필드)"],
-            "quality_filter": {"metrics": ["q_trend", "q_accr", "q_icr"], "cut": quality.Q_CUT},
+            "factors": ["s1_per", "s1_pbr", "s3_per", "upside"],
             "weights": WEIGHTS,
             "winsorize": False,
             # UI 호환 필드
@@ -361,88 +273,7 @@ def main():
         "all_ranked": out_records,
         "avoid": [],
     }
-    # NaN 은 파이썬은 읽지만 JSON 표준·브라우저는 못 읽는다 → 사이트 Top 목록이 통째로 사라진다 (2026-11-24 발견:
-    # 목표가 없는 종목을 유니버스에 남기면서 broker_count 가 NaN 이 됨). null 로 바꾸고 allow_nan=False 로 막는다.
-    OUT.write_text(json.dumps(_clean(out), ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
-
-    # AI 에이전트 입력 (/update-data 2단계) — 정량 필드만 추려 둔다
-    ctx = [{"name": r["name"], "code": r["code"], "rank": r["rank"], "market_cap_억": r["market_cap_억"],
-            "valuation": {k: r.get(k) for k in ("current_price", "current_per", "avg_5y_per", "cur_pbr", "avg_5y_pbr",
-                                                 "forward_per", "fwd_year", "avg_target", "broker_count")},
-            "factors": {k: r.get(k) for k in ("s1_per_raw", "s1_per_z", "s1_pbr_raw", "s1_pbr_z", "outlook_raw", "s3_per_z")},
-            "scores": {k: r.get(k) for k in ("value_score", "growth_score", "total_score")},
-            "expectations": {k: r.get(k) for k in ("implied_fade", "implied_vs_ttm", "midcycle_vs_ttm",
-                                                    "opm_ttm", "opm_med5y", "cyclical_flag")},
-            "quality": {k: r.get(k) for k in ("quality_score", "q_trend", "q_accr", "q_icr")},
-            "buy_inputs": value_core.buy_inputs(r["code"], r.get("current_per"), today_s),
-            "price": price_facts(r["code"]),
-            "note": "avg_5y_* 는 5년 중앙값. forward_per = 시총/(FY0 지배순이익×컨센서스 성장배수). 목표가는 점수 미사용."}
-           for r in out_records[:TOP_N]]
-    (SCREENS_DIR / "_top_context.json").write_text(json.dumps(_clean(ctx), ensure_ascii=False, indent=1,
-                                                              allow_nan=False), encoding="utf-8")
-
-    # ── 검색 대상(시총 2,000억+ 보통주 전체) — Top N 밖 종목도 일별 차트·PER·재무를 볼 수 있게 (2026-11-24) ──
-    # 점수·AI 는 universe 안만. 여기서는 이미 받은 데이터로 '보여 주기'만 채운다 (추가 API 호출 없음).
-    import shutil
-    ex = universe_doc.get("excluded") or {}
-    pool, seen = [], set()
-    for s_ in (universe_doc.get("stage1") or []) + universe + sum((ex.get(k) or [] for k in
-               ("validation_adverse", "validation_short", "validation_nodata", "no_fy1_eps")), []):
-        if s_.get("code") and s_["code"] not in seen:
-            seen.add(s_["code"]); pool.append(s_)
-    ranked = {r["code"]: r for r in out_records}
-    index = []
-    for s_ in pool:
-        c = s_["code"]
-        med_per, cur_per = _calc_avg_and_cur(per_matrix, c)
-        med_pbr, cur_pbr = _calc_avg_and_cur(pbr_matrix, c)
-        r = ranked.get(c) or {}
-        index.append({"code": c, "name": s_.get("name"), "market": s_.get("market"),
-                      "market_cap_억": s_.get("market_cap_억"), "close": s_.get("close"),
-                      "cur_per": cur_per, "med_per": med_per, "cur_pbr": cur_pbr, "med_pbr": med_pbr,
-                      "rank": r.get("rank"), "total_score": r.get("total_score"),
-                      "forward_per": r.get("forward_per"), "avg_target": r.get("avg_target"),
-                      "in_universe": c in ranked, "reason": s_.get("reason")})
-    (SCREENS_DIR / "search_index.json").write_text(
-        json.dumps({"count": len(index), "items": _clean(index)}, ensure_ascii=False, allow_nan=False), encoding="utf-8")
-
-    PUBLISH.mkdir(parents=True, exist_ok=True)
-    for f in PUBLISH.glob("*.json"):
-        f.unlink()
-    for s_ in pool:
-        src = DAILY / f"{s_['code']}.json"
-        if src.exists():
-            shutil.copy(src, PUBLISH / src.name)
-
-    # 재무 추이 파일이 없는 검색 대상은 DART 분기 데이터(financials_q)에서 연간을 파생 — 호출 없음
-    fin_dir = PROJECT / "data" / "financials"
-    for s_ in pool:
-        out_f = fin_dir / f"{s_['code']}.json"
-        q = FQ / f"{s_['code']}.json"
-        if out_f.exists() or not q.exists():
-            continue
-        ser = {k: v for k, v in json.loads(q.read_text(encoding="utf-8"))["series"].items()
-               if v.get("status") == "000" and v.get("currency", "KRW") == "KRW"}
-        ann = []
-        for st in sorted(k for k in ser if k.endswith("12"))[-6:]:
-            v = ser[st]
-            rev, oi, ni = v.get("rev"), v.get("oi"), v.get("ni")
-            ann.append({"year": int(st[:4]), "revenue": rev, "op_income": oi,
-                        "op_margin": round(oi / rev, 4) if rev and oi is not None else None,
-                        "net_income": ni, "net_margin": round(ni / rev, 4) if rev and ni is not None else None,
-                        "fs_div": v.get("fs")})
-        lq = max(ser) if ser else None
-        latest = None
-        if lq and not lq.endswith("12"):
-            v = ser[lq]; rev, oi, ni = v.get("rev"), v.get("oi"), v.get("ni")
-            latest = {"period": f"{lq[:4]}-{int(lq[4:]) // 3}Q(누적)", "revenue": rev, "op_income": oi,
-                      "op_margin": round(oi / rev, 4) if rev and oi is not None else None,
-                      "net_income": ni, "net_margin": round(ni / rev, 4) if rev and ni is not None else None,
-                      "fs_div": v.get("fs")}
-        if ann:
-            out_f.write_text(json.dumps(_clean({"code": s_["code"], "source": "DART 분기 파생 (financials_q)",
-                                               "unit": "원", "annual": ann, "latest_quarter": latest}),
-                                        ensure_ascii=False, allow_nan=False), encoding="utf-8")
+    OUT.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"\n  → {OUT.relative_to(PROJECT)}")
     print(f"\n  === Top 10 ===")

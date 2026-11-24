@@ -2,7 +2,7 @@
   "code": "033270",
   "corp_code": "00158963",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:17:32",
+  "fetched_at": "2026-06-18T16:48:37",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 219106225869,
-    "op_income": 27376077144,
-    "op_margin": 0.1249,
-    "net_income": 44674910622,
-    "net_margin": 0.2039,
+    "period": "2026-1Q(누적)",
+    "revenue": 73817185000,
+    "op_income": 11255932329,
+    "op_margin": 0.1525,
+    "net_income": 13984262716,
+    "net_margin": 0.1894,
     "fs_div": "OFS"
   }
 }

@@ -2,7 +2,7 @@
   "code": "307950",
   "corp_code": "00362441",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:13:17",
+  "fetched_at": "2026-06-18T16:36:55",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 3411149953000,
-    "op_income": 180628559000,
-    "op_margin": 0.053,
-    "net_income": 133124130000,
-    "net_margin": 0.039,
+    "period": "2026-1Q(누적)",
+    "revenue": 935708502000,
+    "op_income": 21175317000,
+    "op_margin": 0.0226,
+    "net_income": 18602754000,
+    "net_margin": 0.0199,
     "fs_div": "CFS"
   }
 }

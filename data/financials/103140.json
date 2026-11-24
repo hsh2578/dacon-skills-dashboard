@@ -2,7 +2,7 @@
   "code": "103140",
   "corp_code": "00684714",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:14:43",
+  "fetched_at": "2026-06-18T16:40:02",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 4379638455686,
-    "op_income": 324225964153,
-    "op_margin": 0.074,
-    "net_income": 223146415511,
-    "net_margin": 0.051,
+    "period": "2026-1Q(누적)",
+    "revenue": 1270895673812,
+    "op_income": 90173037096,
+    "op_margin": 0.071,
+    "net_income": 78000220300,
+    "net_margin": 0.0614,
     "fs_div": "CFS"
   }
 }

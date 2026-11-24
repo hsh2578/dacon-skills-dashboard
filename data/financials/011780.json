@@ -2,7 +2,7 @@
   "code": "011780",
   "corp_code": "00106368",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:13:58",
+  "fetched_at": "2026-06-18T16:39:19",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 5969561872152,
-    "op_income": 377574358909,
-    "op_margin": 0.0632,
-    "net_income": 374709387764,
-    "net_margin": 0.0628,
+    "period": "2026-1Q(누적)",
+    "revenue": 1779957662893,
+    "op_income": 59403454696,
+    "op_margin": 0.0334,
+    "net_income": 96292490134,
+    "net_margin": 0.0541,
     "fs_div": "CFS"
   }
 }

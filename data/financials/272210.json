@@ -2,7 +2,7 @@
   "code": "272210",
   "corp_code": "00339391",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:13:13",
+  "fetched_at": "2026-06-18T16:35:42",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 2363668174582,
-    "op_income": 302429417646,
-    "op_margin": 0.1279,
-    "net_income": -39171729981,
-    "net_margin": -0.0166,
+    "period": "2026-1Q(누적)",
+    "revenue": 807099186689,
+    "op_income": 34284490078,
+    "op_margin": 0.0425,
+    "net_income": -95751914040,
+    "net_margin": -0.1186,
     "fs_div": "CFS"
   }
 }

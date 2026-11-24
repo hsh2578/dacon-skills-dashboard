@@ -2,7 +2,7 @@
   "code": "017960",
   "corp_code": "00159795",
   "source": "OpenDART",
-  "fetched_at": "2026-11-24T12:48:09",
+  "fetched_at": "2026-06-18T16:40:14",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 652716234991,
-    "op_income": 124107859118,
-    "op_margin": 0.1901,
-    "net_income": 68661062270,
-    "net_margin": 0.1052,
+    "period": "2026-1Q(누적)",
+    "revenue": 211821540857,
+    "op_income": 41066114264,
+    "op_margin": 0.1939,
+    "net_income": 15523068123,
+    "net_margin": 0.0733,
     "fs_div": "CFS"
   }
 }

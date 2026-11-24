@@ -2,7 +2,7 @@
   "code": "017800",
   "corp_code": "00164724",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:13:59",
+  "fetched_at": "2026-06-18T16:38:51",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 1842914095396,
-    "op_income": 158880986569,
-    "op_margin": 0.0862,
-    "net_income": 181466371184,
-    "net_margin": 0.0985,
+    "period": "2026-1Q(누적)",
+    "revenue": 545847163885,
+    "op_income": 40486466882,
+    "op_margin": 0.0742,
+    "net_income": 27068395335,
+    "net_margin": 0.0496,
     "fs_div": "CFS"
   }
 }

@@ -2,7 +2,7 @@
   "code": "064960",
   "corp_code": "00398792",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:15:37",
+  "fetched_at": "2026-06-18T16:44:19",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 707970125288,
-    "op_income": 68667656890,
-    "op_margin": 0.097,
-    "net_income": 51796152871,
-    "net_margin": 0.0732,
+    "period": "2026-1Q(누적)",
+    "revenue": 215596175603,
+    "op_income": 21542268898,
+    "op_margin": 0.0999,
+    "net_income": 24854590378,
+    "net_margin": 0.1153,
     "fs_div": "CFS"
   }
 }

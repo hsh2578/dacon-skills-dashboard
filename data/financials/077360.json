@@ -2,7 +2,7 @@
   "code": "077360",
   "corp_code": "00471068",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:17:12",
+  "fetched_at": "2026-06-18T16:44:58",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 258998962285,
-    "op_income": 19644079036,
-    "op_margin": 0.0758,
-    "net_income": 24544922109,
-    "net_margin": 0.0948,
+    "period": "2026-1Q(누적)",
+    "revenue": 68700820168,
+    "op_income": -668459049,
+    "op_margin": -0.0097,
+    "net_income": 5177718354,
+    "net_margin": 0.0754,
     "fs_div": "CFS"
   }
 }

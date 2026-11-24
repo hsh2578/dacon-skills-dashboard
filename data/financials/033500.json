@@ -2,7 +2,7 @@
   "code": "033500",
   "corp_code": "00231105",
   "source": "OpenDART",
-  "fetched_at": "2026-11-24T12:48:03",
+  "fetched_at": "2026-08-13T23:55:06",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 599189158124,
-    "op_income": 80074853199,
-    "op_margin": 0.1336,
-    "net_income": 62458836633,
-    "net_margin": 0.1042,
+    "period": "2026-1Q(누적)",
+    "revenue": 169129356014,
+    "op_income": 19854435243,
+    "op_margin": 0.1174,
+    "net_income": 17122594414,
+    "net_margin": 0.1012,
     "fs_div": "CFS"
   }
 }

@@ -2,7 +2,7 @@
   "code": "024110",
   "corp_code": "00149646",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:13:02",
+  "fetched_at": "2026-06-18T16:36:11",
   "unit": "원",
   "annual": [
     {
@@ -34,11 +34,11 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
+    "period": "2026-1Q(누적)",
     "revenue": null,
-    "op_income": 2878963000000,
+    "op_income": 932546000000,
     "op_margin": null,
-    "net_income": 2214126000000,
+    "net_income": 753413000000,
     "net_margin": null,
     "fs_div": "CFS"
   }

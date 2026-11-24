@@ -33,15 +33,6 @@ def _stock(i, *, with_consensus=True, days_old=0):
     return s
 
 
-@pytest.fixture(autouse=True)
-def _fake_eps_snapshot(monkeypatch):
-    """모든 가짜 종목에 내년·내후년 EPS가 있는 스냅샷 — 이 파일은 목표가 승계만 검증한다."""
-    y = datetime.now().year
-    eps = {f"{y - 1}/12": 1000.0, f"{y + 1}/12": 1200.0, f"{y + 2}/12": 1300.0}
-    snap = {f"{i:06d}": {"eps": eps} for i in range(200)}
-    monkeypatch.setattr(fc, "load_eps_snapshot", lambda: ("eps_annual_test.json", snap))
-
-
 def _write_universe(tmp_path, stocks):
     p = tmp_path / "universe.json"
     p.write_text(json.dumps({"passed": stocks, "stocks": stocks, "meta": {}},
@@ -77,21 +68,21 @@ def test_전부_비어도_직전값이_있으면_승계된다(monkeypatch, tmp_p
     assert all(s["consensus_carried"] for s in out["passed"])
 
 
-def test_페치가_전멸하면_기록을_거부한다(monkeypatch, tmp_path):
-    """목표가를 표시용으로 바꾼 뒤에도 전멸은 막는다 — 종목은 안 빠지지만 목표가가 조용히 다 비는 것도
-    조용한 붕괴다 (2026-11-24 실측: 스로틀로 283종목 중 29개만 목표가 보유)."""
+def test_직전값이_없으면_붕괴하므로_기록을_거부한다(monkeypatch, tmp_path):
+    """승계할 것이 없는 상태에서 페치가 전멸하면 universe.json을 건드리지 않는다."""
     stocks = [_stock(i) for i in range(30)]
     p = _patch(monkeypatch, tmp_path, stocks, EMPTY)
-    monkeypatch.setattr(fc, "CARRY_MAX_DAYS", -1)          # 승계도 막는다
+    # 직전 값 자체를 지워 승계 경로를 막는다
+    monkeypatch.setattr(fc, "CARRY_MAX_DAYS", -1)
     before = p.read_text(encoding="utf-8")
     with pytest.raises(SystemExit) as e:
         fc.main()
-    assert "목표가 보유" in str(e.value)
-    assert p.read_text(encoding="utf-8") == before
+    assert "급감" in str(e.value)
+    assert p.read_text(encoding="utf-8") == before        # 원본 그대로
 
 
 def test_너무_낡은_값은_승계하지_않는다(monkeypatch, tmp_path):
-    """오래된 목표가는 승계하지 않는다 → 전부 비면 기록 거부로 이어진다."""
+    """목표주가는 upside 팩터로 들어간다 — 무한정 승계하면 안 된다."""
     stocks = [_stock(i, days_old=fc.CARRY_MAX_DAYS + 1) for i in range(30)]
     p = _patch(monkeypatch, tmp_path, stocks, EMPTY)
     before = p.read_text(encoding="utf-8")
@@ -138,14 +129,3 @@ def test_신규_종목은_컨센서스가_없으면_정상적으로_빠진다(mo
     codes = {s["code"] for s in out["passed"]}
     assert "000900" not in codes and "000901" not in codes
     assert len(out["passed"]) == 28
-
-
-def test_forward_eps_rule():
-    from datetime import date
-    from fetch_consensus import forward_eps
-    d = date(2026, 11, 23)
-    eps = {"2025/12": 100.0, "2026/12": 120.0, "2027/12": 150.0, "2028/12": 170.0}
-    assert forward_eps(eps, d) == (100.0, 160.0, "avg(2027E,2028E)")
-    assert forward_eps({**eps, "2028/12": None}, d) == (100.0, 150.0, "2027E")
-    assert forward_eps({"2025/12": 100.0, "2026/12": 120.0}, d)[1] is None   # 내년E 없음 → 제외
-    assert forward_eps(eps, date(2027, 2, 1))[1] == 170.0                    # 해가 바뀌면 자동 이동

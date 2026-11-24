@@ -2,7 +2,7 @@
   "code": "375500",
   "corp_code": "01524093",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:14:23",
+  "fetched_at": "2026-06-18T16:38:49",
   "unit": "원",
   "annual": [
     {
@@ -52,12 +52,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 5034696036425,
-    "op_income": 424082713602,
-    "op_margin": 0.0842,
-    "net_income": 263146602633,
-    "net_margin": 0.0523,
+    "period": "2026-1Q(누적)",
+    "revenue": 1725244383034,
+    "op_income": 157360896508,
+    "op_margin": 0.0912,
+    "net_income": 160136020541,
+    "net_margin": 0.0928,
     "fs_div": "CFS"
   }
 }

@@ -133,21 +133,11 @@ def _to_list(series, ndigits=2):
 def fetch_sp500_monthly(years: int = 10) -> dict:
     cutoff = pd.Timestamp(datetime.now() - timedelta(days=years * 366))
 
-    metrics, carried = {}, []
-    prev_p = DATA_DIR / "sp500.json"
-    prev = json.loads(prev_p.read_text(encoding="utf-8")) if prev_p.exists() else None
+    metrics = {}
     for key, url in MULTPL_URLS.items():
         print(f"  multpl/{key}", flush=True)
-        try:
-            s = _fetch_multpl(url)
-            s = _to_month_end(s[s.index >= cutoff])
-        except Exception as e:
-            # 2026-11-24 multpl.com 이 연결을 거부 — 직전 값을 승계하고 표시한다(빈 값으로 덮지 않는다). 종가는 FRED 로 계속 갱신(아래 합집합).
-            if not prev or key not in prev:
-                raise
-            print(f"  multpl/{key} 실패 → 직전 값 승계: {str(e)[:80]}", flush=True)
-            s = pd.Series(prev[key], index=pd.to_datetime(prev["dates"])).dropna()
-            carried.append(key)
+        s = _fetch_multpl(url)
+        s = _to_month_end(s[s.index >= cutoff])
         metrics[key] = s
 
     # close: FRED(공식) 우선, 실패/부재 시 yfinance 폴백
@@ -168,12 +158,9 @@ def fetch_sp500_monthly(years: int = 10) -> dict:
 
     # PER, div_yield는 월별. PBR은 연 1회. close는 월별.
     # 월 인덱스로 통일하고, PBR은 forward fill로 매월 채움.
-    # 날짜 기준 = PER·배당·종가의 합집합 — multpl 승계 중에도 새 달의 FRED 종가가 버려지지 않게 (승계 지표는 직전 값 유지)
-    df = pd.DataFrame({"per": metrics["per"], "div_yield": metrics["div_yield"], "close": close}).sort_index()
-    for k in ("per", "div_yield"):
-        if k in carried:
-            df[k] = df[k].ffill()
-    df = df.dropna(subset=["per", "div_yield", "close"], how="all")
+    df = pd.DataFrame({"per": metrics["per"], "div_yield": metrics["div_yield"]})
+    df["close"] = close
+    df = df.sort_index().dropna(subset=["per", "div_yield"], how="all")
     pbr_yearly = metrics["pbr"].sort_index()
     df["pbr"] = pbr_yearly.reindex(df.index, method="ffill")
 
@@ -187,7 +174,6 @@ def fetch_sp500_monthly(years: int = 10) -> dict:
         "div_yield": _to_list(df["div_yield"]),
         "close": _to_list(df["close"]),
         "close_source": close_source,
-        "multpl_carried": carried,      # 비어 있지 않으면 PER/PBR/배당은 지난 실행 값
         "updated_at": datetime.now().isoformat(timespec="seconds"),
     }
 

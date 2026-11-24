@@ -2,7 +2,7 @@
   "code": "204320",
   "corp_code": "01042775",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:14:36",
+  "fetched_at": "2026-06-18T16:40:39",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 7127470583139,
-    "op_income": 252139834572,
-    "op_margin": 0.0354,
-    "net_income": 69343553120,
-    "net_margin": 0.0097,
+    "period": "2026-1Q(누적)",
+    "revenue": 2311655292684,
+    "op_income": 93583922060,
+    "op_margin": 0.0405,
+    "net_income": 53073919076,
+    "net_margin": 0.023,
     "fs_div": "CFS"
   }
 }

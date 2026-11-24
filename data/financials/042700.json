@@ -2,7 +2,7 @@
   "code": "042700",
   "corp_code": "00161383",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:13:03",
+  "fetched_at": "2026-06-18T16:35:34",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 483079302733,
-    "op_income": 229606250247,
-    "op_margin": 0.4753,
-    "net_income": 162400325945,
-    "net_margin": 0.3362,
+    "period": "2026-1Q(누적)",
+    "revenue": 50902076570,
+    "op_income": 8456257107,
+    "op_margin": 0.1661,
+    "net_income": 19031751252,
+    "net_margin": 0.3739,
     "fs_div": "CFS"
   }
 }

@@ -2,7 +2,7 @@
   "code": "194370",
   "corp_code": "00332927",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:17:02",
+  "fetched_at": "2026-06-18T16:47:32",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 1241717279111,
-    "op_income": 141218985619,
-    "op_margin": 0.1137,
-    "net_income": 71728027123,
-    "net_margin": 0.0578,
+    "period": "2026-1Q(누적)",
+    "revenue": 308035703437,
+    "op_income": 30797471829,
+    "op_margin": 0.1,
+    "net_income": 12177378300,
+    "net_margin": 0.0395,
     "fs_div": "CFS"
   }
 }

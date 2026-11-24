@@ -39,7 +39,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import feeds  # noqa: E402
 from feeds import krx, short_code  # noqa: E402
-import ttm  # noqa: E402
 from ttm import (ANNUAL_LAG_DAYS, QUARTER_LAG_DAYS,  # noqa: E402
                  amount, bps_at, disclosed_stac, ttm_eps)
 
@@ -114,9 +113,7 @@ def fetch_closes_daily(months: int, refresh: bool, workers: int = KRX_WORKERS):
     while day <= end:
         if day.weekday() < 5:                     # 주말 제외 (공휴일은 빈 응답으로 걸러짐)
             ds = day.strftime("%Y%m%d")
-            # 최근 7일의 빈 날은 다시 조회 — KRX는 당일 데이터를 다음 날 공개하므로
-            # 오늘을 휴장일({})로 굳히면 그날이 영영 빠진다.
-            if ds not in raw or (not raw[ds] and (end - day).days < 7):
+            if ds not in raw:
                 todo.append(ds)
         day += timedelta(days=1)
     print(f"  수집 대상 {len(todo)}일 (보유 {len(raw)}일)")
@@ -245,24 +242,14 @@ def fetch_ratios(codes, token, refresh: bool):
         data = json.loads(RATIO_PATH.read_text(encoding="utf-8"))
         print(f"  캐시 {len(data)}종목")
 
-    # 캐시에 있어도 공시 기한이 지난 분기가 없으면 다시 받는다 — 예전엔 한 번 받은
-    # 종목은 영원히 갱신되지 않아 2026-11에도 202603에 멈춰 있었다.
-    # ponytail: 비-12월 결산·공시 지연 종목은 매 실행 재조회됨. 콜이 아까우면 조회일을 캐시에 기록할 것
-    due = ttm.latest_due_stac(date.today())
-    todo = [c for c in codes if c not in data or max(ttm.stacs(data[c]) or ["0"]) < due]
-    print(f"  조회 {len(todo)}종목 (신규 + {due} 미반영)")
+    todo = [c for c in codes if c not in data]
+    print(f"  신규 조회 {len(todo)}종목")
     t0 = time.time()
-    fails = []
     for i, code in enumerate(todo):
         try:
             series = feeds.kis_quarterly_ratios(code, token)
-        except Exception as e:
+        except Exception:
             series = {}
-            fails.append(f"{code}: {e}")
-            # 2026-11-23: 재무비율 API가 404로 바뀌었는데 예외를 삼켜 2,200종목이
-            # 조용히 옛 캐시로 남았다. 처음 20건이 다 실패하면 더 돌 이유가 없다.
-            if len(fails) == 20 and i == 19:
-                sys.exit(f"[ERROR] KIS 재무비율 첫 20건 전부 실패 — 엔드포인트 확인 필요\n  {fails[0]}")
         if series:
             data[code] = series
         if (i + 1) % 50 == 0 or i + 1 == len(todo):
@@ -271,8 +258,6 @@ def fetch_ratios(codes, token, refresh: bool):
                   f"· ETA {el/(i+1)*(len(todo)-i-1):.0f}s", flush=True)
             RATIO_PATH.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
     RATIO_PATH.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
-    if todo and len(fails) > len(todo) * 0.1:
-        sys.exit(f"[ERROR] KIS 재무비율 {len(fails)}/{len(todo)}건 실패 — 매트릭스를 만들지 않습니다\n  예: {fails[:3]}")
     return data
 
 

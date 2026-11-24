@@ -2,7 +2,7 @@
   "code": "031980",
   "corp_code": "00208444",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:13:53",
+  "fetched_at": "2026-06-18T16:40:42",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 158337614413,
-    "op_income": 57982225704,
-    "op_margin": 0.3662,
-    "net_income": 88296026580,
-    "net_margin": 0.5576,
+    "period": "2026-1Q(누적)",
+    "revenue": 27984804290,
+    "op_income": 9171006727,
+    "op_margin": 0.3277,
+    "net_income": 20058481603,
+    "net_margin": 0.7168,
     "fs_div": "CFS"
   }
 }

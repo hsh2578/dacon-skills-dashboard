@@ -2,7 +2,7 @@
   "code": "041830",
   "corp_code": "00269922",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:15:44",
+  "fetched_at": "2026-06-18T16:47:27",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 212972020658,
-    "op_income": 50090615515,
-    "op_margin": 0.2352,
-    "net_income": 35063990117,
-    "net_margin": 0.1646,
+    "period": "2026-1Q(누적)",
+    "revenue": 68444581838,
+    "op_income": 13024609993,
+    "op_margin": 0.1903,
+    "net_income": 16297863377,
+    "net_margin": 0.2381,
     "fs_div": "CFS"
   }
 }

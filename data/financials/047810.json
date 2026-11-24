@@ -2,7 +2,7 @@
   "code": "047810",
   "corp_code": "00309503",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:13:09",
+  "fetched_at": "2026-06-18T16:36:14",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 3324918717481,
-    "op_income": 195000846307,
-    "op_margin": 0.0586,
-    "net_income": 97374406927,
-    "net_margin": 0.0293,
+    "period": "2026-1Q(누적)",
+    "revenue": 1092687418220,
+    "op_income": 67143247058,
+    "op_margin": 0.0614,
+    "net_income": 41311139514,
+    "net_margin": 0.0378,
     "fs_div": "CFS"
   }
 }

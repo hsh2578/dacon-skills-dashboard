@@ -10,19 +10,6 @@ const METRICS = [
 
 let dataset = null;
 
-// v6 (2026-11-24) — 원인 분류 · 기대 괴리 (app.js 와 같은 라벨)
-const CAUSE_LABEL = {
-  CYCLICAL_PEAK: '경기 정점', STRUCTURAL_DECLINE: '구조적 쇠퇴', TEMPORARY_SHOCK: '일시 충격',
-  ONE_OFF_ACCOUNTING: '일회성 회계', GOVERNANCE_DISCOUNT: '지배구조 할인', NEGLECT: '소외',
-  REGULATORY_MACRO: '규제·거시', BALANCE_SHEET_TRAP: '재무 함정',
-};
-const GAP_LABEL = {
-  TOO_PESSIMISTIC: ['가격이 과도하게 비관적', 'uc-temporary'],
-  FAIR: ['가격이 전망 반영', ''],
-  NOT_PESSIMISTIC_ENOUGH: ['함정 경계', 'uc-structural'],
-};
-
-
 function fmtZ(v) {
   return v == null ? '—' : (v >= 0 ? '+' : '') + v.toFixed(2);
 }
@@ -51,37 +38,33 @@ async function loadTripleCrossSignal() {
 
     const total = all.length;
     document.getElementById('signal-rank-line').innerHTML =
-      `universe <b>${total}종목</b> 중 정량 <b>#${me.rank}위</b> · ` +
-      `가치 <b>${fmtZ(me.value_score)}</b> · 전망 <b>${fmtZ(me.growth_score)}</b>` +
-      (me.quality_pass === false ? ' · <b style="color:var(--warn)">퀄리티 하위 20% (Top 자격 없음)</b>' : '') +
-      (me.cyclical_flag ? ' · <b style="color:var(--warn)">이익 정점 의심</b>' : '');
+      `universe <b>${total}종목</b> 중 <b>#${me.rank}위</b> · ` +
+      `Value <b>${fmtZ(me.value_score)}</b> · Growth <b>${fmtZ(me.growth_score)}</b>`;
 
     const tierLabel = {
       HIDDEN_GEM: 'Hidden Gem', STRONG_BUY: 'Strong Buy', BUY: 'Buy',
       WATCH: 'Watch', WEAK: 'Weak', MISS: 'Miss',
     };
     const tierEl = document.getElementById('signal-tier');
-    // v6: 전 종목 같은 티어라 정보가 없다 — 숨김 (순위·기대 괴리가 결론을 대신한다)
-    tierEl.style.display = 'none';
+    tierEl.textContent = tierLabel[me.tier] || me.tier;
+    tierEl.className = `signal-tier-badge tier-${(me.tier || 'BUY').toLowerCase()}`;
 
     const factorList = [
-      { lbl: 'PER 할인', sub: '5Y 중앙 대비', z: me.s1_per_z, raw: me.s1_per_raw },
-      { lbl: 'PBR 할인', sub: '5Y 중앙 대비', z: me.s1_pbr_z, raw: me.s1_pbr_raw },
-      { lbl: '전망 할인', sub: 'Fwd PER vs 5Y 중앙', z: me.s3_per_z, raw: me.s3_per_raw },
-      { lbl: '가격 가정 이익', sub: '컨센서스 대비 배수', z: null, raw: null,
-        txt: me.implied_fade == null ? '—' : '×' + me.implied_fade.toFixed(2),
-        on: me.implied_fade != null && me.implied_fade < 1 },
+      { lbl: 'PER 저평가', sub: '5Y avg 대비', z: me.s1_per_z, raw: me.s1_per_raw },
+      { lbl: 'PBR 저평가', sub: '5Y avg 대비', z: me.s1_pbr_z, raw: me.s1_pbr_raw },
+      { lbl: 'Forward 개선', sub: 'Cur → Fwd PER', z: me.s3_per_z, raw: me.s3_per_raw },
+      { lbl: '목표가 상승여력', sub: '컨센서스', z: me.upside_z, raw: me.upside_raw },
     ];
 
     document.getElementById('signal-factors').innerHTML = factorList.map(f => {
-      const on = f.on ?? (f.z != null && f.z > 0);
-      const rawTxt = f.txt ?? (f.raw == null ? '—' : (f.raw >= 0 ? '+' : '') + (f.raw * 100).toFixed(1) + '%');
+      const on = f.z != null && f.z > 0;
+      const rawTxt = f.raw == null ? '—' : (f.raw >= 0 ? '+' : '') + (f.raw * 100).toFixed(1) + '%';
       return `
         <div class="factor-item ${on ? 'on' : ''}">
           <div class="factor-lbl">${f.lbl}</div>
           <div class="factor-sub">${f.sub}</div>
           <div class="factor-raw">${rawTxt}</div>
-          <div class="factor-z">${f.z == null ? '' : 'z = ' + fmtZ(f.z)}</div>
+          <div class="factor-z">z = ${fmtZ(f.z)}</div>
         </div>`;
     }).join('');
 
@@ -93,12 +76,12 @@ async function loadTripleCrossSignal() {
     };
     document.getElementById('signal-groups').innerHTML = `
       <div class="g-row big">
-        <span class="g-lbl">가치</span>
+        <span class="g-lbl">Value</span>
         ${groupBar(me.value_score)}
         <span class="g-val">${fmtZ(me.value_score)}</span>
       </div>
       <div class="g-row big">
-        <span class="g-lbl">전망</span>
+        <span class="g-lbl">Growth</span>
         ${groupBar(me.growth_score)}
         <span class="g-val">${fmtZ(me.growth_score)}</span>
       </div>`;
@@ -115,24 +98,10 @@ async function loadTripleCrossSignal() {
 async function load() {
   // 1차: 일별 풀 데이터 시도
   try {
-    const [r, scR] = await Promise.all([
-      fetch(`data/daily/${code}.json?t=${Date.now()}`),
-      fetch(`data/screens/triple_cross.json?t=${Date.now()}`),
-    ]);
+    const r = await fetch(`data/stocks/${code}.json?t=${Date.now()}`);
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const d = await r.json();
-    const sc = scR.ok ? ((await scR.json()).all_ranked || []).find(s => s.code === code) : null;
-    const ymd = (x) => `${x.slice(0, 4)}-${x.slice(4, 6)}-${x.slice(6, 8)}`;
-    dataset = {
-      name: d.name || sc?.name || code, ticker: code, market: 'KR', frequency: 'daily',
-      dates: d.dates.map(ymd), per: d.per, pbr: d.pbr,
-      market_cap: d.mcap_억, market_cap_unit: '억원', close: d.close || d.dates.map(() => null), price_unit: '원',
-      forward: { per_forward: sc?.forward_per, year_estimate: sc?.fwd_year },
-      consensus: { summary: { avg_target_price: sc?.avg_target, broker_count: sc?.broker_count }, brokers: [] },
-      updated_at: new Date().toISOString(),
-      note: 'PER·PBR = (보통주+우선주 시가총액) ÷ DART 지배주주 TTM 순이익·자본, 공시 기한 이후 반영',
-      _source: 'daily',
-    };
+    dataset = await r.json();
+    dataset._source = 'daily';
   } catch (e) {
     // 2차: 매트릭스 fallback (월별)
     dataset = await loadFromMatrix(code);
@@ -150,14 +119,13 @@ async function load() {
 
   // 데이터 정밀도 안내
   const sourceNote = dataset._source === 'monthly'
-    ? '월별 데이터 (60개월) — 일별 정밀 데이터는 Top 30 종목만 제공'
+    ? '월별 데이터 (60개월) — 일별 정밀 데이터는 Top 20 종목만 제공'
     : null;
   if (sourceNote) document.getElementById('note').innerHTML = sourceNote;
   else if (dataset.note) document.getElementById('note').textContent = dataset.note;
 
   bindControls();
   render();
-  renderBriefPrice();
   loadTripleCrossSignal();
   loadAiNotes();
   renderFinChart(code);
@@ -177,7 +145,6 @@ async function loadAiNotes() {
     }
     const ai = item.ai_notes;
     sectionEl.style.display = '';
-    renderBriefing(ai.briefing, ai.info_grade || ai.resolution?.info_grade, ai.buy_check, item);
 
     document.getElementById('ai-detail-oneliner').textContent = ai.one_liner || '';
 
@@ -186,20 +153,14 @@ async function loadAiNotes() {
     if (ucEl && uc && uc.text) {
       ucEl.style.display = '';
       const natEl = document.getElementById('ai-detail-uc-nat');
-      const gap = GAP_LABEL[ai.resolution?.expectation_gap];
-      if (uc.cause_type) {
-        natEl.textContent = `${CAUSE_LABEL[uc.cause_type] || uc.cause_type}${gap ? ' · ' + gap[0] : ''}`;
-        natEl.className = `ai-uc-nat ${gap ? gap[1] : ''}`;
-      } else {
-        natEl.textContent = uc.nature === 'STRUCTURAL' ? '구조적 · 회복 지연' : '일시적 · 해소 가능';
-        natEl.className = `ai-uc-nat uc-${(uc.nature || '').toLowerCase()}`;
-      }
+      natEl.textContent = uc.nature === 'STRUCTURAL' ? '구조적 · 회복 지연' : '일시적 · 해소 가능';
+      natEl.className = `ai-uc-nat uc-${(uc.nature || '').toLowerCase()}`;
       document.getElementById('ai-detail-uc-text').textContent = uc.text;
 
       // 초기 진단이 증거로 뒤집혔으면 그게 이 종목의 핵심 서사다.
       const flipEl = document.getElementById('ai-detail-uc-flip');
       if (flipEl) {
-        const flipped = !uc.cause_type && uc.nature_initial && uc.nature_initial !== uc.nature;
+        const flipped = uc.nature_initial && uc.nature_initial !== uc.nature;
         flipEl.style.display = flipped ? '' : 'none';
         if (flipped) {
           flipEl.textContent = `초기 ${natLabel(uc.nature_initial)} → 검증 후 ${natLabel(uc.nature)}`;
@@ -207,10 +168,8 @@ async function loadAiNotes() {
       }
       const basisEl = document.getElementById('ai-detail-uc-basis');
       if (basisEl) {
-        const basis = [uc.implied_expectations, ai.resolution?.expectation_gap_basis].filter(Boolean).join('  /  ')
-          || uc.nature_basis || '';
-        basisEl.style.display = basis ? '' : 'none';
-        basisEl.textContent = basis;
+        basisEl.style.display = uc.nature_basis ? '' : 'none';
+        basisEl.textContent = uc.nature_basis || '';
       }
     } else if (ucEl) {
       ucEl.style.display = 'none';
@@ -221,8 +180,7 @@ async function loadAiNotes() {
     const evCls = `ev-${(ai.evidence_strength || 'mod').toLowerCase()}`;
     const rkCls = `rk-${(ai.risk_level || 'low').toLowerCase()}`;
     document.getElementById('ai-detail-badges').innerHTML = `
-      ${ai.resolution?.info_grade ? `<span class="ai-badge ev-moderate" title="증권사 리포트 수 기준 정보량 (A 6건 이상 · B 2~5 · C 0~1)">정보 ${ai.resolution.info_grade}</span>`
-        : `<span class="ai-badge ${evCls}">근거 ${ai.evidence_strength || ''}</span>`}
+      <span class="ai-badge ${evCls}">근거 ${ai.evidence_strength || ''}</span>
       <span class="ai-badge ${rkCls}">리스크 ${ai.risk_level || ''}</span>
     `;
 
@@ -251,149 +209,6 @@ async function loadAiNotes() {
     console.warn('[ai_notes] 로드 실패:', e.message);
     sectionEl.style.display = 'none';
   }
-}
-
-// ── 종목 브리핑 (briefer) — 처음 보는 사람이 2~3분에 이해하도록. 숫자 칸은 일별 데이터에서 직접 계산한다 ──
-// 출처 태그는 본문에서 각주 번호로 — 문장 흐름을 끊지 않되, 같은 출처는 같은 번호로 끝에 모은다
-let briefNotes = [];
-function briefText(t) {
-  return escapeHtml(t || '')
-    .replace(/\s*\[확인 필요\]/g, ' <span class="brief-unk">확인 필요</span>')
-    .replace(/\s*\[(출처:[^\]]+|정량)\]/g, (_, src) => {
-      const label = src === '정량' ? '정량 — 일별 시총·DART 공시로 코드가 계산한 값' : src.replace(/^출처:\s*/, '');
-      let n = briefNotes.indexOf(label) + 1;
-      if (!n) n = briefNotes.push(label);
-      return `<sup class="fn" title="${label}">${n}</sup>`;
-    });
-}
-
-// 긴 문단은 두 문장씩 끊는다 — 에이전트가 쓴 4~5문장 덩어리가 벽처럼 읽힌다
-function briefParas(t) {
-  const sents = String(t || '').split(/(?<=[다요](?:\s*\[[^\]]+\])*\.(?:\s*\[[^\]]+\])*)\s+/);   // '…입니다 [출처]. 다음' 형태도
-  // 마침표 뒤에 붙은 출처 태그('…습니다. [출처]')는 앞 문장 것 — 다음 조각 앞머리에서 떼어 앞으로 돌려보낸다
-  for (let i = 1; i < sents.length; i++) {
-    const m = sents[i].match(/^(\s*\[[^\]]+\])+/);
-    if (m) { sents[i - 1] += m[0]; sents[i] = sents[i].slice(m[0].length).trim(); }
-  }
-  for (let i = sents.length - 1; i > 0; i--) if (!sents[i]) sents.splice(i, 1);
-  const out = [];
-  for (let i = 0; i < sents.length; i += 2) out.push(sents.slice(i, i + 2).join(' '));
-  return out.map(x => `<p>${briefText(x)}</p>`).join('');
-}
-
-function renderBriefing(b, grade, bc, item) {
-  bc = bc || {};
-  const sec = document.getElementById('brief-section');
-  const ai = document.getElementById('ai-section-detail');
-  if (!b || !sec) return;
-  sec.style.display = '';
-  briefNotes = [];
-  document.getElementById('brief-headline').textContent = b.headline || '';
-  document.getElementById('brief-date').textContent = b.written_at ? `· ${b.written_at} 작성` : '';
-  const warn = document.getElementById('brief-warn');
-  const note = b.confidence_note || (grade === 'C' ? '자료가 적은 종목이라 이 해설의 신뢰도가 낮습니다. 출처를 직접 확인하세요.' : '');
-  if (note) { warn.style.display = ''; warn.innerHTML = briefText(note); }
-
-  const blk = (id, title, html, cls = '') => html ? `<section class="brief-blk ${cls}" id="bk-${id}"><h3>${title}</h3>${html}</section>` : '';
-  const list = (arr, f) => (arr || []).map(f).join('');
-  document.getElementById('brief-body').innerHTML = [
-    blk('biz', '무슨 회사인가', b.business && briefParas(b.business)),
-    blk('price', '주가는 어떻게 왔나', b.price_story && briefParas(b.price_story)),
-    blk('bull', '매수 이유', list(bc.bull, (x, i) =>
-      `<div class="brief-item bull"><h4><span class="num">${i + 1}</span>${escapeHtml(x.title || '')}</h4>${briefParas(x.body)}</div>`)),
-    blk('why', '왜 싸졌나 — 반대 이유', list(b.why_cheap, (x, i) =>
-      `<div class="brief-item"><h4><span class="num">${i + 1}</span>${escapeHtml(x.title || '')}</h4>${briefParas(x.body)}</div>`)),
-    blk('mis', '시장이 틀렸을 수 있는 지점', bc.market_mispricing?.point ? `
-      <div class="brief-mis dir-${(bc.market_mispricing.direction || 'NONE').toLowerCase()}">
-        <span class="mis-dir">${{UNDER: '시장이 과소평가', OVER: '시장이 과대평가', NONE: '틀렸다고 볼 근거 없음'}[bc.market_mispricing.direction] || ''}</span>
-        <p class="mis-point">${briefText(bc.market_mispricing.point)}</p>
-        ${(bc.market_mispricing.evidence || []).map(e => `<p class="mis-ev">${briefText(e)}</p>`).join('')}
-        ${bc.market_mispricing.if_right ? `<p class="mis-if"><b>맞다면</b> ${briefText(bc.market_mispricing.if_right)}</p>` : ''}
-      </div>` : ''),
-    blk('qa', '"그런데 ~ 아닌가요?"', list(b.qa, x =>
-      `<div class="brief-qa"><p class="q">${escapeHtml(x.q || '')}</p><div class="a">${briefParas(x.a)}</div></div>`)),
-    blk('priced', '지금 가격이 가정하는 것', b.priced_in && briefParas(b.priced_in)),
-    blk('trap', '함정 점검 — 숫자로 안 잡히는 것', bc.trap?.level ? `
-      <div class="brief-trap lv-${bc.trap.level.toLowerCase()}">
-        <span class="trap-lv">${{SEVERE: '함정 확인 — 순위 크게 감점', WATCH: '주의 — 소폭 감점', NONE: '해당 없음'}[bc.trap.level]}</span>
-        ${(bc.trap.flags || []).map(f => `<span class="trap-flag">${{ONE_OFF_EARNINGS: '일회성 이익', ACCOUNTING: '회계', STRUCTURAL_BREAK: '구조 변화', GOVERNANCE: '지배구조', BALANCE_SHEET: '재무 체력'}[f] || f}</span>`).join('')}
-        ${briefParas(bc.trap.reason)}
-      </div>` : ''),
-    blk('watch', '다음에 볼 것', b.watch?.length ? `<div class="brief-watch">${list(b.watch, w => `
-      <div class="w-row">
-        <div class="w-head"><b>${briefText(w.what)}</b><span>${escapeHtml(w.when || '')}</span></div>
-        <div class="w-sig good"><em>좋은 신호</em>${briefText(w.good)}</div>
-        <div class="w-sig bad"><em>나쁜 신호</em>${briefText(w.bad)}</div>
-      </div>`)}</div>` : ''),
-    bc.sharp_question ? `<section class="brief-blk brief-sharp" id="bk-sharp"><h3>이 투자 논리를 흔드는 질문</h3><p>${briefText(bc.sharp_question)}</p></section>` : '',
-  ].join('');
-
-  // 옆 칸: 30초 요약 — 왜 싸졌나 제목 + 시장이 맞다면 (반론을 결론만큼 크게)
-  document.getElementById('brief-aside').innerHTML = `
-    ${item?.ai_rank ? `<div class="aside-box rank"><p class="aside-lbl">매수 매력 ${item.ai_rank}위 / 30</p>${rankDetail(item)}</div>` : ''}
-    ${bc.bull?.length ? `<div class="aside-box"><p class="aside-lbl">매수 이유 — 요약</p><ol>${list(bc.bull, x => `<li><a href="#bk-bull">${escapeHtml(x.title || '')}</a></li>`)}</ol></div>` : ''}
-    ${b.why_cheap?.length ? `<div class="aside-box"><p class="aside-lbl">반대 이유 — 요약</p><ol>${list(b.why_cheap, x => `<li><a href="#bk-why">${escapeHtml(x.title || '')}</a></li>`)}</ol></div>` : ''}
-    ${b.if_market_right ? `<div class="aside-box bear"><p class="aside-lbl">시장이 맞다면</p>${briefParas(b.if_market_right)}</div>` : ''}`;
-
-  const src = document.getElementById('brief-sources');
-  src.innerHTML = briefNotes.length ? `<summary>출처 ${briefNotes.length}개</summary><ol>${briefNotes.map(n => `<li>${n}</li>`).join('')}</ol>` : '';
-
-  // 기존 분석 원문은 접어 둔다 — 같은 이야기를 두 번 읽지 않게
-  const btn = document.getElementById('brief-more');
-  ai.classList.add('ai-collapsed');
-  btn.onclick = () => {
-    const open = !ai.classList.toggle('ai-collapsed');
-    btn.setAttribute('aria-expanded', open);
-    btn.textContent = open ? '근거 접기' : '근거 자세히 보기 — AI 분석 원문 · 출처 전체';
-    if (open) ai.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-}
-
-function renderBriefPrice() {
-  const el = document.getElementById('brief-price');
-  if (!el || !dataset || dataset._source !== 'daily') return;
-  // 시총 비례 수정주가 — 원주가는 분할·무상증자 때 계단이 생겨 '고점 대비'가 부풀려진다
-  const raw = dataset.dates.map((d, i) => [d, dataset.close[i], dataset.market_cap[i]]).filter(x => x[1] && x[2]);
-  if (!raw.length) return;
-  const [lastD, last, lastM] = raw[raw.length - 1];
-  const pts = raw.map(([d, , m]) => [d, m * last / lastM]);
-  const stat = (years) => {
-    const cut = new Date(lastD); cut.setFullYear(cut.getFullYear() - years);
-    const w = pts.filter(x => new Date(x[0]) >= cut);
-    const hi = w.reduce((a, b) => (b[1] > a[1] ? b : a));
-    return { hi, from: last / hi[1] - 1, chg: last / w[0][1] - 1 };
-  };
-  const pct = (v) => `${v >= 0 ? '+' : ''}${(v * 100).toFixed(0)}%`;
-  const won = (v) => `${Math.round(v).toLocaleString('ko-KR')}원`;
-  const y1 = stat(1), y3 = stat(3);
-  const per = lastNonNull(dataset.per)?.val, pbr = lastNonNull(dataset.pbr)?.val;
-  el.innerHTML = [
-    ['현재가', won(last), lastD],
-    ['1년 고점 대비', pct(y1.from), `수정 고점 ${won(y1.hi[1])} · ${y1.hi[0]}`],
-    ['1년 수익률', pct(y1.chg), '1년 전 종가 대비'],
-    ['3년 고점 대비', pct(y3.from), `수정 고점 ${won(y3.hi[1])} · ${y3.hi[0]}`],
-    ['PER · PBR', `${per != null ? per.toFixed(1) : '—'} · ${pbr != null ? pbr.toFixed(2) : '—'}`, 'TTM 지배주주 기준'],
-  ].map(([k, v, s]) => `<div class="bp"><span class="bp-k">${k}</span><b class="bp-v${String(v).startsWith('-') ? ' neg' : ''}">${v}</b><span class="bp-s">${s}</span></div>`).join('');
-}
-
-// 순위 계산식을 그대로 보여준다 — (주주이익 수익률 + 재평가 수익) × 확실성, 좋은 사업 6관문
-const RANK_CHECKS = ['ROE 평균 ≥8%', '현금흐름/순이익 ≥0.7', '이자보상 ≥2배', '순이익률 평균 ≥5%', 'FCF 적자 연도 ≤2 (5년)', '주식 수 증가 ≤20%'];
-const PREM_TXT = { INTACT: '과거 프리미엄의 이유 유효 → 과거 배수로', WEAKENED: '이유 약해짐 → 과거와 시장의 중간(기하평균)', NO_HISTORY: '비교할 과거 이력 없음 → 시장 평균 배수', GONE: '이유 사라짐 → 시장 평균 배수로' };
-function rankDetail(item) {
-  const d = item.rank_detail;
-  if (!d || d.er == null) return `<p>${briefText(item.rerank_reason || '')}</p>`;
-  const pct = (v, s = false) => v == null ? '—' : `${s && v >= 0 ? '+' : ''}${(v * 100).toFixed(1)}%`;
-  const fmt = [(v) => pct(v), (v) => v.toFixed(2), (v) => v >= 99 ? '이자 부담 없음' : `${v.toFixed(1)}배`, (v) => pct(v),
-               (v) => `${v}개 해`, (v) => `${v >= 0 ? '+' : ''}${(v * 100).toFixed(0)}%`];
-  const rows = RANK_CHECKS.map((name, i) => {
-    const ok = d.checks?.[i], v = d.check_vals?.[i];
-    return `<li class="${ok === false ? 'no' : ok ? 'ok' : 'na'}"><span>${ok === false ? '✕' : ok ? '✓' : '–'}</span>${name}<em>${v == null ? '자료 없음' : fmt[i](v)}</em></li>`;
-  }).join('');
-  return `<p class="rank-formula">기대 수익 <b>연 ${pct(d.er, true)}</b> = 주주이익 수익률 <b>${pct(d.owner_yield)}</b> + 재평가 <b>${pct(d.rerate, true)}</b><br>× 확실성 <b>${d.certainty}</b></p>
-    ${d.target_per ? `<p class="aside-sub">재평가</p><p class="rank-line">${PREM_TXT[d.premium] || ''}<br>목표 PER <b>${d.target_per}</b> · 지금 ${d.cur_per_reval ?? '—'} (정상화 이익 기준)</p>` : ''}
-    <p class="aside-sub">이익률</p><p class="rank-line">${(d.margin_used * 100).toFixed(1)}% — ${escapeHtml(d.margin_note || '')}</p>
-    <p class="aside-sub">좋은 사업 점검 ${d.good_business}${d.payout != null ? ` · 배당성향 ${(d.payout * 100).toFixed(0)}%` : ''}</p><ul class="rank-checks">${rows}</ul>
-    ${d.overhang_pct ? `<p class="aside-sub">메자닌 오버행</p><p class="rank-line">전환가가 주가 근처인 CB·BW·EB 가 주식의 최대 <b>${d.overhang_pct}%</b> (DART 발행결정 기준 상한)</p>` : ''}`;
 }
 
 function natLabel(n) {
@@ -528,9 +343,7 @@ async function loadFromMatrix(code) {
       .concat(universe?.excluded?.reit || [], universe?.excluded?.spac || [],
               universe?.excluded?.no_forward_per || [], universe?.excluded?.no_target_price || [],
               universe?.excluded?.adverse || [], universe?.excluded?.short_history || [],
-              universe?.excluded?.no_data || [], universe?.excluded?.validation_adverse || [],
-              universe?.excluded?.validation_short || [], universe?.excluded?.validation_nodata || [],
-              universe?.excluded?.no_fy1_eps || [])
+              universe?.excluded?.no_data || [])
       .find(s => s.code === code);
     const screenStock = (screen?.all_ranked || []).find(s => s.code === code);
 
@@ -750,7 +563,7 @@ function renderSummary() {
   };
   const fwd = dataset.forward || {};
   const fwdMap = { per: fwd.per_forward, pbr: fwd.pbr_forward };
-  const fwdYearShort = String(fwd.year_estimate || '').includes('E') ? fwd.year_estimate : ((fwd.year_estimate || '').split('/')[0] + 'E');
+  const fwdYearShort = (fwd.year_estimate || '').split('/')[0] || '';
 
   for (const m of ['per', 'pbr', 'market_cap', 'close']) {
     if (!hasAnyData(m)) continue;
@@ -763,7 +576,7 @@ function renderSummary() {
     const zCls = z >= 0 ? 'z-pos' : 'z-neg';
     const sign = z >= 0 ? '+' : '';
     const fwdRow = (m === 'per' || m === 'pbr') && fwdMap[m] != null
-      ? `<span>Fwd ${fwdYearShort}</span><span style="color:#dc2626;font-weight:600">${fmt(fwdMap[m])}</span>`
+      ? `<span>Fwd ${fwdYearShort}E</span><span style="color:#dc2626;font-weight:600">${fmt(fwdMap[m])}</span>`
       : '';
     blocks.push(`
       <div class="stat-block">
@@ -790,12 +603,13 @@ function renderSummary() {
     const upsideStr = upside == null ? '—' : `${upside >= 0 ? '+' : ''}${upside.toFixed(1)}%`;
     blocks.push(`
       <div class="stat-block">
-        <div class="stat-label">증권사 목표가 (${cs.broker_count || brokers.length}곳 · 점수 미반영)</div>
+        <div class="stat-label">증권사 컨센서스 (${cs.broker_count || brokers.length}곳)</div>
         <div class="stat-val">${fmt(tgt)}원</div>
         <div class="stat-grid">
           <span>현재가 대비</span><span class="${upsideCls}">${upsideStr}</span>
-          ${cs.avg_per_forward != null ? `<span>Fwd PER</span><span>${fmt(cs.avg_per_forward)}</span>` : ''}
-          ${cs.avg_eps_forward != null ? `<span>Fwd EPS</span><span>${fmt(cs.avg_eps_forward)}</span>` : ''}
+          <span>Fwd PER</span><span>${fmt(cs.avg_per_forward)}</span>
+          <span>Fwd EPS</span><span>${fmt(cs.avg_eps_forward)}</span>
+          <span>점수</span><span>${cs.consensus_score ?? '—'}</span>
         </div>
       </div>`);
   }

@@ -7,25 +7,6 @@ model: sonnet
 
 당신은 Triple Cross Top 20 종목의 **펀더멘털 + 모멘텀** 분석 서브에이전트입니다.
 
-
-## 0. 자료 묶음을 먼저 읽는다 (2026-11-23 — WebSearch보다 먼저)
-
-`data/research/{code}.json`을 **반드시 먼저 Read** 한다 (`scripts/build_research_pack.py`가 만든 공식 출처 묶음).
-
-| 키 | 내용 | 출처 태그 |
-|---|---|---|
-| `dart` | 최근 1년 주요사항보고·거래소공시 (공급계약·자사주·배당·잠정실적·밸류업·증자…) | `[출처: DART · YYYY-MM-DD]` |
-| `reports` | 최근 6개월 증권사 리포트 (증권사·목표가·본문 앞부분) | `[출처: 리포트 · {증권사} · YYYY-MM]` |
-| `news` | 최근 3개월 네이버 뉴스 (언론사·날짜) | `[출처: 뉴스 · {언론사} · YYYY-MM]` |
-| `telegram` | 최근 3개월 증권 텔레그램 채널 언급 — **단서일 뿐**, 다른 출처로 확인되지 않으면 근거로 쓰지 않는다 | `[출처: 텔레그램 · YYYY-MM]` |
-| `revisions` | FnGuide 당해 추정치 현재·1·3·6개월·1년 전 | `[정량]` |
-
-- 이 환경의 WebSearch는 미국 중심이라 한국 중소형주에 약하다. **WebSearch는 묶음에 없는 것(업황·글로벌 가격·해외 경쟁사)만 보충**한다.
-- 공시는 가장 강한 근거다 — 공급계약·자사주 소각·잠정실적은 날짜와 금액이 확정돼 있어 `verifiable_by`가 곧 공시일이다.
-- 묶음 파일이 없거나 `counts`가 전부 0이면 출력 맨 앞에 `"pack_missing": true`를 적는다 (조용히 WebSearch만으로 채우지 말 것).
-
-**정보량 등급** (`reports` 건수 기준): **A** 6건 이상 — 컨센서스를 되풀이하지 말고 **반대 관점**을 찾는다 / **B** 2~5건 — 수치마다 출처를 붙이고 불확실성을 적는다 / **C** 0~1건 — 리포트를 채우려 하지 말고 핵심 질문 2~3개에 집중한다. 자료가 많다고 확실한 게 아니고, 적다고 불확실한 것도 아니다. 출력에 `"info_grade": "A|B|C"`를 넣는다.
-
 ## 역할
 
 universe(303종목) 정량 시그널을 통과한 종목에 대해 다음 두 측면을 동시에 분석:
@@ -55,24 +36,9 @@ universe(303종목) 정량 시그널을 통과한 종목에 대해 다음 두 �
     "s3_per_raw": ..., "s3_per_z": ...,
     "upside_raw": ..., "upside_z": ...
   },
-  "scores": { "value_score": ..., "growth_score": ..., "total_score": ... },
-  "expectations": {
-    "implied_fade": ..., "implied_vs_ttm": ..., "midcycle_vs_ttm": ...,
-    "opm_ttm": ..., "opm_med5y": ..., "cyclical_flag": true|false
-  }
+  "scores": { "value_score": ..., "growth_score": ..., "total_score": ... }
 }
 ```
-
-> 2026-11-23 v6: `growth_score`/`s3_per`는 이제 **전망(outlook)** = 1 − Forward PER ÷ 5년 PER 중앙값이다. `upside`(목표가 괴리)는 점수에서 빠졌다 — 근거로 쓰지 말 것.
-
-**`expectations` — 가격이 깔고 있는 가정 [정량]** (`triple_cross.json`이 계산해 둔 값. 직접 계산하지 말 것)
-
-| 필드 | 뜻 | 읽는 법 |
-|---|---|---|
-| `implied_fade` | (시총 ÷ 5년 PER 중앙값) ÷ 컨센서스 Forward 이익 | **평소 PER을 받으려면 필요한 이익이 컨센서스의 몇 배인가.** 0.2면 "시장은 이익이 컨센서스의 1/5로 줄어든다고 가격을 매김" |
-| `implied_vs_ttm` | 같은 값 ÷ 최근 4분기 이익 | 지금 이익 대비 |
-| `midcycle_vs_ttm` | (5년 영업이익률 중앙값 × 현재 매출) ÷ 현재 영업이익 | 1보다 작으면 **지금 마진이 평소보다 높다** (정점일 수 있음) |
-| `cyclical_flag` | 최근 20분기 영업이익률이 적자를 오갔거나 최고/최저 ≥3배, 또는 현재가 중앙값의 2배 이상 | 참이면 **경기 정점 의심** — 낮은 PER이 기회가 아니라 경고일 수 있다 (Lynch) |
 
 **추가 데이터 (있으면 Read)**: `data/financials/{code}.json` — OpenDART 공식 재무. 매출·영업이익·순이익·**영업이익률** 5~6년 추이 + 최근분기. `undervaluation_cause.nature` 판정의 객관 근거로 사용 (Step 1 참조). 파일이 없으면 WebSearch만으로 판정.
 
@@ -93,24 +59,6 @@ universe(303종목) 정량 시그널을 통과한 종목에 대해 다음 두 �
 | **THESIS_DRIVER** | 구조적 성장 드라이버 (M/S 확대·신사업 본격화·산업 사이클·해외 침투) | `[출처: WebSearch · {YYYY-MM}]` |
 | **RECENT_EARNINGS** | 최근 분기 실적·가이던스 변화 | `[출처: WebSearch · {YYYY-MM}]` |
 | **UNDERVALUATION_CAUSE** | **왜 시장이 이 종목을 싸게 보는가** — 저평가의 직접 원인 (필수 1개). 그 원인이 *일시적*(단기 비용·일정 지연·센티먼트 위축)인지 *구조적*(점유율 잠식·산업 사양화·추세적 가이던스 하향)인지 한 단어로 분류 첨부 | `[출처: WebSearch · {YYYY-MM}]` |
-
-#### 원인 분류 `cause_type` (필수 — 주원인 1개, 부원인 0~1개)
-
-질문은 "일시적이냐 구조적이냐"가 아니라 **"이 가격에는 이익이 어떻게 된다는 가정이 들어 있고, 왜 시장이 그렇게 보는가"**다 (Mauboussin 역산·Marks 2차적 사고). 아래에서 고른다.
-
-| cause_type | 데이터 신호 | 무엇을 검색하나 |
-|---|---|---|
-| `CYCLICAL_PEAK` | `cyclical_flag`, `midcycle_vs_ttm` < 0.7, Forward PER ≪ 5년 PER | 이 이익이 **언제까지** 가나 — 업황 정점, 업계 증설, 재고, 가격 |
-| `STRUCTURAL_DECLINE` | 영업이익률·매출 수년 하락 | 점유율 잠식, 대체 기술, 산업 사양화 |
-| `TEMPORARY_SHOCK` | 마진은 안정인데 1~2분기만 부진 | 일회성 비용·일정 지연의 정점 통과 여부 |
-| `ONE_OFF_ACCOUNTING` | 순이익률과 영업이익률 괴리, 손상차손 | 일회성 항목 내역 |
-| `GOVERNANCE_DISCOUNT` | PBR<1, 낮은 배당성향, 지주사·중복상장 | 밸류업 공시, 자사주 소각, 배당정책 |
-| `NEGLECT` | 커버 증권사 < 3, 거래대금 작음 | 커버리지 개시, 지수 편입 |
-| `REGULATORY_MACRO` | 정책·환율·금리 노출 | 정책 일정, 시행·철회 |
-| `BALANCE_SHEET_TRAP` | 부채 증가, 이자보상배율 하락, 증자 이력 | 차입 상환·자산 매각·증자 계획 |
-
-- **`cyclical_flag`가 참이면** 아래 쿼리를 반드시 포함한다: `{종목명} 피크아웃`, `{업종} 증설 사이클`, `{업종} 재고`, `{업종} 업황 전망 {내후년}`. 삼성전자형(이익 급증 + PER 급락)은 "싸다"가 아니라 "이 이익이 내후년 이후에도 이어지나"가 핵심 질문이다.
-- `implied_expectations`에 `expectations` 수치를 **문장으로만** 해석한다. 새 수치를 만들지 않는다. 예: "평소 PER(12.9배) 기준이면 필요한 이익이 컨센서스의 0.18배 — 시장은 이익의 대폭 축소를 가격에 반영 [정량]".
 
 규칙:
 - 카테고리 다양화 권장: 단기 촉매 1-2 + 구조적 드라이버 1-2 + 최근 실적 1
@@ -170,10 +118,7 @@ universe(303종목) 정량 시그널을 통과한 종목에 대해 다음 두 �
   ],
   "undervaluation_cause": {
     "text": "왜 시장이 이 종목을 싸게 보는가 — 2~3문장 (180~260자) [출처: WebSearch · YYYY-MM]",
-    "cause_type": "CYCLICAL_PEAK | STRUCTURAL_DECLINE | TEMPORARY_SHOCK | ONE_OFF_ACCOUNTING | GOVERNANCE_DISCOUNT | NEGLECT | REGULATORY_MACRO | BALANCE_SHEET_TRAP",
-    "cause_type_secondary": "위 중 하나 또는 null",
-    "implied_expectations": "expectations 수치를 문장으로 해석 (새 수치 금지) [정량]",
-    "nature": "TEMPORARY | STRUCTURAL   (UI 호환용 잠정 라벨 — resolution-scout가 확정)"
+    "nature": "TEMPORARY | STRUCTURAL"
   },
   "evidence_strength": "STRONG | MODERATE | WEAK"
 }

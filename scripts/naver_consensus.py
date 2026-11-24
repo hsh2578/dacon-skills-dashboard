@@ -164,23 +164,6 @@ def fetch_naver_data(code: str) -> Dict:
         except Exception:
             pass
 
-    # 요약 표가 비었는데 증권사별 표는 살아 있는 경우 (2026-11-24 실측: 요약은 "최근3개월 이내에 제시된
-    # 의견이 없습니다", 바로 아래 표엔 11월 목표가 14건 — 스로틀 때 요약만 비는 증상). 최근 92일 목표가 평균으로 대신한다.
-    summ = out["consensus"]["summary"]
-    if not summ.get("avg_target_price") and out["consensus"]["brokers"]:
-        from datetime import datetime, timedelta
-        cut = datetime.now() - timedelta(days=92)
-        recent = []
-        for b in out["consensus"]["brokers"]:
-            try:
-                if datetime.strptime(b["date"], "%y/%m/%d") >= cut:
-                    recent.append(b["target_price"])
-            except ValueError:
-                continue
-        if recent:
-            summ.update({"avg_target_price": int(sum(recent) / len(recent)), "broker_count": len(recent),
-                         "target_source": "brokers_92d"})
-
     return out
 
 

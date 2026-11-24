@@ -2,7 +2,7 @@
   "code": "214450",
   "corp_code": "00970453",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:13:47",
+  "fetched_at": "2026-06-18T16:39:21",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 496347154830,
-    "op_income": 186389299055,
-    "op_margin": 0.3755,
-    "net_income": 135210012408,
-    "net_margin": 0.2724,
+    "period": "2026-1Q(누적)",
+    "revenue": 146100260508,
+    "op_income": 57292342573,
+    "op_margin": 0.3921,
+    "net_income": 48748490607,
+    "net_margin": 0.3337,
     "fs_div": "CFS"
   }
 }

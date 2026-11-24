@@ -2,7 +2,7 @@
   "code": "044490",
   "corp_code": "00186799",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:16:57",
+  "fetched_at": "2026-06-18T16:43:32",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 281237995568,
-    "op_income": -2288445918,
-    "op_margin": -0.0081,
-    "net_income": -7342229947,
-    "net_margin": -0.0261,
+    "period": "2026-1Q(누적)",
+    "revenue": 88266192736,
+    "op_income": 2792171225,
+    "op_margin": 0.0316,
+    "net_income": 4248669702,
+    "net_margin": 0.0481,
     "fs_div": "OFS"
   }
 }

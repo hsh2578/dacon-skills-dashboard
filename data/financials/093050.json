@@ -2,7 +2,7 @@
   "code": "093050",
   "corp_code": "00593032",
   "source": "OpenDART",
-  "fetched_at": "2026-11-23T22:15:28",
+  "fetched_at": "2026-06-18T16:45:16",
   "unit": "원",
   "annual": [
     {
@@ -61,12 +61,12 @@
     }
   ],
   "latest_quarter": {
-    "period": "2026-3Q(누적)",
-    "revenue": 1356424040153,
-    "op_income": 139547630505,
-    "op_margin": 0.1029,
-    "net_income": 100370356891,
-    "net_margin": 0.074,
+    "period": "2026-1Q(누적)",
+    "revenue": 461914239756,
+    "op_income": 44404244301,
+    "op_margin": 0.0961,
+    "net_income": 31632972869,
+    "net_margin": 0.0685,
     "fs_div": "CFS"
   }
 }
