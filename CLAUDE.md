@@ -228,12 +228,12 @@ AI 정성 분석은 Agent 도구로 종목 10개 동시 발사 (`subagent_type=g
 - `git config user.name`/`user.email` **미설정**. 사용자가 직접 한 번 설정하는 게 편함:
   ```bash
   git config --local user.name "hsh2578"
-  git config --local user.email "hsh2578111@gmail.com"
+  git config --local user.email "78069104+hsh2578@users.noreply.github.com"
   ```
 - 위 설정 전까지는 instruction "NEVER update the git config" 준수를 위해 환경변수 우회:
   ```bash
-  GIT_AUTHOR_NAME="hsh2578" GIT_AUTHOR_EMAIL="hsh2578111@gmail.com" \
-  GIT_COMMITTER_NAME="hsh2578" GIT_COMMITTER_EMAIL="hsh2578111@gmail.com" \
+  GIT_AUTHOR_NAME="hsh2578" GIT_AUTHOR_EMAIL="78069104+hsh2578@users.noreply.github.com" \
+  GIT_COMMITTER_NAME="hsh2578" GIT_COMMITTER_EMAIL="78069104+hsh2578@users.noreply.github.com" \
   git commit -m "..."
   ```
 
