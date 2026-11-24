@@ -78,6 +78,12 @@ python scripts/ai_stage.py apply-rank     # ai_rank 반영 + 판단 기록(data/
 python scripts/judgments.py grade         # 지난 판단 채점 (1·3·6·12개월 도래분)
 ```
 
+### 2-2b. 매수 전 점검 (buy-check — 순위의 함정 감점이 여기서 나온다)
+
+`analyze` 종목만 (재사용 종목은 직전 점검이 ai_notes 에 따라온다). 브리핑과 같은 에이전트에 이어서 시켜도 된다:
+`.claude/agents/buy-check.md 정독 후 그대로. 대상 {코드}. _ai/{코드}.json 에 ai_notes.buy_check 만 추가.`
+점검까지 끝난 뒤 merge → `rank_ai.py` → apply-rank 순서로 돌린다 (trap.level 이 점수에 들어간다).
+
 ### 2-3. 종목 브리핑 (사람이 읽는 해설)
 
 `analyze` 종목만 (재사용 종목은 직전 브리핑이 ai_notes 에 따라온다). Agent(`general-purpose`) 최대 10개 동시, 프롬프트:

@@ -293,6 +293,7 @@ async function loadTripleCross() {
             <span class="card-nat">${natTxt}</span>
           </div>
           ${c.cyclical_flag ? `<div class="card-cyc" title="최근 20분기 영업이익률이 크게 출렁였거나 지금이 평소의 2배 이상 — 낮은 PER이 이익 정점 때문일 수 있음">이익 정점 의심</div>` : ''}
+          ${(() => { const tl = ai?.buy_check?.trap?.level; return tl === 'SEVERE' ? '<div class="card-trap sev">함정 확인</div>' : tl === 'WATCH' ? '<div class="card-trap">함정 주의</div>' : ''; })()}
           <div class="card-name">${c.name}</div>
           <div class="card-code">${c.code} · ${c.market || 'KR'}</div>
           <div class="card-price">${fmtPrice(c.current_price)}</div>

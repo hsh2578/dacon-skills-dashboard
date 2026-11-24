@@ -11,8 +11,10 @@ AI 는 종목별 판정(expectation_gap·verdict·confidence·risk_level)만 내
       (+만) 1-2Q +.5 · 1년+/불명 −.5 · 반증 수 ≥ 근거 수 −.5
   3 실적 = DART 지배 TTM 영업이익 전년 대비 (예상치가 아니라 발표된 숫자)
       ≥+30% +1.5 · +10~30% +.75 · ±10% 0 · ≤−10% −1.5 · 적자→흑자 +1.5 · 적자 −1.5
-      이익 정점 의심(cyclical_flag · midcycle_vs_ttm<0.7)이면 0 이하로 — 단 가격 판정이 TOO_PESSIMISTIC 면 예외
-  4 risk_level  LOW +.5 · HIGH −.5
+  4 퀄리티 점수(유니버스 순위 0~1) → (q−.5)×3 = ±1.5   ┐ 백테스트로 확인된 두 가지 (backtest_signals.py)
+  5 영업이익률 ÷ 자기 5년 중앙  ≥1.2 +.75 · ≤0.8 −.75   ┘ (옛 '이익 정점이면 가점 제외'는 데이터와 반대라 삭제)
+  6 함정 점검 (buy-check 에이전트 trap.level)  SEVERE −3 · WATCH −.75
+  7 risk_level  LOW +.5 · HIGH −.5
   동점 → 정량 순위
 
     python scripts/rank_ai.py      # ai_notes.json + triple_cross.json + financials_q → data/screens/_ranking.json
@@ -32,6 +34,9 @@ GAP = {"TOO_PESSIMISTIC": 4, "FAIR": 0, "NOT_PESSIMISTIC_ENOUGH": -4}   # 한 �
 CONF = {"HIGH": 1, "MEDIUM": 0.75, "LOW": 0.5}
 VERDICT = {"RESOLVING": 2, "EARLY_SIGNS": 1, "NO_EVIDENCE": -1.5, "WORSENING": -2.5}
 RISK = {"LOW": 0.5, "MEDIUM": 0, "HIGH": -0.5}
+TRAP = {"SEVERE": -3, "WATCH": -0.75, "NONE": 0}
+TRAP_KR = {"ONE_OFF_EARNINGS": "일회성 이익", "ACCOUNTING": "회계", "STRUCTURAL_BREAK": "구조 변화",
+           "GOVERNANCE": "지배구조", "BALANCE_SHEET": "재무 체력"}
 GAP_KR = {"TOO_PESSIMISTIC": "가격이 과도하게 비관", "FAIR": "가격이 전망 반영", "NOT_PESSIMISTIC_ENOUGH": "함정 경계"}
 VERDICT_KR = {"RESOLVING": "해소 진행", "EARLY_SIGNS": "해소 초기 신호", "NO_EVIDENCE": "해소 근거 없음", "WORSENING": "원인 악화"}
 
@@ -74,18 +79,25 @@ def score(ai, q, oi):
         if len(r.get("counter_evidence") or []) >= len(r.get("evidence") or []):
             res -= 0.5
     b["2_resolution"] = res
-    e = earnings_pts(*oi)
-    peak = bool(q.get("cyclical_flag")) and (q.get("midcycle_vs_ttm") or 1) < 0.7
-    if peak and gap != "TOO_PESSIMISTIC":
-        e = min(e, 0.0)
-    b["3_earnings"] = e
-    b["4_risk"] = RISK.get(ai.get("risk_level"), 0)
+    b["3_earnings"] = earnings_pts(*oi)
+    # 백테스트(backtest_signals.py, 싼 종목 안 43개월): 퀄리티 IC +0.054(t 3.9) · 이익률/자기 중앙 +0.034(t 2.8).
+    # 그래서 옛 '이익 정점이면 실적 가점 제외'는 뺐다 — 과거엔 이익률이 평소보다 높은 싼 종목이 오히려 더 올랐다.
+    qs = q.get("quality_score")
+    b["4_quality"] = round((qs - 0.5) * 3, 2) if qs is not None else 0.0
+    ot, om = q.get("opm_ttm"), q.get("opm_med5y")
+    ratio = ot / om if (ot is not None and om and om > 0) else None
+    b["5_margin"] = 0.75 if (ratio and ratio >= 1.2) else -0.75 if (ratio is not None and ratio <= 0.8) else 0.0
+    trap = ((ai.get("buy_check") or {}).get("trap") or {})
+    b["6_trap"] = TRAP.get(trap.get("level"), 0)
+    b["7_risk"] = RISK.get(ai.get("risk_level"), 0)
     total = round(sum(b.values()), 2)
     yoy = oi[0]
     parts = [GAP_KR.get(gap, "판정 없음"), VERDICT_KR.get(v, "해소 판정 없음") + (f"({r.get('expected_window')})" if res > 0 and r.get("expected_window") else ""),
              "영업이익(4분기 합) " + (f"{yoy:+.0%}" if yoy is not None else ("적자" if (oi[1] or 0) <= 0 and oi[1] is not None else "흑자전환" if oi[1] else "자료 없음")) + " [출처: DART]"]
-    if peak:
-        parts.append("이익 정점 의심" + (" — 가격 판정으로 예외" if gap == "TOO_PESSIMISTIC" else " — 실적 가점 제외") + " [정량]")
+    if qs is not None:
+        parts.append(f"퀄리티 상위 {100 - round(qs * 100)}%" if qs >= 0.5 else f"퀄리티 하위 {round(qs * 100)}%")
+    if trap.get("level") in ("SEVERE", "WATCH"):
+        parts.append(("함정 확인" if trap["level"] == "SEVERE" else "함정 주의") + "(" + ",".join(TRAP_KR.get(f, f) for f in trap.get("flags") or []) + ")")
     return total, b, " · ".join(parts)
 
 
@@ -103,7 +115,7 @@ def main():
     for i, x in enumerate(rows, 1):
         x["ai_rank"] = i
     out = {"ranking": rows, "ranked_at": date.today().isoformat(),
-           "basis": "scripts/rank_ai.py — 가격 판정(×확신도) > 해소 근거 > DART TTM 영업이익 YoY > 리스크. AI 는 판정만, 합산은 코드"}
+           "basis": "매수 매력 순위 — scripts/rank_ai.py: 가격 판정(×확신도) · 해소 근거 · DART TTM 영업이익 YoY · 퀄리티 · 이익률 수준 · 함정 점검 · 리스크. AI 는 판정만, 합산은 코드"}
     (SC / "_ranking.json").write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     names = {i["code"]: i["name"] for i in notes}
     for x in rows:

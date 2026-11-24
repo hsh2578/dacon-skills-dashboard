@@ -177,7 +177,7 @@ async function loadAiNotes() {
     }
     const ai = item.ai_notes;
     sectionEl.style.display = '';
-    renderBriefing(ai.briefing, ai.info_grade || ai.resolution?.info_grade);
+    renderBriefing(ai.briefing, ai.info_grade || ai.resolution?.info_grade, ai.buy_check, item);
 
     document.getElementById('ai-detail-oneliner').textContent = ai.one_liner || '';
 
@@ -270,12 +270,19 @@ function briefText(t) {
 // 긴 문단은 두 문장씩 끊는다 — 에이전트가 쓴 4~5문장 덩어리가 벽처럼 읽힌다
 function briefParas(t) {
   const sents = String(t || '').split(/(?<=[다요](?:\s*\[[^\]]+\])*\.(?:\s*\[[^\]]+\])*)\s+/);   // '…입니다 [출처]. 다음' 형태도
+  // 마침표 뒤에 붙은 출처 태그('…습니다. [출처]')는 앞 문장 것 — 다음 조각 앞머리에서 떼어 앞으로 돌려보낸다
+  for (let i = 1; i < sents.length; i++) {
+    const m = sents[i].match(/^(\s*\[[^\]]+\])+/);
+    if (m) { sents[i - 1] += m[0]; sents[i] = sents[i].slice(m[0].length).trim(); }
+  }
+  for (let i = sents.length - 1; i > 0; i--) if (!sents[i]) sents.splice(i, 1);
   const out = [];
   for (let i = 0; i < sents.length; i += 2) out.push(sents.slice(i, i + 2).join(' '));
   return out.map(x => `<p>${briefText(x)}</p>`).join('');
 }
 
-function renderBriefing(b, grade) {
+function renderBriefing(b, grade, bc, item) {
+  bc = bc || {};
   const sec = document.getElementById('brief-section');
   const ai = document.getElementById('ai-section-detail');
   if (!b || !sec) return;
@@ -292,22 +299,40 @@ function renderBriefing(b, grade) {
   document.getElementById('brief-body').innerHTML = [
     blk('biz', '무슨 회사인가', b.business && briefParas(b.business)),
     blk('price', '주가는 어떻게 왔나', b.price_story && briefParas(b.price_story)),
-    blk('why', '왜 싸졌나', list(b.why_cheap, (x, i) =>
+    blk('bull', '매수 이유', list(bc.bull, (x, i) =>
+      `<div class="brief-item bull"><h4><span class="num">${i + 1}</span>${escapeHtml(x.title || '')}</h4>${briefParas(x.body)}</div>`)),
+    blk('why', '왜 싸졌나 — 반대 이유', list(b.why_cheap, (x, i) =>
       `<div class="brief-item"><h4><span class="num">${i + 1}</span>${escapeHtml(x.title || '')}</h4>${briefParas(x.body)}</div>`)),
+    blk('mis', '시장이 틀렸을 수 있는 지점', bc.market_mispricing?.point ? `
+      <div class="brief-mis dir-${(bc.market_mispricing.direction || 'NONE').toLowerCase()}">
+        <span class="mis-dir">${{UNDER: '시장이 과소평가', OVER: '시장이 과대평가', NONE: '틀렸다고 볼 근거 없음'}[bc.market_mispricing.direction] || ''}</span>
+        <p class="mis-point">${briefText(bc.market_mispricing.point)}</p>
+        ${(bc.market_mispricing.evidence || []).map(e => `<p class="mis-ev">${briefText(e)}</p>`).join('')}
+        ${bc.market_mispricing.if_right ? `<p class="mis-if"><b>맞다면</b> ${briefText(bc.market_mispricing.if_right)}</p>` : ''}
+      </div>` : ''),
     blk('qa', '"그런데 ~ 아닌가요?"', list(b.qa, x =>
       `<div class="brief-qa"><p class="q">${escapeHtml(x.q || '')}</p><div class="a">${briefParas(x.a)}</div></div>`)),
     blk('priced', '지금 가격이 가정하는 것', b.priced_in && briefParas(b.priced_in)),
+    blk('trap', '함정 점검 — 숫자로 안 잡히는 것', bc.trap?.level ? `
+      <div class="brief-trap lv-${bc.trap.level.toLowerCase()}">
+        <span class="trap-lv">${{SEVERE: '함정 확인 — 순위 크게 감점', WATCH: '주의 — 소폭 감점', NONE: '해당 없음'}[bc.trap.level]}</span>
+        ${(bc.trap.flags || []).map(f => `<span class="trap-flag">${{ONE_OFF_EARNINGS: '일회성 이익', ACCOUNTING: '회계', STRUCTURAL_BREAK: '구조 변화', GOVERNANCE: '지배구조', BALANCE_SHEET: '재무 체력'}[f] || f}</span>`).join('')}
+        ${briefParas(bc.trap.reason)}
+      </div>` : ''),
     blk('watch', '다음에 볼 것', b.watch?.length ? `<div class="brief-watch">${list(b.watch, w => `
       <div class="w-row">
         <div class="w-head"><b>${briefText(w.what)}</b><span>${escapeHtml(w.when || '')}</span></div>
         <div class="w-sig good"><em>좋은 신호</em>${briefText(w.good)}</div>
         <div class="w-sig bad"><em>나쁜 신호</em>${briefText(w.bad)}</div>
       </div>`)}</div>` : ''),
+    bc.sharp_question ? `<section class="brief-blk brief-sharp" id="bk-sharp"><h3>이 투자 논리를 흔드는 질문</h3><p>${briefText(bc.sharp_question)}</p></section>` : '',
   ].join('');
 
   // 옆 칸: 30초 요약 — 왜 싸졌나 제목 + 시장이 맞다면 (반론을 결론만큼 크게)
   document.getElementById('brief-aside').innerHTML = `
-    ${b.why_cheap?.length ? `<div class="aside-box"><p class="aside-lbl">왜 싸졌나 — 요약</p><ol>${list(b.why_cheap, x => `<li><a href="#bk-why">${escapeHtml(x.title || '')}</a></li>`)}</ol></div>` : ''}
+    ${item?.ai_rank ? `<div class="aside-box rank"><p class="aside-lbl">매수 매력 ${item.ai_rank}위 / 30</p><p>${briefText(item.rerank_reason || '')}</p></div>` : ''}
+    ${bc.bull?.length ? `<div class="aside-box"><p class="aside-lbl">매수 이유 — 요약</p><ol>${list(bc.bull, x => `<li><a href="#bk-bull">${escapeHtml(x.title || '')}</a></li>`)}</ol></div>` : ''}
+    ${b.why_cheap?.length ? `<div class="aside-box"><p class="aside-lbl">반대 이유 — 요약</p><ol>${list(b.why_cheap, x => `<li><a href="#bk-why">${escapeHtml(x.title || '')}</a></li>`)}</ol></div>` : ''}
     ${b.if_market_right ? `<div class="aside-box bear"><p class="aside-lbl">시장이 맞다면</p>${briefParas(b.if_market_right)}</div>` : ''}`;
 
   const src = document.getElementById('brief-sources');

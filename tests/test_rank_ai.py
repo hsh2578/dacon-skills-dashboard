@@ -17,10 +17,12 @@ def test_실적은_발표된_숫자로만():
     assert earnings_pts(None, 5, -1) == 1.5 and earnings_pts(None, -1, 5) == -1.5
 
 
-def test_이익정점은_가격판정이_비관적이지_않을때만_가점_제외():
-    q = {"cyclical_flag": True, "midcycle_vs_ttm": 0.5}
-    assert score(_ai(gap="FAIR"), q, (0.5, 2, 1))[1]["3_earnings"] == 0
-    assert score(_ai(gap="TOO_PESSIMISTIC"), q, (0.5, 2, 1))[1]["3_earnings"] == 1.5
+def test_함정은_크게_감점하고_퀄리티_이익률은_가점():
+    base = score(_ai(), {}, (0, 1, 1))[0]
+    sev = _ai(); sev["buy_check"] = {"trap": {"level": "SEVERE", "flags": ["ACCOUNTING"]}}
+    assert score(sev, {}, (0, 1, 1))[0] == base - 3
+    good = score(_ai(), {"quality_score": 0.9, "opm_ttm": 0.15, "opm_med5y": 0.10}, (0, 1, 1))[1]
+    assert good["4_quality"] == 1.2 and good["5_margin"] == 0.75
 
 
 def test_가격판정이_1순위():
