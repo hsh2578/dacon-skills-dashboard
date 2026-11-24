@@ -90,6 +90,10 @@ def extract(rows, fs, annual):
     return {"ni": ni, "eq": eq, "eps": flow(EPS_IDS),
             "rev": flow(["ifrs-full_Revenue"]) if flow(["ifrs-full_Revenue"]) is not None else flow(["ifrs-full_RevenueFromContractsWithCustomers"]), "oi": flow(["dart_OperatingIncomeLoss"]),
             "ocf": ocf, "assets": stock(["ifrs-full_Assets"]), "fc": flow(["ifrs-full_FinanceCosts"]),
+            # 2026-11-24 매수 매력 순위용: 전체 순이익(→ 지배주주 몫 비율 — 지주회사 연결 이익 과대 방지) · 설비투자(→ FCF)
+            "ni_tot": flow(["ifrs-full_ProfitLoss"]),
+            "fi": flow(["ifrs-full_FinanceIncome"]),   # 금융수익 — 금융비용의 외환·파생 손실과 상계해 순금융비용을 본다
+            "capex": _pick(rows, ["ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities"], "thstrm_amount", ("CF",)),
             "currency": cur}
 
 

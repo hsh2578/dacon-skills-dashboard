@@ -116,8 +116,9 @@ def apply_rank():
         sys.exit(f"[ERROR] ranker 결과에 없는 종목: {miss}")
     for i in doc["items"]:
         i["ai_rank"], i["rerank_reason"] = by[i["code"]]["ai_rank"], by[i["code"]].get("rerank_reason")
+        i["rank_detail"] = by[i["code"]].get("score_breakdown")
     doc["items"].sort(key=lambda i: i["ai_rank"])
-    doc["meta"]["ranking"] = {"basis": rk.get("basis"), "ranked_at": rk.get("ranked_at")}
+    doc["meta"]["ranking"] = {"basis": rk.get("basis"), "ranked_at": rk.get("ranked_at"), "checks": rk.get("checks")}
     (SC / "ai_notes.json").write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"[ai] ai_rank 반영 {len(doc['items'])}종목")
     sys.path.insert(0, str(ROOT / "scripts"))

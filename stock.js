@@ -330,7 +330,7 @@ function renderBriefing(b, grade, bc, item) {
 
   // 옆 칸: 30초 요약 — 왜 싸졌나 제목 + 시장이 맞다면 (반론을 결론만큼 크게)
   document.getElementById('brief-aside').innerHTML = `
-    ${item?.ai_rank ? `<div class="aside-box rank"><p class="aside-lbl">매수 매력 ${item.ai_rank}위 / 30</p><p>${briefText(item.rerank_reason || '')}</p></div>` : ''}
+    ${item?.ai_rank ? `<div class="aside-box rank"><p class="aside-lbl">매수 매력 ${item.ai_rank}위 / 30</p>${rankDetail(item)}</div>` : ''}
     ${bc.bull?.length ? `<div class="aside-box"><p class="aside-lbl">매수 이유 — 요약</p><ol>${list(bc.bull, x => `<li><a href="#bk-bull">${escapeHtml(x.title || '')}</a></li>`)}</ol></div>` : ''}
     ${b.why_cheap?.length ? `<div class="aside-box"><p class="aside-lbl">반대 이유 — 요약</p><ol>${list(b.why_cheap, x => `<li><a href="#bk-why">${escapeHtml(x.title || '')}</a></li>`)}</ol></div>` : ''}
     ${b.if_market_right ? `<div class="aside-box bear"><p class="aside-lbl">시장이 맞다면</p>${briefParas(b.if_market_right)}</div>` : ''}`;
@@ -374,6 +374,23 @@ function renderBriefPrice() {
     ['3년 고점 대비', pct(y3.from), `수정 고점 ${won(y3.hi[1])} · ${y3.hi[0]}`],
     ['PER · PBR', `${per != null ? per.toFixed(1) : '—'} · ${pbr != null ? pbr.toFixed(2) : '—'}`, 'TTM 지배주주 기준'],
   ].map(([k, v, s]) => `<div class="bp"><span class="bp-k">${k}</span><b class="bp-v${String(v).startsWith('-') ? ' neg' : ''}">${v}</b><span class="bp-s">${s}</span></div>`).join('');
+}
+
+// 순위 계산식을 그대로 보여준다 — (평소 주주이익 수익률 + 재평가 여지) × 확실성, 좋은 사업 6관문
+const RANK_CHECKS = ['ROE 평균 ≥8%', '현금흐름/순이익 ≥0.7', '이자보상 ≥2배', '순이익률 평균 ≥5%', '5년 누적 FCF > 0', '주식 수 증가 ≤20%'];
+function rankDetail(item) {
+  const d = item.rank_detail;
+  if (!d) return `<p>${briefText(item.rerank_reason || '')}</p>`;
+  const pct = (v) => v == null ? '—' : `${(v * 100).toFixed(1)}%`;
+  const fmt = [(v) => pct(v), (v) => v.toFixed(2), (v) => v >= 99 ? '이자 부담 없음' : `${v.toFixed(1)}배`, (v) => pct(v),
+               (v) => `${Math.round(v / 1e8).toLocaleString('ko-KR')}억`, (v) => `${v >= 0 ? '+' : ''}${(v * 100).toFixed(0)}%`];
+  const rows = RANK_CHECKS.map((name, i) => {
+    const ok = d.checks?.[i], v = d.check_vals?.[i];
+    return `<li class="${ok === false ? 'no' : ok ? 'ok' : 'na'}"><span>${ok === false ? '✕' : ok ? '✓' : '–'}</span>${name}<em>${v == null ? '자료 없음' : fmt[i](v)}</em></li>`;
+  }).join('');
+  return `<p class="rank-formula">(평소 주주이익 수익률 <b>${pct(d.owner_yield)}</b> + 재평가 여지 <b>${d.rerate >= 0 ? '+' : ''}${(d.rerate * 100).toFixed(1)}%p</b>) × 확실성 <b>${d.certainty}</b></p>
+    <p class="aside-sub">좋은 사업 점검 ${d.good_business}</p><ul class="rank-checks">${rows}</ul>
+    <p class="aside-why">${briefText(item.rerank_reason || '')}</p>`;
 }
 
 function natLabel(n) {

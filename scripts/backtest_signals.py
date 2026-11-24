@@ -77,7 +77,7 @@ def main():
     fp = fin_panel(per.columns, dates)
     print(f"[bt] 재무 패널 {len(fp)}건")
 
-    sig_names = ["value", "oi_yoy", "peak", "quality", "mom12_1", "mom6_1", "drawdown", "rev1"]
+    sig_names = ["value", "oi_yoy", "peak", "quality", "mom12_1", "mom6_1", "drawdown", "rev1", "norm_ey", "ttm_ey"]
     rows = []
     for i, d in enumerate(dates[:-1]):
         if i < max(bv.MIN_HIST, 13):
@@ -101,6 +101,10 @@ def main():
         p0, p1, p6, p12 = px.loc[d, df.index], px.iloc[i - 1][df.index], px.iloc[i - 6][df.index], px.iloc[i - 12][df.index]
         df["mom12_1"], df["mom6_1"], df["rev1"] = p1 / p12 - 1, p1 / p6 - 1, p0 / p1 - 1
         df["drawdown"] = -(p0 / px.iloc[i - 12:i + 1][df.index].max() - 1)
+        # 평소 이익(TTM 매출 × 자기 20분기 중앙 이익률) 기준 이익수익률 = 1 / (PER × 지금마진/평소마진) — 가치투자자의 정상화 이익
+        cp = per.loc[d, df.index]
+        df["ttm_ey"] = 1 / cp
+        df["norm_ey"] = 1 / (cp * df["peak"])
         cheap = df[df.value >= df.value.quantile(1 - CHEAP)]
         row = {"date": d, "n": len(cheap), "cheap_ret": cheap.ret.mean(), "all_ret": df.ret.mean(),
                "cheap_ret3": cheap.ret3.mean()}
@@ -115,7 +119,9 @@ def main():
             row[f"ls_{s}"] = top.ret.mean() - bot.ret.mean()
         # Top 30 포트폴리오 비교 — 지금 방식(가치 순) vs 싼 종목 안에서 퀄리티·이익률 순
         z = lambda col: bv.rz(cheap[col].fillna(cheap[col].median()))
-        strat = {"A_value_top30": df.value,
+        strat = {"E_cheap_normEY": cheap.norm_ey,
+                 "F_cheap_normEY+q": z("norm_ey") + z("quality"),
+                 "A_value_top30": df.value,
                  "B_cheap_quality": cheap.quality,
                  "C_cheap_q+peak+oi": z("quality") + z("peak") + z("oi_yoy"),
                  "D_cheap_q+peak+oi-dd": z("quality") + z("peak") + z("oi_yoy") - z("drawdown")}
